@@ -8,6 +8,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.effect.Blend?>
@@ -38,8 +39,8 @@
                       </Menu>
                       <Menu fx:id="menuEdit" mnemonicParsing="false" text="Edit">
                         <items>
-                          <MenuItem mnemonicParsing="false" onAction="#getPdfFile" text="Chọn file cần chuyển" />
-                              <MenuItem mnemonicParsing="false" onAction="#setSaveExcelFileDir" text="Chọn thư mục lưu file" />
+                          <MenuItem mnemonicParsing="false" onAction="#getExcelFile" text="Chọn file cần chuyển" />
+                              <MenuItem mnemonicParsing="false" onAction="#setSave3bcFileDir" text="Chọn thư mục lưu file" />
                         </items>
                       </Menu>
                       <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
@@ -55,8 +56,8 @@
             </HBox>
             <HBox spacing="20.0">
                <children>
-                  <TextField fx:id="linkPdfFile" editable="false" HBox.hgrow="SOMETIMES" />
-                  <Button fx:id="getPdfFileBtn" mnemonicParsing="false" onAction="#getPdfFile" style="-fx-background-radius: 8;" text="Chọn file cần chuyển" textFill="#0463e8">
+                  <TextField fx:id="linkExcelFile" editable="false" HBox.hgrow="SOMETIMES" />
+                  <Button fx:id="getExcelFileBtn" mnemonicParsing="false" onAction="#getExcelFile" style="-fx-background-radius: 8;" text="Chọn file EXCEL cần chuyển" textFill="#0463e8">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
@@ -65,21 +66,31 @@
                      </effect></Button>
                </children>
             </HBox>
-            <HBox>
+            <HBox layoutX="10.0" layoutY="35.0" spacing="20.0">
                <children>
-                  <TextField fx:id="linkCvsDir1" editable="false" HBox.hgrow="SOMETIMES" />
-                  <Button fx:id="setSaveCsvFileDirBtn1" mnemonicParsing="false" onAction="#setSaveExcelFileDir" style="-fx-background-radius: 8;" text="Chọn thư mục chứa file 3BC" textFill="#0463e8">
+                  <TextField fx:id="link3bcToriaiFile" editable="false" HBox.hgrow="SOMETIMES" />
+                  <Button fx:id="get3bcToriaiFileBtn" mnemonicParsing="false" onAction="#get3bcToriaiFile" style="-fx-background-radius: 8;" text="Chọn file tính vật liệu của 3BC" textFill="#0463e8">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
                      <effect>
                         <SepiaTone level="0.25" />
                      </effect>
-                     <HBox.margin>
-                        <Insets left="8.0" right="5.0" />
-                     </HBox.margin>
                   </Button>
-                  <Button fx:id="setSaveCsvFileDirBtn11" defaultButton="true" mnemonicParsing="false" onAction="#setSaveExcelFileDir" style="-fx-background-radius: 18;" text="CHUYEN FILE EXCEL SANG 3BC" textFill="#45855c">
+               </children>
+            </HBox>
+            <HBox maxHeight="-Infinity" minHeight="-Infinity" spacing="5.0" style="-fx-background-color: #D1C4E9; -fx-background-radius: 8;">
+               <children>
+                  <TextArea fx:id="link3bcDir" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="30.0" prefWidth="30.0" wrapText="true" HBox.hgrow="SOMETIMES" />
+                  <Button fx:id="setSave3bcFileDirBtn" maxHeight="-Infinity" mnemonicParsing="false" onAction="#setSave3bcFileDir" prefWidth="100.0" style="-fx-background-radius: 8;" text="Chọn thư mục chứa file 3BC" textFill="#0463e8" wrapText="true">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <effect>
+                        <SepiaTone level="0.25" />
+                     </effect>
+                  </Button>
+                  <Button fx:id="convertExcelTo3BCFileBtn" defaultButton="true" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#convertExcelTo3bcFile" prefWidth="120.0" style="-fx-background-radius: 8;" text="CHUYEN FILE EXCEL SANG 3BC" textAlignment="CENTER" textFill="#45855c" wrapText="true">
                      <font>
                         <Font name="Tahoma Bold" size="12.0" />
                      </font>
@@ -88,19 +99,9 @@
                      </effect>
                   </Button>
                </children>
-            </HBox>
-            <HBox layoutX="10.0" layoutY="35.0" spacing="20.0">
-               <children>
-                  <TextField fx:id="linkCvsDir" editable="false" HBox.hgrow="SOMETIMES" />
-                  <Button fx:id="setSaveExcelFileDirBtn" mnemonicParsing="false" onAction="#setSaveExcelFileDir" style="-fx-background-radius: 8;" text="Chọn thư mục lưu file" textFill="#0463e8">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                     <effect>
-                        <SepiaTone level="0.25" />
-                     </effect>
-                  </Button>
-               </children>
+               <padding>
+                  <Insets bottom="5.0" left="3.0" right="3.0" top="5.0" />
+               </padding>
             </HBox>
          </children>
       </VBox>

@@ -1,6 +1,6 @@
 package com.lenha.excel_3bc_toriai.convert;
 
-import com.lenha.excel_3bc_toriai.model.CsvFile;
+import com.lenha.excel_3bc_toriai.model.ExcelFile;
 import com.opencsv.CSVWriter;
 import javafx.collections.ObservableList;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -68,15 +68,15 @@ public class ReadPDFToExcel {
      * chuyển đổi pdf tính vật liệu thành các file chl theo từng vật liệu khác nhau
      * @param filePDFPath link file pdf
      * @param fileChlDirPath link thư mục chứa file chl sẽ tạo
-     * @param csvFileNames list chứa danh sách các file chl đã tạo
+     * @param excelFileNames list chứa danh sách các file chl đã tạo
      */
-    public static void convertPDFToExcel(String filePDFPath, String fileChlDirPath, ObservableList<CsvFile> csvFileNames) throws FileNotFoundException, TimeoutException, IOException {
-/*        csvFileNames.add(new CsvFile("test.", "", 0, 0));
+    public static void convertPDFToExcel(String filePDFPath, String fileChlDirPath, ObservableList<ExcelFile> excelFileNames) throws FileNotFoundException, TimeoutException, IOException {
+/*        excelFileNames.add(new ExcelFile("test.", "", 0, 0));
         fileName = "test.sysc2";
         throw new TimeoutException();*/
 
         // xóa danh sách cũ trước khi thực hiện, tránh bị ghi chồng lên nhau
-        csvFileNames.clear();
+        excelFileNames.clear();
 
         // lấy địa chỉ file pdf
         pdfPath = filePDFPath;
@@ -142,8 +142,8 @@ public class ReadPDFToExcel {
             // mỗi map này trong list sẽ tạo thành 1 file trong trường hợp chia file
             List<Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>>> fileList = getToriaiData(kakuKakou);
 
-//            writeDataToExcel(kaKouPairs, i - 1, csvFileNames);
-//            writeDataToCSV(kaKouPairs, i - 1, csvFileNames);
+//            writeDataToExcel(kaKouPairs, i - 1, excelFileNames);
+//            writeDataToCSV(kaKouPairs, i - 1, excelFileNames);
             // ghi thông tin của vật liệu này vào các file định dạng sysc2 là file của chl
             int fileListSize = fileList.size();
 
@@ -154,7 +154,7 @@ public class ReadPDFToExcel {
                 Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs = fileList.get(k);
                 j++;
                 // thêm trong trường hợp số file của vật liệu này lớn hơn 1 thì thêm k vào là hậu tố của file ở hàm writeDataToChl
-                writeDataToChl(kaKouPairs, j, csvFileNames, fileListSize, k + 1);
+                writeDataToChl(kaKouPairs, j, excelFileNames, fileListSize, k + 1);
             }
         }
 
@@ -527,7 +527,7 @@ public class ReadPDFToExcel {
         return rowToriAiNum;
     }
 
-    private static void writeDataToExcel(Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs, int timePlus, ObservableList<CsvFile> csvFileNames) throws FileNotFoundException {
+    private static void writeDataToExcel(Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs, int timePlus, ObservableList<ExcelFile> excelFileNames) throws FileNotFoundException {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Sheet1");
 
@@ -684,11 +684,11 @@ public class ReadPDFToExcel {
 
         System.out.println("tong chieu dai bozai " + kouzaiChouGoukei);
         System.out.println("tong chieu dai san pham " + seiHinChouGoukei);
-        csvFileNames.add(new CsvFile(fileName, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));
+        excelFileNames.add(new ExcelFile(fileName, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));
 
     }
 
-    private static void writeDataToCSV(Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs, int timePlus, ObservableList<CsvFile> csvFileNames) throws FileNotFoundException {
+    private static void writeDataToCSV(Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs, int timePlus, ObservableList<ExcelFile> excelFileNames) throws FileNotFoundException {
 
         // Ghi thời gian hiện tại vào dòng đầu tiên
         Date currentDate = new Date();
@@ -846,7 +846,7 @@ public class ReadPDFToExcel {
 
         System.out.println("tong chieu dai bozai " + kouzaiChouGoukei);
         System.out.println("tong chieu dai san pham " + seiHinChouGoukei);
-        csvFileNames.add(new CsvFile(fileName, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));
+        excelFileNames.add(new ExcelFile(fileName, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));
 
     }
 
@@ -855,11 +855,11 @@ public class ReadPDFToExcel {
      *
      * @param kaKouPairs   map chứa tính vật liệu
      * @param timePlus     thời gian hoặc chỉ số cộng thêm vào ô time để tránh bị trùng tên  time giữa các file
-     * @param csvFileNames list chứa danh sách các file đã tạo
+     * @param excelFileNames list chứa danh sách các file đã tạo
      * @param fileListSize
      * @param k
      */
-    private static void writeDataToChl(Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs, int timePlus, ObservableList<CsvFile> csvFileNames, int fileListSize, int k) throws FileNotFoundException {
+    private static void writeDataToChl(Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs, int timePlus, ObservableList<ExcelFile> excelFileNames, int fileListSize, int k) throws FileNotFoundException {
 
         // Ghi thời gian hiện tại vào dòng đầu tiên
         Date currentDate = new Date();
@@ -1104,7 +1104,7 @@ public class ReadPDFToExcel {
         }
 
         // thêm file vào list hiển thị
-        csvFileNames.add(new CsvFile(fileName, kouSyuName, kouzaiChouGoukeiTempt, seiHinChouGoukeiTempt));
+        excelFileNames.add(new ExcelFile(fileName, kouSyuName, kouzaiChouGoukeiTempt, seiHinChouGoukeiTempt));
 
     }
 

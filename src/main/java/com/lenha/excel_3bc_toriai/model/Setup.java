@@ -1,24 +1,25 @@
 package com.lenha.excel_3bc_toriai.model;
 
 public class Setup {
-    private String linkPdfFile = "";
-    private String linkSaveCvsFileDir = "";
+    private String linkExcelFile = "";
+    private String link3bcToriaiFile = "";
+    private String linkSave3BCFileDir = "";
     private String lang = "";
 
-    public String getLinkPdfFile() {
-        return linkPdfFile;
+    public String getLinkExcelFile() {
+        return linkExcelFile;
     }
 
-    public void setLinkPdfFile(String linkPdfFile) {
-        this.linkPdfFile = linkPdfFile;
+    public void setLinkExcelFile(String linkExcelFile) {
+        this.linkExcelFile = linkExcelFile;
     }
 
-    public String getLinkSaveCvsFileDir() {
-        return linkSaveCvsFileDir;
+    public String getLink3bcToriaiFile() {
+        return link3bcToriaiFile;
     }
 
-    public void setLinkSaveCvsFileDir(String linkSaveCvsFileDir) {
-        this.linkSaveCvsFileDir = linkSaveCvsFileDir;
+    public void setLink3bcToriaiFile(String link3bcToriaiFile) {
+        this.link3bcToriaiFile = link3bcToriaiFile;
     }
 
     public String getLang() {
@@ -27,5 +28,13 @@ public class Setup {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    public String getLinkSave3BCFileDir() {
+        return linkSave3BCFileDir;
+    }
+
+    public void setLinkSave3BCFileDir(String linkSave3BCFileDir) {
+        this.linkSave3BCFileDir = linkSave3BCFileDir;
     }
 }

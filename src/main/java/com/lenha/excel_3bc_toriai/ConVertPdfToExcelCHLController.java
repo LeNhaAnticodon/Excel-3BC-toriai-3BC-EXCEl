@@ -2,7 +2,7 @@ package com.lenha.excel_3bc_toriai;
 
 import com.lenha.excel_3bc_toriai.convert.ReadPDFToExcel;
 import com.lenha.excel_3bc_toriai.dao.SetupData;
-import com.lenha.excel_3bc_toriai.model.CsvFile;
+import com.lenha.excel_3bc_toriai.model.ExcelFile;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -20,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -51,15 +52,15 @@ import java.util.concurrent.TimeoutException;
 public class ConVertPdfToExcelCHLController implements Initializable {
 
     @FXML
-    public TextField linkPdfFile;
+    public TextField linkExcelFile;
     @FXML
-    public Button getPdfFileBtn;
+    public Button getExcelFileBtn;
     @FXML
-    public TextField linkCvsDir;
+    public TextArea link3bcDir;
     @FXML
-    public Button setSaveExcelFileDirBtn;
+    public Button setSave3bcFileDirBtn;
     @FXML
-    public ListView<CsvFile> csvFIleList;
+    public ListView<ExcelFile> csvFIleList;
     @FXML
     public Button convertFileBtn;
     @FXML
@@ -92,6 +93,12 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     public Label product;
     @FXML
     public Label baseMaterial;
+    @FXML
+    public Button convertExcelTo3BCFileBtn;
+    @FXML
+    public TextField link3bcToriaiFile;
+    @FXML
+    public Button get3bcToriaiFileBtn;
 
     // map các ngôn ngữ
     private Map<String, String> languageMap;
@@ -145,12 +152,12 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        System.out.println("link csv " + SetupData.getInstance().getSetup().getLinkSaveCvsFileDir());
-        System.out.println("old link file " + SetupData.getInstance().getSetup().getLinkPdfFile());
-        System.out.println("old" + SetupData.getInstance().getSetup().getLinkPdfFile());
+        System.out.println("link excel " + SetupData.getInstance().getSetup().getLinkExcelFile());
+        System.out.println("link toriai 3bc " + SetupData.getInstance().getSetup().getLink3bcToriaiFile());
+        System.out.println("link 3bc dir " + SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
 
         // bind list view với list các file chl đã tạo
-        csvFIleList.setItems(SetupData.getInstance().getChlFiles());
+        csvFIleList.setItems(SetupData.getInstance().getExcelFiles());
         // cài đặt các cell của list view
         setupCellChlFIleList();
 
@@ -159,7 +166,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
         // lấy list chứa các control UI cần để thay đổi ngôn ngữ hiển thị
         controls = SetupData.getInstance().getControls();
         // thêm các control của controller này vào map
-        controls.addAll(getPdfFileBtn, setSaveExcelFileDirBtn, convertFileBtn, openDirCsvBtn, listCsvFileTitle, menuBar, copyLinkStatusLabel, copyLinkBtn,
+        controls.addAll(getExcelFileBtn, setSave3bcFileDirBtn, convertFileBtn, openDirCsvBtn, listCsvFileTitle, menuBar, copyLinkStatusLabel, copyLinkBtn,
                 fileName, product, baseMaterial);
 
         // Lấy bundle của file ngôn ngữ
@@ -206,27 +213,30 @@ public class ConVertPdfToExcelCHLController implements Initializable {
             }
         });
 
-        // nếu 2 ô hiển thị link file và thư mục có thay đổi giá trị thì cho viền của chúng đổi màu trong 3s
-        linkPdfFile.textProperty().addListener((observableValue, oldValue, newValue) -> {
-            setBorderColorTF(linkPdfFile);
+        // nếu 3 ô hiển thị link file, thư mục có thay đổi giá trị thì cho viền của chúng đổi màu trong 3s
+        linkExcelFile.textProperty().addListener((observableValue, oldValue, newValue) -> {
+            setBorderColorTF(linkExcelFile);
         });
-        linkCvsDir.textProperty().addListener((observableValue, oldValue, newValue) -> {
-            setBorderColorTF(linkCvsDir);
+        link3bcToriaiFile.textProperty().addListener((observableValue, oldValue, newValue) -> {
+            setBorderColorTF(link3bcToriaiFile);
+        });
+        link3bcDir.textProperty().addListener((observableValue, oldValue, newValue) -> {
+            setBorderColorTF(link3bcDir);
         });
 
-        // lấy địa chỉ đã chọn lần gần nhất của thư mục sẽ lưu file chl
-        File fileCsvDiv = new File(SetupData.getInstance().getSetup().getLinkSaveCvsFileDir());
+        // lấy địa chỉ đã chọn lần gần nhất của thư mục sẽ lưu file 3bc
+        File file3bcDiv = new File(SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
 
         // nếu địa chỉ đúng là thư mục thì cho hiển thị trên màn hình
-        if (fileCsvDiv.isDirectory()) {
-            linkCvsDir.setText(SetupData.getInstance().getSetup().getLinkSaveCvsFileDir());
+        if (file3bcDiv.isDirectory()) {
+            link3bcDir.setText(SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
         }
     }
 
     /**
-     * đổi màu viền của textfield
+     * đổi màu viền của textfield hoặc text area
      */
-    private void setBorderColorTF(TextField textField) {
+    private void setBorderColorTF(TextInputControl textField) {
         // chạy trong nền
         Task<Void> task = new Task<>() {
             @Override
@@ -269,17 +279,97 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     }
 
     /**
-     * lấy địa chỉ file pdf cần chuyển
+     * lấy địa chỉ file excel cần tính vật liệu
      * @return  file pdf đã chọn
      */
     @FXML
-    public File getPdfFile() {
-        // tạo trình chọn file PDF
+    public File getExcelFile() {
+        // tạo trình chọn file excel
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("EXCEL", "*.xlsx"));
+
+        // lấy địa chỉ file excel đã chọn lần trước
+        String oldLinkExcelFile = SetupData.getInstance().getSetup().getLinkExcelFile();
+        System.out.println("old" + oldLinkExcelFile);
+        // nếu địa chỉ không rỗng thì lấy thư mục chứa file lần trước và cho trình chọn file mở thư mục đó
+        if (!oldLinkExcelFile.isBlank()) {
+            // tách link tại các đoạn phân tách địa chỉ
+            String[] oldLinkExcelFileArr = oldLinkExcelFile.split("\\\\");
+            // link thư mục chứa file pdf
+            String linkExcelFileDir = "";
+            // ghép lại link nhưng bỏ phần cuối cùng(tên file xlsx) là ra địa chỉ thư mục chứa file pdf
+            for (int i = 0; i < oldLinkExcelFileArr.length - 1; i++) {
+                linkExcelFileDir = linkExcelFileDir.concat(oldLinkExcelFileArr[i]).concat("\\");
+            }
+
+            // tạo file thư mục chứa file excel
+            File file = new File(linkExcelFileDir);
+            // nếu file là thư mục thì cho trình chọn file pdf bắt đầu chọn file từ thư mục này
+            if (file.isDirectory()) {
+                fileChooser.setInitialDirectory(file);
+            }
+        }
+
+        // file excel
+        File file;
+        // chọn file pdf nếu không có lỗi địa chỉ khởi đầu thì thoát,nếu không cho địa chỉ khởi đầu là null và chọn lại đến khi hết lỗi
+        while (true) {
+            try {
+                // lấy file excel
+                file = fileChooser.showOpenDialog(menuBar.getScene().getWindow());
+                break;
+            } catch (IllegalArgumentException e) {
+                System.out.println("địa chỉ khởi đầu không hợp lệ");
+                fileChooser.setInitialDirectory(null);
+            }
+        }
+
+        // nếu file pdf không null và là file hợp lệ
+        if (file != null && file.isFile()) {
+            // địa chỉ file
+            String link = file.getAbsolutePath();
+            // nếu địa chỉ link của file được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file excel
+            if (!link.equals(SetupData.getInstance().getSetup().getLinkExcelFile())) {
+                SetupData.getInstance().getExcelFiles().clear();
+            }
+            // cho hiển thị địa chỉ file rồi lưu vào đối tượng cài đặt và lưu vào file
+            linkExcelFile.setText(link);
+            SetupData.getInstance().setLinkExcelFile(link);
+
+//            // nếu địa chỉ thư mục chứa file excel sẽ tạo chưa được chọn thì chọn luôn thư mục của file excel vừa chọn
+//            // không đúng logic của app này
+//            if (link3bcDir.getText().isBlank()) {
+//                // phân tách địa chỉ file pdf
+//                String[] csvDirArr = link.split("\\\\");
+//                // địa chỉ thư mục chứa file chl
+//                String csvDir = "";
+//                // ghép lại link nhưng bỏ phần cuối cùng(tên file pdf) là ra địa chỉ thư mục chứa file pdf
+//                for (int i = 0; i < csvDirArr.length - 1; i++) {
+//                    csvDir = csvDir.concat(csvDirArr[i]).concat("\\");
+//                }
+//                // hiển thị địa chỉ thư mục
+//                link3bcDir.setText(csvDir);
+//                // lưu địa chỉ vào đối tượng setup và lưu vào file
+//                SetupData.getInstance().setLinkSave3bcFileDir(csvDir);
+//            }
+        } else {
+            System.out.println("không chọn file");
+        }
+
+        return file;
+    }
+
+    /**
+     * lấy địa chỉ file pdf tính vật liệu của 3bc
+     * @return
+     */
+    public File get3bcToriaiFile() {
+        // tạo trình chọn file pdf tính vật liệu
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
 
         // lấy địa chỉ file pdf đã chọn lần trước
-        String oldLinkPdfFile = SetupData.getInstance().getSetup().getLinkPdfFile();
+        String oldLinkPdfFile = SetupData.getInstance().getSetup().getLink3bcToriaiFile();
         System.out.println("old" + oldLinkPdfFile);
         // nếu địa chỉ không rỗng thì lấy thư mục chứa file lần trước và cho trình chọn file mở thư mục đó
         if (!oldLinkPdfFile.isBlank()) {
@@ -318,29 +408,11 @@ public class ConVertPdfToExcelCHLController implements Initializable {
         if (file != null && file.isFile()) {
             // địa chỉ file
             String link = file.getAbsolutePath();
-            // nếu địa chỉ link của file được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file chl
-            if (!link.equals(SetupData.getInstance().getSetup().getLinkPdfFile())) {
-                SetupData.getInstance().getChlFiles().clear();
-            }
-            // cho hiển thị địa chỉ file rồi lưu vào đối tượng cài đặt và lưu vào file
-            linkPdfFile.setText(link);
-            SetupData.getInstance().setLinkPdfFile(link);
 
-            // nếu địa chỉ thư mục chứa file chl sẽ tạo chưa được chọn thì chọn luôn thư mục của file pdf vừa chọn
-            if (linkCvsDir.getText().isBlank()) {
-                // phân tách địa chỉ file pdf
-                String[] csvDirArr = link.split("\\\\");
-                // địa chỉ thư mục chứa file chl
-                String csvDir = "";
-                // ghép lại link nhưng bỏ phần cuối cùng(tên file pdf) là ra địa chỉ thư mục chứa file pdf
-                for (int i = 0; i < csvDirArr.length - 1; i++) {
-                    csvDir = csvDir.concat(csvDirArr[i]).concat("\\");
-                }
-                // hiển thị địa chỉ thư mục
-                linkCvsDir.setText(csvDir);
-                // lưu địa chỉ vào đối tượng setup và lưu vào file
-                SetupData.getInstance().setLinkSaveCvsFileDir(csvDir);
-            }
+            // cho hiển thị địa chỉ file rồi lưu vào đối tượng cài đặt và lưu vào file
+            link3bcToriaiFile.setText(link);
+            SetupData.getInstance().setLink3bcToriaiFile(link);
+
         } else {
             System.out.println("không chọn file");
         }
@@ -349,38 +421,39 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     }
 
     /**
-     * lấy địa chỉ thư mục chứa file chl
-     * @return file thư mục chứa file chl đã chọn
+     * lấy địa chỉ thư mục chứa file 3bc
+     * @return file thư mục chứa file 3bc đã chọn
      */
     @FXML
-    public File setSaveExcelFileDir() {
+    public File setSave3bcFileDir() {
         // trình chọn thư mục
         DirectoryChooser directoryChooser = new DirectoryChooser();
-        // thư mục chứa file chl lần trước
-        String oldDir = SetupData.getInstance().getSetup().getLinkSaveCvsFileDir();
+        // thư mục chứa file 3bc lần trước
+        String oldDir = SetupData.getInstance().getSetup().getLinkSave3BCFileDir();
         File oldFileDir = new File(oldDir);
-        // nếu thư mục chứa file chl lần trước là thư mục thì cho trình chọn thư mục bắt đầu từ thư mục này
+        // nếu thư mục chứa file 3bc lần trước là thư mục thì cho trình chọn thư mục bắt đầu từ thư mục này
         if (oldFileDir.isDirectory()) {
             directoryChooser.setInitialDirectory(oldFileDir);
         }
 
-        // lấy thư mục chứa file chl vừa chọn
+        // lấy thư mục chứa file 3bc vừa chọn
         File dir = directoryChooser.showDialog(menuBar.getScene().getWindow());
 
-        // nếu thư mục chứa file chl không null và là thư mục hợp lệ thì hiển thị rồi lưu địa chỉ vào đối tượng setup và lưu vào file
+        // nếu thư mục chứa file 3bc không null và là thư mục hợp lệ thì hiển thị rồi lưu địa chỉ vào đối tượng setup và lưu vào file
         if (dir != null && dir.isDirectory()) {
 
             String link = dir.getAbsolutePath();
 
-            // nếu địa chỉ link của thư mục được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file csv
-            if (!link.equals(SetupData.getInstance().getSetup().getLinkSaveCvsFileDir())) {
-                SetupData.getInstance().getChlFiles().clear();
-            }
+//            // nếu địa chỉ link của thư mục được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file excel
+//            // không đúng logic với ứng dụng này
+//            if (!link.equals(SetupData.getInstance().getSetup().getLinkSave3bcFileDir())) {
+//                SetupData.getInstance().getChlFiles().clear();
+//            }
 
             // hiển thị link
-            linkCvsDir.setText(link);
+            link3bcDir.setText(link);
             // lưu vào đối tượng setup và lưu vào file
-            SetupData.getInstance().setLinkSaveCvsFileDir(link);
+            SetupData.getInstance().setLinkSave3bcFileDir(link);
         } else {
             System.out.println("không chọn thư mục");
         }
@@ -402,8 +475,8 @@ public class ConVertPdfToExcelCHLController implements Initializable {
         // nếu chọn xong thì phải chuyển dữ liệu thành công thì mới thoát được vòng lặp
         while (true) {
             // lấy link từ các ô đang hiển thị
-            pdfFilePath = linkPdfFile.getText();
-            chlFileDirPath = linkCvsDir.getText();
+            pdfFilePath = linkExcelFile.getText();
+            chlFileDirPath = link3bcDir.getText();
 
             // tạo file theo các link trên
             File pdfFile = new File(pdfFilePath);
@@ -424,7 +497,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
                 // nếu đồng ý thì gọi hàm chọn file
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    File fileSelected = getPdfFile();
+                    File fileSelected = getExcelFile();
                     // nếu file đã chọn null nghĩa là người dùng click vào nút cancel khi chọn file
                     // thì thoát và không làm gì nữa
                     if (fileSelected == null) {
@@ -451,8 +524,8 @@ public class ConVertPdfToExcelCHLController implements Initializable {
                 /* nếu địa chỉ file pdf đã xác nhận thì nó sẽ tự động lấy địa chỉ thư mục chứa file pdf đó nhập vào
                  linkCvsDir, mà trước đó đã xác nhận chưa chọn thư mục chứa file đã chuyển nên cần xóa text của
                  linkCvsDir đi để người dùng xác nhận lại, tránh hiển thị địa chỉ mặc định trên ỏ linkCvsDir làm khó hiểu */
-                linkCvsDir.setText("");
-                SetupData.getInstance().setLinkSaveCvsFileDir("");
+                link3bcDir.setText("");
+                SetupData.getInstance().setLinkSave3bcFileDir("");
                 // hiển thị alert yêu cầu chọn lại
                 confirmAlert.setTitle(CONFIRM_CHL_FILE_DIR_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_CHL_FILE_DIR_HEADER);
@@ -462,7 +535,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
                 // nếu là nút ok thì gọi hàm chọn thư mục
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    File dirSelected = setSaveExcelFileDir();
+                    File dirSelected = setSave3bcFileDir();
 
                     // nếu thư mục trả về null tức người dùng hủy chọn bằng nút cancel thì thoát hàm và không làm gì nữa
                     if (dirSelected == null) {
@@ -493,7 +566,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
             // gọi hàm chuyển file từ class static ReadPDFToExcel
             try {
-                ReadPDFToExcel.convertPDFToExcel(pdfFile.getAbsolutePath(), chlFileDir.getAbsolutePath(), SetupData.getInstance().getChlFiles());
+                ReadPDFToExcel.convertPDFToExcel(pdfFile.getAbsolutePath(), chlFileDir.getAbsolutePath(), SetupData.getInstance().getExcelFiles());
                 // hiển thị alert chuyển file thành công
                 confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_CONVERT_COMPLETE_HEADER);
@@ -570,7 +643,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
                 // nếu chọn ok thì gọi lại hàm chọn file pdf để chọn file khác
                 // nếu chọn cancel thì thoát
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    File fileSelected2 = getPdfFile();
+                    File fileSelected2 = getExcelFile();
 
                     // nếu không chọn file thì thoát
                     if (fileSelected2 == null) {
@@ -599,7 +672,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     @FXML
     public void openDirChl(ActionEvent actionEvent) {
         // lấy địa chỉ thư mục đang hiển thị gán vào file
-        File chlFileDir = new File(linkCvsDir.getText());
+        File chlFileDir = new File(link3bcDir.getText());
         // nếu file là thư mục thì mở thư mục bằng cửa sổ của window
         // nếu không thì thông báo lỗi
         if (chlFileDir.isDirectory()) {
@@ -795,7 +868,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     private void copylinkChlFolder() {
 
         // lấy địa chỉ thư mục chứa các file chl
-        File chlFileDir = new File(linkCvsDir.getText());
+        File chlFileDir = new File(link3bcDir.getText());
         // nếu thư mục chứa các file chl là thư mục thì copy địa chỉ thư mục chứa các file chl vào clipboard
         // hiển thị label thông báo đã copy trong 3 giây
         if (chlFileDir.isDirectory()) {
@@ -834,18 +907,18 @@ public class ConVertPdfToExcelCHLController implements Initializable {
             tham số là 1 FunctionalInterface Callback, ta sẽ tạo lớp ẩn danh của
             Interface này để Override method call của nó
             cần xác định các thuộc tính để Callback truyền vào cho method call bằng generics với
-            2 thuộc tính lần này là ListView<CsvFile> và ListCell<CsvFile>*/
-        csvFIleList.setCellFactory(new Callback<ListView<CsvFile>, ListCell<CsvFile>>() {
+            2 thuộc tính lần này là ListView<ExcelFile> và ListCell<ExcelFile>*/
+        csvFIleList.setCellFactory(new Callback<ListView<ExcelFile>, ListCell<ExcelFile>>() {
             @Override
-            public ListCell<CsvFile> call(ListView<CsvFile> CsvFileListView) {
+            public ListCell<ExcelFile> call(ListView<ExcelFile> CsvFileListView) {
 
                  /*các ListCell là các phần tử con hay các hàng của list nó extends Labeled
                  nên có thể định dạng cho nó giống Labeled như màu sắc
                  ListCell không phải Interface nhưng ta vẫn tạo lớp ẩn danh kế thừa lớp này và
                  Override method updateItem của nó*/
-                ListCell<CsvFile> cell = new ListCell<CsvFile>() {
+                ListCell<ExcelFile> cell = new ListCell<ExcelFile>() {
                     @Override
-                    protected void updateItem(CsvFile csvFile, boolean empty) {
+                    protected void updateItem(ExcelFile csvFile, boolean empty) {
                         //vẫn giữ lại các cài đặt của lớp cha, chỉ cần sửa một vài giá trị
                         super.updateItem(csvFile, empty);
 
@@ -1030,4 +1103,10 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
 
     }
+
+    @FXML
+    public void convertExcelTo3bcFile(ActionEvent actionEvent) {
+
+    }
+
 }

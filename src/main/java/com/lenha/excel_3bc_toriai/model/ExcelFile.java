@@ -1,6 +1,6 @@
 package com.lenha.excel_3bc_toriai.model;
 
-public class CsvFile {
+public class ExcelFile {
     private String name;
 
     private String kouSyuName;
@@ -16,7 +16,7 @@ public class CsvFile {
         this.kouSyuName = kouSyuName;
     }
 
-    public CsvFile(String name, String kouSyuName, double kouzaiChouGoukei, double seiHinChouGoukei) {
+    public ExcelFile(String name, String kouSyuName, double kouzaiChouGoukei, double seiHinChouGoukei) {
         this.name = name;
         this.kouSyuName = kouSyuName;
         this.kouzaiChouGoukei = kouzaiChouGoukei;
