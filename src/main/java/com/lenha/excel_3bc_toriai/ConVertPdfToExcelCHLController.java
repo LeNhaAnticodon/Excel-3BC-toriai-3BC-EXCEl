@@ -1,5 +1,6 @@
 package com.lenha.excel_3bc_toriai;
 
+import com.lenha.excel_3bc_toriai.convert.ExcelTo3BC;
 import com.lenha.excel_3bc_toriai.convert.ReadPDFToExcel;
 import com.lenha.excel_3bc_toriai.dao.SetupData;
 import com.lenha.excel_3bc_toriai.model.ExcelFile;
@@ -121,9 +122,17 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     private static final String CONFIRM_PDF_FILE_LINK_HEADER = "Địa chỉ của file PDF chưa được xác nhận";
     private static final String CONFIRM_PDF_FILE_LINK_CONTENT = "Hãy chọn file PDF để tiếp tục!";
 
+    private static final String CONFIRM_EXCEL_FILE_LINK_TITLE = "Xác nhận địa chỉ file Excel";
+    private static final String CONFIRM_EXCEL_FILE_LINK_HEADER = "Địa chỉ của file Excel chưa được xác nhận";
+    private static final String CONFIRM_EXCEL_FILE_LINK_CONTENT = "Hãy chọn file Excel để tiếp tục!";
+
     private static final String CONFIRM_CHL_FILE_DIR_TITLE = "Xác nhận thư mục chứa các file CHL";
     private static final String CONFIRM_CHL_FILE_DIR_HEADER = "Địa chỉ thư mục chứa các file CHL chưa được xác nhận";
     private static final String CONFIRM_CHL_FILE_DIR_CONTENT = "Hãy chọn thư mục chứa để tiếp tục!";
+
+    private static final String CONFIRM_3BC_FILE_DIR_TITLE = "Xác nhận thư mục chứa các file 3BC";
+    private static final String CONFIRM_3BC_FILE_DIR_HEADER = "Địa chỉ thư mục chứa các file 3BC chưa được xác nhận";
+    private static final String CONFIRM_3BC_FILE_DIR_CONTENT = "Hãy chọn thư mục chứa để tiếp tục!";
 
     private static final String CONFIRM_CONVERT_COMPLETE_TITLE = "Thông tin hoạt động chuyển file";
     private static final String CONFIRM_CONVERT_COMPLETE_HEADER = "Đã chuyển xong file PDF sang các file CHL";
@@ -1106,7 +1115,194 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     @FXML
     public void convertExcelTo3bcFile(ActionEvent actionEvent) {
+        // link file excel
+        String excelFilePath;
+        // link thư mục chứa file 3bc
+        String _3bcFileDirPath;
 
+        // yêu cầu chọn địa chỉ file và thư mục khi 2 địa chỉ này chưa được chọn
+        // nếu chọn xong thì phải chuyển dữ liệu thành công thì mới thoát được vòng lặp
+        while (true) {
+            // lấy link từ các ô đang hiển thị
+            excelFilePath = linkExcelFile.getText();
+            _3bcFileDirPath = link3bcDir.getText();
+
+            // tạo file theo các link trên
+            File excelFile = new File(excelFilePath);
+            File _3bcFileDir = new File(_3bcFileDirPath);
+
+            // kiểm tra hợp lệ địa chỉ file và thư mục
+            boolean isFileExcel = excelFile.isFile();
+            boolean isDir = _3bcFileDir.isDirectory();
+
+            // nếu không phải là file excel thì yêu cầu chọn lại
+            if (!isFileExcel) {
+                // hiển thị alert yêu cầu chọn lại file pdf
+                confirmAlert.setTitle(CONFIRM_EXCEL_FILE_LINK_TITLE);
+                confirmAlert.setHeaderText(CONFIRM_EXCEL_FILE_LINK_HEADER);
+                confirmAlert.setContentText(CONFIRM_EXCEL_FILE_LINK_CONTENT);
+                updateLangAlert(confirmAlert);
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // nếu đồng ý thì gọi hàm chọn file
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    File fileSelected = getExcelFile();
+                    // nếu file đã chọn null nghĩa là người dùng click vào nút cancel khi chọn file
+                    // thì thoát và không làm gì nữa
+                    if (fileSelected == null) {
+                        return;
+                    }
+
+                    /* sau khi đã chọn xong file EXCEL thì gán luôn file do hàm chọn trả về để hàm lấy file cho việc chuyển bên dưới
+                     hoạt động đúng mà không phải thêm 1 vòng lặp nữa tính lại file */
+                    excelFile = fileSelected;
+
+                    // nếu file chọn không đúng thì nhảy sang sang vòng lặp mới và chọn lại từ đầu
+                    if (!excelFile.isFile()) {
+                        continue;
+                    }
+                }
+                // nếu không đồng ý thì thoát hàm
+                else {
+                    return;
+                }
+            }
+
+            // nếu không phải là thư mục thì yêu cầu chọn lại
+            if (!isDir) {
+                /* nếu địa chỉ file 3BC đã xác nhận thì nó sẽ tự động lấy địa chỉ thư mục chứa file 3BC đó nhập vào
+                 link3bcDir, mà trước đó đã xác nhận chưa chọn thư mục chứa file đã chuyển nên cần xóa text của
+                 link3bcDir đi để người dùng xác nhận lại, tránh hiển thị địa chỉ mặc định trên ỏ link3bcDir làm khó hiểu */
+                link3bcDir.setText("");
+                SetupData.getInstance().setLinkSave3bcFileDir("");
+                // hiển thị alert yêu cầu chọn lại
+                confirmAlert.setTitle(CONFIRM_3BC_FILE_DIR_TITLE);
+                confirmAlert.setHeaderText(CONFIRM_3BC_FILE_DIR_HEADER);
+                confirmAlert.setContentText(CONFIRM_3BC_FILE_DIR_CONTENT);
+                updateLangAlert(confirmAlert);
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // nếu là nút ok thì gọi hàm chọn thư mục
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    File dirSelected = setSave3bcFileDir();
+
+                    // nếu thư mục trả về null tức người dùng hủy chọn bằng nút cancel thì thoát hàm và không làm gì nữa
+                    if (dirSelected == null) {
+                        return;
+                    }
+
+                    /* sau khi đã chọn xong thư mục thì gán luôn thư mục do hàm chọn trả về để hàm lấy thư mục cho việc chuyển bên dưới
+                     hoạt động đúng mà không phải thêm 1 vòng lặp nữa tính lại thư mục */
+                    _3bcFileDir = dirSelected;
+
+                    // nếu thư mục trả về không đúng thì nhảy sang sang vòng lặp mới và chọn lại từ đầu
+                    if (!_3bcFileDir.isDirectory()) {
+                        continue;
+                    }
+                }
+                // nếu không đồng ý thì thoát hàm
+                else {
+                    return;
+                }
+            }
+
+            // đến đây nếu không bị return thì đã chọn xong 2 địa chỉ file
+            if (excelFile.isFile() && _3bcFileDir.isDirectory()) {
+                System.out.println("đã chọn xong 2 địa chỉ");
+                System.out.println("LINK EXCEL FILE: " + excelFile.getAbsolutePath());
+                System.out.println("LINK 3BC DIR: " + _3bcFileDir.getAbsolutePath());
+            }
+
+            // gọi hàm chuyển file từ class static ReadPDFToExcel
+            try {
+                ExcelTo3BC.convertExcelTo3bc();
+                // hiển thị alert chuyển file thành công
+                confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
+                confirmAlert.setHeaderText(CONFIRM_CONVERT_COMPLETE_HEADER);
+                confirmAlert.setContentText(CONFIRM_CONVERT_COMPLETE_CONTENT);
+
+                updateLangAlert(confirmAlert);
+
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // nếu là nút ok thì copy đường dẫn thư mục chứa file chl vào clipboard và mở thư mục này
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    copyContentToClipBoard(_3bcFileDir.getAbsolutePath());
+                    // mở thư mục chứa file chl
+                    Desktop.getDesktop().open(_3bcFileDir);
+                }
+
+                return;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+                // xóa hết các button, đổi alert sang dạng error rồi thêm lại 2 nút ok và cancel
+                confirmAlert.getButtonTypes().clear();
+                confirmAlert.setAlertType(Alert.AlertType.ERROR);
+                confirmAlert.getButtonTypes().add(ButtonType.CANCEL);
+                confirmAlert.getButtonTypes().add(ButtonType.OK);
+
+                confirmAlert.setTitle(ERROR_CONVERT_TITLE);
+                confirmAlert.setHeaderText(ERROR_CONVERT_HEADER);
+                confirmAlert.setContentText(ERROR_CONVERT_CONTENT);
+                // cập nhật ngôn ngữ cho alert
+                updateLangAlert(confirmAlert);
+
+                // nếu là sự kiện không ghi được file chl do file trùng tên với file sắp tạo đang được mở
+                // th in ra cảnh báo và thoát
+                if (e instanceof FileNotFoundException) {
+                    confirmAlert.getButtonTypes().clear();
+                    confirmAlert.getButtonTypes().add(ButtonType.OK);
+                    confirmAlert.setHeaderText("Tên file CHL đang tạo: (\"" + ReadPDFToExcel.fileName + "\") trùng tên với 1 file CHL khác đang được mở nên không thể ghi đè");
+                    confirmAlert.setContentText("Hãy đóng file CHL đang mở để tiếp tục!");
+                    System.out.println("File đang được mở bởi người dùng khác");
+                    updateLangAlert(confirmAlert);
+                    confirmAlert.showAndWait();
+
+                    // chuyển lại alert về dạng confirm và thêm nút cancel
+                    confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+                    confirmAlert.getButtonTypes().add(ButtonType.CANCEL);
+
+                    return;
+                }
+                // nếu là lỗi quá 99 dòng thì thông báo và thoát
+                if (e instanceof TimeoutException) {
+                    confirmAlert.getButtonTypes().clear();
+                    confirmAlert.getButtonTypes().add(ButtonType.OK);
+                    confirmAlert.setHeaderText("File CHL đang tạo: (\"" + ReadPDFToExcel.fileName + "\") trong một boZai duy nhất có số dòng sản phẩm cần ghi lớn hơn 99 nên không thể ghi");
+                    confirmAlert.setContentText("Hãy chỉnh sửa lại dữ liệu vật liệu đang chuyển để tiếp tục!");
+                    System.out.println("Vật liệu có số dòng lớn hơn 99");
+                    updateLangAlert(confirmAlert);
+                    confirmAlert.showAndWait();
+
+                    // chuyển lại alert về dạng confirm và thêm nút cancel
+                    confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+                    confirmAlert.getButtonTypes().add(ButtonType.CANCEL);
+
+                    return;
+                }
+
+
+                // nếu là lỗi ghi file thì thông báo
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // chuyển lại alert về dạng confirm
+                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+
+                // nếu chọn ok thì gọi lại hàm chọn file pdf để chọn file khác
+                // nếu chọn cancel thì thoát
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    File fileSelected2 = getExcelFile();
+
+                    // nếu không chọn file thì thoát
+                    if (fileSelected2 == null) {
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            }
+        }
     }
 
 }
