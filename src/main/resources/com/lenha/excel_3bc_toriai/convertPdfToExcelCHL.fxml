@@ -8,10 +8,8 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.RadioButton?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.effect.Blend?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.effect.SepiaTone?>
 <?import javafx.scene.layout.BorderPane?>
@@ -66,6 +64,19 @@
                      </effect></Button>
                </children>
             </HBox>
+            <HBox layoutX="10.0" layoutY="60.0" spacing="20.0" style="-fx-background-color: #D1C4E9;">
+               <children>
+                  <TextField fx:id="link3bcDir" editable="false" HBox.hgrow="SOMETIMES" />
+                  <Button fx:id="setSave3bcFileDirBtn" mnemonicParsing="false" onAction="#setSave3bcFileDir" style="-fx-background-radius: 8;" text="Chọn thư mục chứa file 3BC" textFill="#0463e8">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <effect>
+                        <SepiaTone level="0.25" />
+                     </effect>
+                  </Button>
+               </children>
+            </HBox>
             <HBox layoutX="10.0" layoutY="35.0" spacing="20.0">
                <children>
                   <TextField fx:id="link3bcToriaiFile" editable="false" HBox.hgrow="SOMETIMES" />
@@ -78,30 +89,6 @@
                      </effect>
                   </Button>
                </children>
-            </HBox>
-            <HBox maxHeight="-Infinity" minHeight="-Infinity" spacing="5.0" style="-fx-background-color: #D1C4E9; -fx-background-radius: 8;">
-               <children>
-                  <TextArea fx:id="link3bcDir" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="30.0" prefWidth="30.0" wrapText="true" HBox.hgrow="SOMETIMES" />
-                  <Button fx:id="setSave3bcFileDirBtn" maxHeight="-Infinity" mnemonicParsing="false" onAction="#setSave3bcFileDir" prefWidth="100.0" style="-fx-background-radius: 8;" text="Chọn thư mục chứa file 3BC" textFill="#0463e8" wrapText="true">
-                     <font>
-                        <Font name="System Bold" size="12.0" />
-                     </font>
-                     <effect>
-                        <SepiaTone level="0.25" />
-                     </effect>
-                  </Button>
-                  <Button fx:id="convertExcelTo3BCFileBtn" defaultButton="true" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#convertExcelTo3bcFile" prefWidth="120.0" style="-fx-background-radius: 8;" text="CHUYEN FILE EXCEL SANG 3BC" textAlignment="CENTER" textFill="#45855c" wrapText="true">
-                     <font>
-                        <Font name="Tahoma Bold" size="12.0" />
-                     </font>
-                     <effect>
-                        <Blend />
-                     </effect>
-                  </Button>
-               </children>
-               <padding>
-                  <Insets bottom="5.0" left="3.0" right="3.0" top="5.0" />
-               </padding>
             </HBox>
          </children>
       </VBox>
@@ -151,43 +138,81 @@
    <right>
       <VBox alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
          <children>
-            <VBox alignment="CENTER" spacing="10.0" VBox.vgrow="SOMETIMES">
-               <children>
-                  <Button fx:id="convertFileBtn" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#convertFile" prefWidth="180.0" style="-fx-background-radius: 20;" text="THỰC HIỆN CHUYỂN FILE" textAlignment="CENTER" textFill="#45855c" wrapText="true">
-                     <font>
-                        <Font name="Tahoma Bold" size="18.0" />
-                     </font>
-                     <effect>
-                        <DropShadow blurType="GAUSSIAN" height="41.52" radius="19.527500000000003" width="38.59">
-                           <color>
-                              <Color red="0.6899999976158142" green="0.6350628733634949" blue="0.1656000018119812" />
-                           </color>
-                        </DropShadow>
-                     </effect>
-                  </Button>
-                  <Button fx:id="openDirCsvBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="75.0" mnemonicParsing="false" onAction="#openDirChl" prefWidth="168.0" style="-fx-background-radius: 20;" text="Mở thư mục chứa các file CHL" textAlignment="CENTER" textFill="#0463e8" wrapText="true">
-                     <font>
-                        <Font name="Tahoma Bold" size="12.9" />
-                     </font>
-                     <effect>
-                        <DropShadow blurType="GAUSSIAN" height="41.52" radius="19.527500000000003" width="38.59">
-                           <color>
-                              <Color red="0.6899999976158142" green="0.6350628733634949" blue="0.1656000018119812" />
-                           </color>
-                        </DropShadow>
-                     </effect>
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                  </Button>
-               </children>
+            <HBox spacing="15.0" VBox.vgrow="SOMETIMES">
                <VBox.margin>
                   <Insets bottom="10.0" />
                </VBox.margin>
-               <padding>
-                  <Insets top="20.0" />
-               </padding>
-            </VBox>
+               <children>
+                  <VBox alignment="CENTER" spacing="10.0">
+                     <children>
+                        <Button fx:id="convertExcelTo3BCFileBtn" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#convertExcelTo3bcFile" prefWidth="180.0" style="-fx-background-radius: 20;" text="CHUYEN FILE EXCEL SANG 3BC" textAlignment="CENTER" textFill="#45855c" wrapText="true">
+                           <font>
+                              <Font name="Tahoma Bold" size="18.0" />
+                           </font>
+                           <effect>
+                              <DropShadow blurType="GAUSSIAN" height="41.52" radius="19.527500000000003" width="38.59">
+                                 <color>
+                                    <Color red="0.6899999976158142" green="0.6350628733634949" blue="0.1656000018119812" />
+                                 </color>
+                              </DropShadow>
+                           </effect>
+                        </Button>
+                        <Button fx:id="openDirCsvBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="75.0" mnemonicParsing="false" onAction="#openDirChl" prefWidth="168.0" style="-fx-background-radius: 20;" text="Mở thư mục chứa file EXCEL" textAlignment="CENTER" textFill="#0463e8" wrapText="true">
+                           <font>
+                              <Font name="Tahoma Bold" size="12.9" />
+                           </font>
+                           <effect>
+                              <DropShadow blurType="GAUSSIAN" height="41.52" radius="19.527500000000003" width="38.59">
+                                 <color>
+                                    <Color red="0.6899999976158142" green="0.6350628733634949" blue="0.1656000018119812" />
+                                 </color>
+                              </DropShadow>
+                           </effect>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </Button>
+                     </children>
+                     <padding>
+                        <Insets top="20.0" />
+                     </padding>
+                  </VBox>
+                  <VBox alignment="CENTER" layoutX="10.0" layoutY="10.0" spacing="10.0">
+                     <children>
+                        <Button fx:id="convertFileBtn1" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#convertFile" prefWidth="180.0" style="-fx-background-radius: 20;" text="THỰC HIỆN CHUYỂN FILE" textAlignment="CENTER" textFill="#45855c" wrapText="true">
+                           <font>
+                              <Font name="Tahoma Bold" size="18.0" />
+                           </font>
+                           <effect>
+                              <DropShadow blurType="GAUSSIAN" height="41.52" radius="19.527500000000003" width="38.59">
+                                 <color>
+                                    <Color red="0.6899999976158142" green="0.6350628733634949" blue="0.1656000018119812" />
+                                 </color>
+                              </DropShadow>
+                           </effect>
+                        </Button>
+                        <Button fx:id="openDirCsvBtn1" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="75.0" mnemonicParsing="false" onAction="#openDirChl" prefWidth="168.0" style="-fx-background-radius: 20;" text="Mở thư mục chứa file EXCEL" textAlignment="CENTER" textFill="#0463e8" wrapText="true">
+                           <font>
+                              <Font name="Tahoma Bold" size="12.9" />
+                           </font>
+                           <effect>
+                              <DropShadow blurType="GAUSSIAN" height="41.52" radius="19.527500000000003" width="38.59">
+                                 <color>
+                                    <Color red="0.6899999976158142" green="0.6350628733634949" blue="0.1656000018119812" />
+                                 </color>
+                              </DropShadow>
+                           </effect>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </Button>
+                     </children>
+                     <padding>
+                        <Insets top="20.0" />
+                     </padding>
+                  </VBox>
+               </children>
+            </HBox>
             <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="SOMETIMES">
                <children>
                   <VBox alignment="BOTTOM_LEFT" spacing="5.0" HBox.hgrow="SOMETIMES">

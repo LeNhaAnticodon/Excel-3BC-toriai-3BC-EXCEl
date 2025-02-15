@@ -57,7 +57,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     @FXML
     public Button getExcelFileBtn;
     @FXML
-    public TextArea link3bcDir;
+    public TextField link3bcDir;
     @FXML
     public Button setSave3bcFileDirBtn;
     @FXML
@@ -1215,7 +1215,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
             // gọi hàm chuyển file từ class static ReadPDFToExcel
             try {
-                ExcelTo3BC.convertExcelTo3bc();
+                ExcelTo3BC.convertExcelTo3bc(excelFile.getAbsolutePath(), _3bcFileDir.getAbsolutePath());
                 // hiển thị alert chuyển file thành công
                 confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_CONVERT_COMPLETE_HEADER);
