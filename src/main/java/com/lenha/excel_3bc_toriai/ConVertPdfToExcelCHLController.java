@@ -100,6 +100,10 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     public TextField link3bcToriaiFile;
     @FXML
     public Button get3bcToriaiFileBtn;
+    @FXML
+    public TextField linkExcelResultDir;
+    @FXML
+    public Button getLinkExcelResultDir;
 
     // map các ngôn ngữ
     private Map<String, String> languageMap;
