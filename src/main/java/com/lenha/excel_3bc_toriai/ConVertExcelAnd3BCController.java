@@ -54,7 +54,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     @FXML
     public TextField linkExcelFile;
     @FXML
-    public Button getExcelFileBtn;
+    public Button setExcelFileBtn;
     @FXML
     public TextField link3bcDir;
     @FXML
@@ -98,11 +98,11 @@ public class ConVertExcelAnd3BCController implements Initializable {
     @FXML
     public TextField link3bcToriaiFile;
     @FXML
-    public Button get3bcToriaiFileBtn;
+    public Button set3bcToriaiFileBtn;
     @FXML
     public TextField linkExcelResultDir;
     @FXML
-    public Button getLinkExcelResultDirBtn;
+    public Button setLinkExcelResultDirBtn;
 
     // map các ngôn ngữ
     private Map<String, String> languageMap;
@@ -182,7 +182,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
         // lấy list chứa các control UI cần để thay đổi ngôn ngữ hiển thị
         controls = SetupData.getInstance().getControls();
         // thêm các control của controller này vào map
-        controls.addAll(getExcelFileBtn, setSave3bcFileDirBtn, convertFileBtn, openDirCsvBtn, listCsvFileTitle, menuBar, copyLinkStatusLabel, copyLinkBtn,
+        controls.addAll(setExcelFileBtn, setSave3bcFileDirBtn, set3bcToriaiFileBtn, setLinkExcelResultDirBtn, convertFileBtn, openDirCsvBtn, listCsvFileTitle, menuBar, copyLinkStatusLabel, copyLinkBtn,
                 fileName, product, baseMaterial);
 
         // Lấy bundle của file ngôn ngữ
@@ -242,6 +242,14 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
         // lấy địa chỉ đã chọn lần gần nhất của thư mục sẽ lưu file 3bc
         File file3bcDiv = new File(SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
+
+        // lấy địa chỉ đã chọn lần gần nhất của thư mục sẽ lưu file excel
+        File fileExcelDiv = new File(SetupData.getInstance().getSetup().getLinkSaveExcelFileDir());
+
+        // nếu địa chỉ đúng là thư mục thì cho hiển thị trên màn hình
+        if (fileExcelDiv.isDirectory()) {
+            linkExcelResultDir.setText(SetupData.getInstance().getSetup().getLinkSaveExcelFileDir());
+        }
 
         // nếu địa chỉ đúng là thư mục thì cho hiển thị trên màn hình
         if (file3bcDiv.isDirectory()) {
@@ -486,7 +494,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
         // trình chọn thư mục
         DirectoryChooser directoryChooser = new DirectoryChooser();
         // thư mục chứa file 3bc lần trước
-        String oldDir = SetupData.getInstance().getSetup().getLinkSave3BCFileDir();
+        String oldDir = SetupData.getInstance().getSetup().getLinkSaveExcelFileDir();
         File oldFileDir = new File(oldDir);
         // nếu thư mục chứa file 3bc lần trước là thư mục thì cho trình chọn thư mục bắt đầu từ thư mục này
         if (oldFileDir.isDirectory()) {
@@ -508,9 +516,9 @@ public class ConVertExcelAnd3BCController implements Initializable {
 //            }
 
             // hiển thị link
-            link3bcDir.setText(link);
+            linkExcelResultDir.setText(link);
             // lưu vào đối tượng setup và lưu vào file
-            SetupData.getInstance().setLinkSave3bcFileDir(link);
+            SetupData.getInstance().setLinkSaveExcelFileDir(link);
         } else {
             System.out.println("không chọn thư mục");
         }

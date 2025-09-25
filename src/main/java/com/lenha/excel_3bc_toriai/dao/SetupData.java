@@ -31,7 +31,7 @@ public class SetupData {
     // ví dụ: C:\Users\HuanTech PC\AppData\Roaming\convert pdf to chl
     private static final String appDataPath = System.getenv("APPDATA");
     // đường dẫn thư mục lưu cài đặt của chương trình từ địa chỉ app data đã lấy được ở trên
-    private static final Path myAppPath = Paths.get(appDataPath, "Convert both Excel and 3BC");
+    private static final Path myAppPath = Paths.get(appDataPath, "Convert Toriai Both Excel and 3BC");
     // list chứa các control UI cần để thay đổi ngôn ngữ hiển thị
     private final ObservableList<Object> controls = FXCollections.observableArrayList();
 
@@ -39,7 +39,7 @@ public class SetupData {
      * hàm khởi tạo đối tượng duy nhất của class
      */
     private SetupData() {
-        // tạo đường dẫn đến file cài đặt từ thư mục lưu cài đặt
+        // tạo đường dẫn đến file cài đặt từ thư mục lưu cài đặt (link thư mục appdata + tên file setup sẽ tạo)
         FILE_SETUP_NAME = myAppPath.toAbsolutePath() + "\\setup_data.set";
         // tạo path của đường dẫn trên
         pathFile = Paths.get(FILE_SETUP_NAME);
@@ -236,10 +236,23 @@ public class SetupData {
 
     /**
      * set link thư mục chứa file 3bc sẽ tạo cho đối tượng cài đặt và lưu vào file
-     * @param Save3bcFileDir link thư mục chứa file chl sẽ tạo
+     * @param save3bcFileDir link thư mục chứa file chl sẽ tạo
      */
-    public void setLinkSave3bcFileDir(String Save3bcFileDir) {
-        setup.setLinkSave3BCFileDir(Save3bcFileDir);
+    public void setLinkSave3bcFileDir(String save3bcFileDir) {
+        setup.setLinkSave3BCFileDir(save3bcFileDir);
+        try {
+            saveSetup();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * set link thư mục chứa file excel sẽ tạo cho đối tượng cài đặt và lưu vào file
+     * @param saveExcelFileDir link thư mục chứa file chl sẽ tạo
+     */
+    public void setLinkSaveExcelFileDir(String saveExcelFileDir) {
+        setup.setLinkSaveExcelFileDir(saveExcelFileDir);
         try {
             saveSetup();
         } catch (IOException e) {
@@ -293,6 +306,7 @@ public class SetupData {
                     String linkSaveCvsFileDir = dis.readUTF();
                     String lang = dis.readUTF();
                     String linkSave3bcFileDir = dis.readUTF();
+                    String linkSaveExcelFileDir = dis.readUTF();
 
                     setup.setLinkExcelFile(linkPdfFile);
                     System.out.println(":" + setup.getLinkExcelFile());
@@ -305,6 +319,9 @@ public class SetupData {
 
                     setup.setLinkSave3BCFileDir(linkSave3bcFileDir);
                     System.out.println(":" + setup.getLinkSave3BCFileDir());
+
+                    setup.setLinkSaveExcelFileDir(linkSaveExcelFileDir);
+                    System.out.println(":" + setup.getLinkSaveExcelFileDir());
 
                 } catch (EOFException e) {
                     eof = true;
@@ -341,6 +358,7 @@ public class SetupData {
             dos.writeUTF(setup.getLink3bcToriaiFile());
             dos.writeUTF(setup.getLang());
             dos.writeUTF(setup.getLinkSave3BCFileDir());
+            dos.writeUTF(setup.getLinkSaveExcelFileDir());
         }
 
         // Đặt quyền chỉ đọc cho file, để không chỉnh sửa file

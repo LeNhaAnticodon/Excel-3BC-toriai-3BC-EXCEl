@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="com.obiscr.chatgpt.settings.EasyCodeState">
+    <option name="projectFiles" value="$PROJECT_DIR$/src/main/java/com/lenha/excel_3bc_toriai/convert/ExcelTo3BC.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/com/lenha/excel_3bc_toriai/convert/ReadPDFToExcel.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/com/lenha/excel_3bc_toriai/dao/SetupData.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/com/lenha/excel_3bc_toriai/model/ExcelFile.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/com/lenha/excel_3bc_toriai/model/Setup.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/com/lenha/excel_3bc_toriai/test/ZipEditor.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/com/lenha/excel_3bc_toriai/AboutController.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/com/lenha/excel_3bc_toriai/ConVertExcelAnd3BCController.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/com/lenha/excel_3bc_toriai/Main.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/com/lenha/excel_3bc_toriai/MainApplication.java;C:/Users/HuanTech PC/IdeaProjects/EXCEL_3BC_TORIAI/src/main/java/module-info.java" />
+  </component>
+</project>

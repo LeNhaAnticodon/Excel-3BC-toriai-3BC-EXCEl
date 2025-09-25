@@ -57,7 +57,7 @@
                   <HBox alignment="CENTER" spacing="20.0">
                      <children>
                         <TextField fx:id="linkExcelFile" editable="false" HBox.hgrow="SOMETIMES" />
-                        <Button fx:id="getExcelFileBtn" mnemonicParsing="false" onAction="#getExcelFile" style="-fx-background-radius: 1;" text="Chọn file EXCEL cần chuyển" textFill="#0463e8" underline="true">
+                        <Button fx:id="setExcelFileBtn" mnemonicParsing="false" onAction="#getExcelFile" style="-fx-background-radius: 1;" text="Chọn file EXCEL cần chuyển" textFill="#0463e8" underline="true">
                            <font>
                               <Font name="System Bold" size="12.0" />
                            </font>
@@ -132,7 +132,7 @@
             <HBox alignment="CENTER" layoutX="10.0" layoutY="35.0" spacing="20.0">
                <children>
                   <TextField fx:id="link3bcToriaiFile" editable="false" HBox.hgrow="SOMETIMES" />
-                  <Button fx:id="get3bcToriaiFileBtn" mnemonicParsing="false" onAction="#get3bcToriaiFile" style="-fx-background-radius: 8;" text="Chọn file tính vật liệu của 3BC" textFill="#0463e8">
+                  <Button fx:id="set3bcToriaiFileBtn" mnemonicParsing="false" onAction="#get3bcToriaiFile" style="-fx-background-radius: 8;" text="Chọn file tính vật liệu của 3BC" textFill="#0463e8">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
@@ -145,7 +145,7 @@
             <HBox alignment="CENTER" layoutX="10.0" layoutY="173.0" spacing="20.0">
                <children>
                   <TextField fx:id="linkExcelResultDir" editable="false" HBox.hgrow="SOMETIMES" />
-                  <Button fx:id="getLinkExcelResultDirBtn" mnemonicParsing="false" onAction="#setSaveExcelFileDir" style="-fx-background-radius: 8;" text="Chọn thư mục chứa file EXCEL sẽ tạo" textFill="#0463e8">
+                  <Button fx:id="setLinkExcelResultDirBtn" mnemonicParsing="false" onAction="#setSaveExcelFileDir" style="-fx-background-radius: 8;" text="Chọn thư mục chứa file EXCEL sẽ tạo" textFill="#0463e8">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>

@@ -4,6 +4,7 @@ public class Setup {
     private String linkExcelFile = "";
     private String link3bcToriaiFile = "";
     private String linkSave3BCFileDir = "";
+    private String linkSaveExcelFileDir = "";
     private String lang = "";
 
     public String getLinkExcelFile() {
@@ -34,7 +35,15 @@ public class Setup {
         return linkSave3BCFileDir;
     }
 
+    public String getLinkSaveExcelFileDir() {
+        return linkSaveExcelFileDir;
+    }
+
     public void setLinkSave3BCFileDir(String linkSave3BCFileDir) {
         this.linkSave3BCFileDir = linkSave3BCFileDir;
+    }
+
+    public void setLinkSaveExcelFileDir(String linkSaveExcelFileDir) {
+        this.linkSaveExcelFileDir = linkSaveExcelFileDir;
     }
 }
