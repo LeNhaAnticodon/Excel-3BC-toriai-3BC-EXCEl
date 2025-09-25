@@ -42,7 +42,7 @@ public class AboutController {
      * @param conVertPdfToExcelCHLController controller của cửa sổ convert
      * @param dialog đối tượng dialog của chính cửa sổ này
      */
-    public void init(ConVertPdfToExcelCHLController conVertPdfToExcelCHLController, Dialog<Object> dialog) {
+    public void init(ConVertExcelAnd3BCController conVertPdfToExcelCHLController, Dialog<Object> dialog) {
         this.dialog = dialog;
 
         // đóng dialog bằng nút X

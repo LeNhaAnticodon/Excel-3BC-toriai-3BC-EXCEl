@@ -21,7 +21,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -50,7 +49,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeoutException;
 
-public class ConVertPdfToExcelCHLController implements Initializable {
+public class ConVertExcelAnd3BCController implements Initializable {
 
     @FXML
     public TextField linkExcelFile;
@@ -103,7 +102,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     @FXML
     public TextField linkExcelResultDir;
     @FXML
-    public Button getLinkExcelResultDir;
+    public Button getLinkExcelResultDirBtn;
 
     // map các ngôn ngữ
     private Map<String, String> languageMap;
@@ -140,10 +139,16 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     private static final String CONFIRM_CONVERT_COMPLETE_TITLE = "Thông tin hoạt động chuyển file";
     private static final String CONFIRM_CONVERT_COMPLETE_HEADER = "Đã chuyển xong file PDF sang các file CHL";
+    // NEW
+    private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_HEADER = "Đã chuyển xong file EXCEL sang file 3BC";
     private static final String CONFIRM_CONVERT_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa các file CHL và\ntự động copy địa chỉ không?";
+    // NEW
+    private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa file 3BC và\ntự động copy địa chỉ không?";
 
     private static final String ERROR_CONVERT_TITLE = "Thông báo lỗi chuyển file";
     private static final String ERROR_CONVERT_HEADER = "Nội dung file PDF không phải là tính toán vật liệu hoặc file không được phép truy cập";
+    //NEW
+    private static final String ERROR_CONVERT_EXCEL_TO_3BC_HEADER = "Nội dung file EXCEL không phải là tính toán vật liệu hoặc file không được phép truy cập";
     private static final String ERROR_CONVERT_CONTENT = "Bạn có muốn chọn file khác và thực hiện lại không?";
 
     private static final String ERROR_OPEN_CHL_DIR_TITLE = "Lỗi mở thư mục";
@@ -154,13 +159,11 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     /**
      * hàm khởi tạo
-     * @param url
-     * The location used to resolve relative paths for the root object, or
-     * {@code null} if the location is not known.
      *
-     * @param resourceBundle
-     * The resources used to localize the root object, or {@code null} if
-     * the root object was not localized.
+     * @param url            The location used to resolve relative paths for the root object, or
+     *                       {@code null} if the location is not known.
+     * @param resourceBundle The resources used to localize the root object, or {@code null} if
+     *                       the root object was not localized.
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -293,7 +296,8 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     /**
      * lấy địa chỉ file excel cần tính vật liệu
-     * @return  file pdf đã chọn
+     *
+     * @return file pdf đã chọn
      */
     @FXML
     public File getExcelFile() {
@@ -341,7 +345,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
         if (file != null && file.isFile()) {
             // địa chỉ file
             String link = file.getAbsolutePath();
-            // nếu địa chỉ link của file được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file excel
+            // nếu địa chỉ link của file được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file chl đã được tạo(file cũ là excel)
             if (!link.equals(SetupData.getInstance().getSetup().getLinkExcelFile())) {
                 SetupData.getInstance().getExcelFiles().clear();
             }
@@ -374,8 +378,10 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     /**
      * lấy địa chỉ file pdf tính vật liệu của 3bc
+     *
      * @return
      */
+    @FXML
     public File get3bcToriaiFile() {
         // tạo trình chọn file pdf tính vật liệu
         FileChooser fileChooser = new FileChooser();
@@ -435,10 +441,48 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     /**
      * lấy địa chỉ thư mục chứa file 3bc
+     *
      * @return file thư mục chứa file 3bc đã chọn
      */
     @FXML
     public File setSave3bcFileDir() {
+        // trình chọn thư mục
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        // thư mục chứa file 3bc lần trước
+        String oldDir = SetupData.getInstance().getSetup().getLinkSave3BCFileDir();
+        File oldFileDir = new File(oldDir);
+        // nếu thư mục chứa file 3bc lần trước là thư mục thì cho trình chọn thư mục bắt đầu từ thư mục này
+        if (oldFileDir.isDirectory()) {
+            directoryChooser.setInitialDirectory(oldFileDir);
+        }
+
+        // lấy thư mục chứa file 3bc vừa chọn
+        File dir = directoryChooser.showDialog(menuBar.getScene().getWindow());
+
+        // nếu thư mục chứa file 3bc không null và là thư mục hợp lệ thì hiển thị rồi lưu địa chỉ vào đối tượng setup và lưu vào file
+        if (dir != null && dir.isDirectory()) {
+
+            String link = dir.getAbsolutePath();
+
+//            // nếu địa chỉ link của thư mục được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file excel
+//            // không đúng logic với ứng dụng này
+//            if (!link.equals(SetupData.getInstance().getSetup().getLinkSave3bcFileDir())) {
+//                SetupData.getInstance().getChlFiles().clear();
+//            }
+
+            // hiển thị link
+            link3bcDir.setText(link);
+            // lưu vào đối tượng setup và lưu vào file
+            SetupData.getInstance().setLinkSave3bcFileDir(link);
+        } else {
+            System.out.println("không chọn thư mục");
+        }
+        // trả về thư mục vừa chọn
+        return dir;
+    }
+
+
+    public File setSaveExcelFileDir(ActionEvent actionEvent) {
         // trình chọn thư mục
         DirectoryChooser directoryChooser = new DirectoryChooser();
         // thư mục chứa file 3bc lần trước
@@ -672,6 +716,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     /**
      * thay đổi ngôn ngữ của alert theo ngôn ngữ đang chọn
+     *
      * @param alert cần thay đổi ngôn ngữ
      */
     private void updateLangAlert(Alert alert) {
@@ -680,17 +725,55 @@ public class ConVertPdfToExcelCHLController implements Initializable {
     }
 
     /**
-     * mở cửa sổ chọn thư mục chứa file chl đang được hiển thị khi chuyển file xong
+     * mở cửa sổ chọn thư mục chứa file excel đang được hiển thị khi chuyển file xong
      */
     @FXML
-    public void openDirChl(ActionEvent actionEvent) {
+    public void openExcelDir(ActionEvent actionEvent) {
         // lấy địa chỉ thư mục đang hiển thị gán vào file
-        File chlFileDir = new File(link3bcDir.getText());
+        File excelFileDir = new File(linkExcelResultDir.getText());
         // nếu file là thư mục thì mở thư mục bằng cửa sổ của window
         // nếu không thì thông báo lỗi
-        if (chlFileDir.isDirectory()) {
+        if (excelFileDir.isDirectory()) {
             try {
-                Desktop.getDesktop().open(chlFileDir);
+                Desktop.getDesktop().open(excelFileDir);
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                confirmAlert.setAlertType(Alert.AlertType.ERROR);
+                confirmAlert.setTitle(ERROR_OPEN_CHL_DIR_TITLE);
+                confirmAlert.setHeaderText(e.getMessage());
+                confirmAlert.setContentText("");
+                updateLangAlert(confirmAlert);
+                confirmAlert.showAndWait();
+                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+                confirmAlert.getButtonTypes().add(ButtonType.CANCEL);
+
+            }
+        } else {
+            confirmAlert.setAlertType(Alert.AlertType.ERROR);
+            confirmAlert.setTitle(ERROR_OPEN_CHL_DIR_TITLE);
+            confirmAlert.setHeaderText(ERROR_CHL_DIR_HEADER);
+            confirmAlert.setContentText("");
+            updateLangAlert(confirmAlert);
+            confirmAlert.showAndWait();
+            confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+            confirmAlert.getButtonTypes().add(ButtonType.CANCEL);
+
+        }
+
+    }
+
+    /**
+     * mở cửa sổ chọn thư mục chứa file 3bc đang được hiển thị khi chuyển file xong
+     */
+    @FXML
+    public void open3bcFileDir(ActionEvent actionEvent) {
+        // lấy địa chỉ thư mục đang hiển thị gán vào file
+        File _3bcFileDir = new File(link3bcDir.getText());
+        // nếu file là thư mục thì mở thư mục bằng cửa sổ của window
+        // nếu không thì thông báo lỗi
+        if (_3bcFileDir.isDirectory()) {
+            try {
+                Desktop.getDesktop().open(_3bcFileDir);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
                 confirmAlert.setAlertType(Alert.AlertType.ERROR);
@@ -731,7 +814,8 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     /**
      * cập nhật ngôn ngữ trong nền
-     * @param langBtn nút radio của ngôn ngữ đang chọn
+     *
+     * @param langBtn  nút radio của ngôn ngữ đang chọn
      * @param controls các control cần update ngôn ngữ
      */
     public void updateLangInBackground(Toggle langBtn, ObservableList<Object> controls) {
@@ -753,7 +837,8 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     /**
      * cập nhật text của các control theo ngôn ngữ đang chọn
-     * @param lang ngôn ngữ đang chọn
+     *
+     * @param lang     ngôn ngữ đang chọn
      * @param controls các control cần update ngôn ngữ
      */
     private void updateLang(String lang, ObservableList<Object> controls) {
@@ -847,6 +932,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     /**
      * copy nội dung content vào clipboard của window
+     *
      * @param content nội dung cần copy
      */
     private void copyContentToClipBoard(String content) {
@@ -996,7 +1082,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
                             hBox.setStyle("-fx-font-weight: bold; -fx-background-color: #DCEDC8; -fx-padding: 3 3 3 3");
 
                             // tạo luồng đọc file ảnh
-                            Class<ConVertPdfToExcelCHLController> clazz = ConVertPdfToExcelCHLController.class;
+                            Class<ConVertExcelAnd3BCController> clazz = ConVertExcelAnd3BCController.class;
                             InputStream input = clazz.getResourceAsStream("/com/lenha/excel_3bc_toriai/ICON/ok.png");
 
                             // lấy tên vật liệu của file
@@ -1081,7 +1167,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
         // cho phép thay đổi kích thước
         dialog.setResizable(true);
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(ConVertPdfToExcelCHLController.class.getResource("/com/lenha/excel_3bc_toriai/about.fxml"));// thêm ui fxml
+        loader.setLocation(ConVertExcelAnd3BCController.class.getResource("/com/lenha/excel_3bc_toriai/about.fxml"));// thêm ui fxml
 
         try {
             dialog.getDialogPane().setContent(loader.load());// liên kết ui fxml vào dialog
@@ -1117,6 +1203,11 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
     }
 
+    /**
+     * chuyển file excel máy cắt sang file 3bc
+     *
+     * @param actionEvent
+     */
     @FXML
     public void convertExcelTo3bcFile(ActionEvent actionEvent) {
         // link file excel
@@ -1141,14 +1232,14 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
             // nếu không phải là file excel thì yêu cầu chọn lại
             if (!isFileExcel) {
-                // hiển thị alert yêu cầu chọn lại file pdf
+                // hiển thị alert yêu cầu chọn lại file excel
                 confirmAlert.setTitle(CONFIRM_EXCEL_FILE_LINK_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_EXCEL_FILE_LINK_HEADER);
                 confirmAlert.setContentText(CONFIRM_EXCEL_FILE_LINK_CONTENT);
                 updateLangAlert(confirmAlert);
                 Optional<ButtonType> result = confirmAlert.showAndWait();
 
-                // nếu đồng ý thì gọi hàm chọn file
+                // nếu đồng ý thì gọi lại hàm chọn file
                 if (result.isPresent() && result.get() == ButtonType.OK) {
                     File fileSelected = getExcelFile();
                     // nếu file đã chọn null nghĩa là người dùng click vào nút cancel khi chọn file
@@ -1222,8 +1313,8 @@ public class ConVertPdfToExcelCHLController implements Initializable {
                 ExcelTo3BC.convertExcelTo3bc(excelFile.getAbsolutePath(), _3bcFileDir.getAbsolutePath());
                 // hiển thị alert chuyển file thành công
                 confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
-                confirmAlert.setHeaderText(CONFIRM_CONVERT_COMPLETE_HEADER);
-                confirmAlert.setContentText(CONFIRM_CONVERT_COMPLETE_CONTENT);
+                confirmAlert.setHeaderText(CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_HEADER);
+                confirmAlert.setContentText(CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_CONTENT);
 
                 updateLangAlert(confirmAlert);
 
@@ -1247,18 +1338,19 @@ public class ConVertPdfToExcelCHLController implements Initializable {
                 confirmAlert.getButtonTypes().add(ButtonType.OK);
 
                 confirmAlert.setTitle(ERROR_CONVERT_TITLE);
-                confirmAlert.setHeaderText(ERROR_CONVERT_HEADER);
+                confirmAlert.setHeaderText(ERROR_CONVERT_EXCEL_TO_3BC_HEADER);
                 confirmAlert.setContentText(ERROR_CONVERT_CONTENT);
                 // cập nhật ngôn ngữ cho alert
                 updateLangAlert(confirmAlert);
 
-                // nếu là sự kiện không ghi được file chl do file trùng tên với file sắp tạo đang được mở
-                // th in ra cảnh báo và thoát
+                // nếu là sự kiện không ghi được file excel do file trùng tên với file sắp tạo đang được mở
+                // thì in ra cảnh báo và thoát
                 if (e instanceof FileNotFoundException) {
                     confirmAlert.getButtonTypes().clear();
                     confirmAlert.getButtonTypes().add(ButtonType.OK);
-                    confirmAlert.setHeaderText("Tên file CHL đang tạo: (\"" + ReadPDFToExcel.fileName + "\") trùng tên với 1 file CHL khác đang được mở nên không thể ghi đè");
-                    confirmAlert.setContentText("Hãy đóng file CHL đang mở để tiếp tục!");
+                    //NEW
+                    confirmAlert.setHeaderText("Tên file 3BC đang tạo: (\"" + ReadPDFToExcel.fileName + "\") trùng tên với 1 file 3BC khác đang được mở nên không thể ghi đè");
+                    confirmAlert.setContentText("Hãy đóng file 3BC đang mở để tiếp tục!");
                     System.out.println("File đang được mở bởi người dùng khác");
                     updateLangAlert(confirmAlert);
                     confirmAlert.showAndWait();
@@ -1269,7 +1361,9 @@ public class ConVertPdfToExcelCHLController implements Initializable {
 
                     return;
                 }
-                // nếu là lỗi quá 99 dòng thì thông báo và thoát
+
+                // 3BC KHÔNG CÓ LỖI NÀY NHƯ CHL
+                /*// nếu là lỗi quá 99 dòng thì thông báo và thoát
                 if (e instanceof TimeoutException) {
                     confirmAlert.getButtonTypes().clear();
                     confirmAlert.getButtonTypes().add(ButtonType.OK);
@@ -1284,7 +1378,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
                     confirmAlert.getButtonTypes().add(ButtonType.CANCEL);
 
                     return;
-                }
+                }*/
 
 
                 // nếu là lỗi ghi file thì thông báo
@@ -1293,7 +1387,7 @@ public class ConVertPdfToExcelCHLController implements Initializable {
                 // chuyển lại alert về dạng confirm
                 confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
 
-                // nếu chọn ok thì gọi lại hàm chọn file pdf để chọn file khác
+                // nếu chọn ok thì gọi lại hàm chọn file EXCEL để chọn file khác
                 // nếu chọn cancel thì thoát
                 if (result.isPresent() && result.get() == ButtonType.OK) {
                     File fileSelected2 = getExcelFile();
