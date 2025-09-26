@@ -31,7 +31,7 @@
                     <menus>
                       <Menu fx:id="menuHelp" mnemonicParsing="false" text="Help">
                         <items>
-                          <MenuItem mnemonicParsing="false" onAction="#copyLinkChlDir" text="Copy link thư mục" />
+                          <MenuItem mnemonicParsing="false" onAction="#copyLinkExcelResultDir" text="Copy link thư mục" />
                               <MenuItem fx:id="getInfo" mnemonicParsing="false" onAction="#openAbout" text="About" />
                         </items>
                       </Menu>
@@ -43,7 +43,7 @@
                       </Menu>
                       <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
                         <items>
-                          <MenuItem mnemonicParsing="false" onAction="#convertFile" text="THỰC HIỆN CHUYỂN FILE" />
+                          <MenuItem mnemonicParsing="false" onAction="#convertFilePdfToriaiToExcel" text="THỰC HIỆN CHUYỂN FILE" />
                               <MenuItem mnemonicParsing="false" onAction="#openExcelDir" text="Mở thư mục chứa các file CHL" />
                               <MenuItem mnemonicParsing="false" onAction="#closeApp" text="Đóng" />
                         </items>
@@ -220,7 +220,7 @@
                         </DropShadow>
                      </effect>
                   </Button>
-                  <Button fx:id="convertFileBtn1" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#convertFile" prefWidth="180.0" style="-fx-background-radius: 20;" text="THỰC HIỆN CHUYỂN FILE" textAlignment="CENTER" textFill="#45855c" wrapText="true">
+                  <Button fx:id="convertFileBtn1" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#convertFilePdfToriaiToExcel" prefWidth="180.0" style="-fx-background-radius: 20;" text="THỰC HIỆN CHUYỂN FILE" textAlignment="CENTER" textFill="#45855c" wrapText="true">
                      <font>
                         <Font name="Tahoma Bold" size="18.0" />
                      </font>
@@ -243,7 +243,7 @@
                               <Font name="System Italic" size="12.0" />
                            </font>
                         </Label>
-                        <Button fx:id="copyLinkBtn" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#copyLinkChlDir" prefWidth="72.0" style="-fx-background-radius: 12;" text="Copy link thư mục" textAlignment="CENTER" textFill="#4b4d03" wrapText="true">
+                        <Button fx:id="copyLinkBtn" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#copyLinkExcelResultDir" prefWidth="72.0" style="-fx-background-radius: 12;" text="Copy link thư mục" textAlignment="CENTER" textFill="#4b4d03" wrapText="true">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font></Button>

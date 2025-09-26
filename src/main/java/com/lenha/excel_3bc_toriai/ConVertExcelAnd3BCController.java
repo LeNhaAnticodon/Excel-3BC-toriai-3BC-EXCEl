@@ -527,10 +527,10 @@ public class ConVertExcelAnd3BCController implements Initializable {
     }
 
     /**
-     * thực hiện chuyển dữ liệu từ file pdf sang các file chl
+     * thực hiện chuyển dữ liệu từ file pdf sang file excel
      */
     @FXML
-    public void convertFile(ActionEvent actionEvent) {
+    public void convertFilePdfToriaiToExcel(ActionEvent actionEvent) {
         // link file pdf
         String pdfFilePath;
         // link thư mục chứa các file chl
@@ -951,14 +951,14 @@ public class ConVertExcelAnd3BCController implements Initializable {
     }
 
     /**
-     * copy địa chỉ thư mục chứa các file chl
+     * copy địa chỉ thư mục chứa file excel kết quả
      */
-    public void copyLinkChlDir(ActionEvent actionEvent) {
+    public void copyLinkExcelResultDir(ActionEvent actionEvent) {
         // tạo tác vụ chạy nền và gọi hàm copy địa chỉ thư mục chứa các file chl
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
-                Platform.runLater(() -> copylinkChlFolder());
+                Platform.runLater(() -> copylinkExcelResultFolder());
                 return null;
             }
         };
@@ -970,11 +970,11 @@ public class ConVertExcelAnd3BCController implements Initializable {
     }
 
     /**
-     * copy địa chỉ thư mục chứa các file chl
+     * copy địa chỉ thư mục chứa file excel kết quả
      */
-    private void copylinkChlFolder() {
+    private void copylinkExcelResultFolder() {
 
-        // lấy địa chỉ thư mục chứa các file chl
+        // lấy địa chỉ thư mục chứa file excel
         File chlFileDir = new File(link3bcDir.getText());
         // nếu thư mục chứa các file chl là thư mục thì copy địa chỉ thư mục chứa các file chl vào clipboard
         // hiển thị label thông báo đã copy trong 3 giây
@@ -1220,7 +1220,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     public void convertExcelTo3bcFile(ActionEvent actionEvent) {
         // link file excel
         String excelFilePath;
-        // link thư mục chứa file 3bc
+        // link thư mục chứa file 3bc sẽ tạo
         String _3bcFileDirPath;
 
         // yêu cầu chọn địa chỉ file và thư mục khi 2 địa chỉ này chưa được chọn
