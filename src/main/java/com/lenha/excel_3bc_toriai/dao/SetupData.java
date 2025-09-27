@@ -1,15 +1,22 @@
 package com.lenha.excel_3bc_toriai.dao;
 
+import com.lenha.excel_3bc_toriai.convert.excelTo3bc.ReadExcel;
 import com.lenha.excel_3bc_toriai.model.ExcelFile;
 import com.lenha.excel_3bc_toriai.model.Setup;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class SetupData {
@@ -34,6 +41,12 @@ public class SetupData {
     private static final Path myAppPath = Paths.get(appDataPath, "Convert Toriai Both Excel and 3BC");
     // list chứa các control UI cần để thay đổi ngôn ngữ hiển thị
     private final ObservableList<Object> controls = FXCollections.observableArrayList();
+
+    public List<String[]> getVatLieuDuPhong() {
+        return vatLieuDuPhong;
+    }
+
+    private final List<String[]> vatLieuDuPhong = new LinkedList<>();
 
     /**
      * hàm khởi tạo đối tượng duy nhất của class
@@ -179,6 +192,47 @@ public class SetupData {
         languageMap.put("CHL file name", "CHL_file_name");
         languageMap.put("Product(m)", "Product");
         languageMap.put("Material(m)", "Base_material");
+
+
+        // lấy ra list các size vật liệu dự phòng đùng trong trường hợp các vật liệu trong excel không khớp với các vật liệu cài sẵn
+        // thì bỏ vật liệu không khớp đó đi và gán cho nó vật liệu dự phòng này
+        try (InputStream fileVatLieuDuPhong = SetupData.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/VAT_LIEU_DU_PHONG.xlsx")) {
+            if (fileVatLieuDuPhong == null) {
+                throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
+            }
+            Workbook workbook = new XSSFWorkbook(fileVatLieuDuPhong);
+            Sheet sheet = workbook.getSheetAt(0);
+            // lấy 99 size vật liệu dự phòng loại H
+            for (int i = 0; i < 99; i++) {
+                Row row = sheet.getRow(i);
+                // thêm mảng chứa size, khối lượng riêng, kí hiệu của vật liệu đang đọc vào list vật liệu dự phòng
+                vatLieuDuPhong.add(new String[]{
+                        // gọi hàm đọc chuỗi số và thêm vào giá trị của cell trong hàng vật liệu đang duyệt
+                        ReadExcel.extractNumberString(ReadExcel.getFullStringCellValue(row.getCell(4))),
+                        "H",
+                        ReadExcel.extractNumberString(ReadExcel.getFullStringCellValue(row.getCell(0))),
+                        ReadExcel.extractNumberString(ReadExcel.getFullStringCellValue(row.getCell(1))),
+                        ReadExcel.extractNumberString(ReadExcel.getFullStringCellValue(row.getCell(2))),
+                        ReadExcel.extractNumberString(ReadExcel.getFullStringCellValue(row.getCell(3))),
+
+
+                });
+            }
+
+            // in ra kết quả
+            /*vatLieuDuPhong.forEach(size -> {
+                System.out.println(size[1] + ": " + size[2] + ": " + size[3] + ": " + size[4] + ": " + size[5] + ": " + size[0] + ": " );
+            });*/
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            try {
+                throw new FileNotFoundException();
+            } catch (FileNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     /**

@@ -141,9 +141,11 @@ public class ConVertExcelAnd3BCController implements Initializable {
     private static final String CONFIRM_CONVERT_COMPLETE_HEADER = "Đã chuyển xong file PDF sang các file CHL";
     // NEW
     private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_HEADER = "Đã chuyển xong file EXCEL sang file 3BC";
+    private static final String CO_VAT_LIEU_KHONG_TON_TAI = "Có tồn tại vật liệu không nằm trong danh sách";
     private static final String CONFIRM_CONVERT_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa các file CHL và\ntự động copy địa chỉ không?";
     // NEW
     private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa file 3BC và\ntự động copy địa chỉ không?";
+    private static final String THONG_BAO_DOI_VAT_LIEU = "Đã thay thế tất cả vật liệu sang bộ vật liệu dự phòng!";
 
     private static final String ERROR_CONVERT_TITLE = "Thông báo lỗi chuyển file";
     private static final String ERROR_CONVERT_HEADER = "Nội dung file PDF không phải là tính toán vật liệu hoặc file không được phép truy cập";
@@ -1318,8 +1320,24 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
             // gọi hàm chuyển file từ class static ReadPDFToExcel
             try {
-                ExcelTo3BC.convertExcelTo3bc(excelFile.getAbsolutePath(), _3bcFileDir.getAbsolutePath());
+                // biến kiểm tra trong danh sách các sheet tính vật liệu có sheet nào đó có vật liệu không giống với các vật liệu đã cài đặt sẵn trong chương trình không,
+                // nếu có thì sẽ thay vật liệu của toàn bộ các sheet bằng bộ vật liệu tự cho trong danh sách dự phòng đã tạo khi khởi tạo chương trình
+                // bộ vật liệu dự phòng lấy từ file excel VAT_LIEU_DU_PHONG.xlsx
+                boolean co1VatLieuKhongTonTai = false;
+
+                co1VatLieuKhongTonTai = ExcelTo3BC.convertExcelTo3bc(excelFile.getAbsolutePath(), _3bcFileDir.getAbsolutePath());
+                if (co1VatLieuKhongTonTai){
+                    // hiển thị alert cảnh báo đã đổi vật liệu không có trong danh sách sang bộ vật liệu dự phòng
+                    confirmAlert.setAlertType(Alert.AlertType.WARNING);
+                    confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
+                    confirmAlert.setHeaderText(CO_VAT_LIEU_KHONG_TON_TAI);
+                    confirmAlert.setContentText(THONG_BAO_DOI_VAT_LIEU);
+                    confirmAlert.showAndWait();
+
+                }
+
                 // hiển thị alert chuyển file thành công
+                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
                 confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_HEADER);
                 confirmAlert.setContentText(CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_CONTENT);
