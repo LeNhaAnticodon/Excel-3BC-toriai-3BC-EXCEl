@@ -11,6 +11,15 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ReadExcel {
+    private static final int HANG_MA_DON = 1;
+    private static final int COT_MA_DON = 2;
+    private static final int HANG_NGAY_THANG = 0;
+    private static final int HANG_KAKOU_NO = 2;
+    private static final int COT_CHECK_FILE_EXCEL_HOP_LE = 0;
+    private static final String TEXT_NGAY_THANG = "納期  ［";
+    private static final String TEXT_MA_DON = "受注NO  ［";
+    private static final String TEXT_KAKOU_NO = "加工指示NO  ［";
+
     // link của file excel
     private static String excelPath = "";
 
@@ -21,7 +30,8 @@ public class ReadExcel {
     private static final int COT_CHIEU_DAI_SAN_PHAM = 0;
     // lấy hàng đầu tiên chứa chiều dài số lượng sản phẩm
     private static final int HANG_DAU_TIEN_CHUA_SAN_PHAM = 9;
-    private static final int CAC_THONG_SO_KHOI_LUONG_RIENG_VA_MA_VAT_LIEU = 6;
+    private static final int CAC_THONG_SO_KHOI_LUONG_RIENG_VA_MA_VAT_LIEU = 7;
+    private static XSSFWorkbook workbook;
 
     public static boolean readExcel(String fileExcelPath, Map<String[], List<Map.Entry<Double, Integer>>> toriaiSheets) throws FileNotFoundException {
         // lấy địa chỉ file excel
@@ -33,7 +43,7 @@ public class ReadExcel {
         boolean co1VatLieuKhongTonTai = false;
 
         try (FileInputStream excelFileFis = new FileInputStream(excelPath)) {
-            Workbook workbook = new XSSFWorkbook(excelFileFis);
+            workbook = new XSSFWorkbook(excelFileFis);
             /*
             test
             // lấy sheet đầu tiên
@@ -57,6 +67,8 @@ public class ReadExcel {
                 Cell khoiLuongRiengCell = sheet.getRow(HANG_KHOI_LUONG_RIENG).getCell(COT_KHOI_LUONG_RIENG);
                 khoiLuongRieng = Double.parseDouble(getStringNumberCellValue(khoiLuongRiengCell));
 
+                String maDonHang = getFullStringCellValue(sheet.getRow(HANG_MA_DON).getCell(COT_MA_DON));
+
                 // tạo mảng chứa khối lượng riêng và mã vật liệu
                 String[] kousyuVaKhoiLuongRiengArr = new String[CAC_THONG_SO_KHOI_LUONG_RIENG_VA_MA_VAT_LIEU];
                 // khởi tạo cho mảng để tránh bị null trong trường hợp vật liệu không có trong bộ vật liệu cho trước
@@ -67,6 +79,7 @@ public class ReadExcel {
                 kousyuVaKhoiLuongRiengArr[3] = "";
                 kousyuVaKhoiLuongRiengArr[4] = "";
                 kousyuVaKhoiLuongRiengArr[5] = "";
+                kousyuVaKhoiLuongRiengArr[6] = maDonHang;
 //                System.out.println("khoi tao" + kousyuVaKhoiLuongRiengArr[0]);
 
 
@@ -397,5 +410,30 @@ public class ReadExcel {
             }
         }
         return -1; // Không tìm thấy dữ liệu
+    }
+
+    public static boolean checkExcelcontent(String excelFilePath) throws IOException {
+        workbook = new XSSFWorkbook(excelFilePath);
+        Sheet sheet1 = workbook.getSheetAt(0);
+        // lấy số lượng sheets
+        int sheetCount = workbook.getNumberOfSheets();
+
+        if (sheetCount > 0) {
+            String tieuDeNgayThang = sheet1.getRow(HANG_NGAY_THANG).getCell(COT_CHECK_FILE_EXCEL_HOP_LE).getStringCellValue();
+            String tieuDeMaDon = sheet1.getRow(HANG_MA_DON).getCell(COT_CHECK_FILE_EXCEL_HOP_LE).getStringCellValue();
+            String tieuDeKakouNO = sheet1.getRow(HANG_KAKOU_NO).getCell(COT_CHECK_FILE_EXCEL_HOP_LE).getStringCellValue();
+
+            if (tieuDeNgayThang.equalsIgnoreCase(TEXT_NGAY_THANG) &&
+                    tieuDeMaDon.equalsIgnoreCase(TEXT_MA_DON) &&
+                    tieuDeKakouNO.equalsIgnoreCase(TEXT_KAKOU_NO)) {
+                System.out.println("file hợp lệ");
+
+                return true;
+            }
+        }
+
+        System.out.println("file không hợp lệ");
+
+        return false;
     }
 }

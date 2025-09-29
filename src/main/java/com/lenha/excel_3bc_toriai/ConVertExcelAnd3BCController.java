@@ -2,6 +2,7 @@ package com.lenha.excel_3bc_toriai;
 
 import com.lenha.excel_3bc_toriai.convert.ExcelTo3BC;
 import com.lenha.excel_3bc_toriai.convert.ReadPDFToExcel;
+import com.lenha.excel_3bc_toriai.convert.excelTo3bc.ReadExcel;
 import com.lenha.excel_3bc_toriai.dao.SetupData;
 import com.lenha.excel_3bc_toriai.model.ExcelFile;
 import javafx.animation.KeyFrame;
@@ -138,13 +139,16 @@ public class ConVertExcelAnd3BCController implements Initializable {
     private static final String CONFIRM_3BC_FILE_DIR_CONTENT = "Hãy chọn thư mục chứa để tiếp tục!";
 
     private static final String CONFIRM_CONVERT_COMPLETE_TITLE = "Thông tin hoạt động chuyển file";
+    private static final String CONFIRM_CHECK_EXCEL_FILE = "Thông báo kết quả kiểm tra file";
     private static final String CONFIRM_CONVERT_COMPLETE_HEADER = "Đã chuyển xong file PDF sang các file CHL";
     // NEW
     private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_HEADER = "Đã chuyển xong file EXCEL sang file 3BC";
+    private static final String CONFIRM_CHECK_EXCEL_FILE_HEADER = "File excel này không phải tính vật liệu";
     private static final String CO_VAT_LIEU_KHONG_TON_TAI = "Có tồn tại vật liệu không nằm trong danh sách";
     private static final String CONFIRM_CONVERT_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa các file CHL và\ntự động copy địa chỉ không?";
     // NEW
     private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa file 3BC và\ntự động copy địa chỉ không?";
+    private static final String CONFIRM_CHECK_EXCEL_FILE_CONTENT = "Bạn có muốn chọn lại file excel khác không?";
     private static final String THONG_BAO_DOI_VAT_LIEU = "Đã thay thế tất cả vật liệu sang bộ vật liệu dự phòng!";
 
     private static final String ERROR_CONVERT_TITLE = "Thông báo lỗi chuyển file";
@@ -381,7 +385,44 @@ public class ConVertExcelAnd3BCController implements Initializable {
 //            }
         } else {
             System.out.println("không chọn file");
+            return null;
         }
+
+//        while (true){
+            try {
+                boolean checkExcelFile = false;
+                if (file != null) {
+                    checkExcelFile = ReadExcel.checkExcelcontent(file.getAbsolutePath());
+                }
+
+                if (!checkExcelFile){
+                    throw new IOException("File không đúng định dạng");
+                }
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                // hiển thị alert file không hợp lệ
+                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+                confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
+                confirmAlert.setHeaderText(CONFIRM_CHECK_EXCEL_FILE_HEADER);
+                confirmAlert.setContentText(CONFIRM_CHECK_EXCEL_FILE_CONTENT);
+
+                updateLangAlert(confirmAlert);
+
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // nếu là nút ok thì copy đường dẫn thư mục chứa file chl vào clipboard và mở thư mục này
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    getExcelFile();
+                }
+            }
+
+
+
+
+//        }
+
 
         return file;
     }
