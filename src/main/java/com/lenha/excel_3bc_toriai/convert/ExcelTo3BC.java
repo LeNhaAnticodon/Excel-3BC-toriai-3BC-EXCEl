@@ -21,7 +21,7 @@ public class ExcelTo3BC {
         boolean co1VatLieuKhongTonTai = false;
         try {
             // đọc file excel
-            co1VatLieuKhongTonTai = ReadExcel.readExcel(fileExcelPath, toriaiSheets);
+            co1VatLieuKhongTonTai = ReadExcel.readExcelFile(fileExcelPath, toriaiSheets);
 
                 toriaiSheets.forEach((vatLieu, sanPhams) ->{
                     System.out.println(Arrays.toString(vatLieu));
@@ -35,13 +35,15 @@ public class ExcelTo3BC {
                 });
 
             // ghi file 3bc
-            Write3BC.write3BC(file3bcDirPath);
+            Write3BC.write3BCFile(file3bcDirPath);
 
             // reset lại map các tính vật liệu mỗi khi chạy xong, tránh tình trạng thực hiện hàm này lần 2 thì giá trị cũ chưa bị xóa làm tăng gấp đôi giá trị
             toriaiSheets.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        Write3BC.write3BCFile(file3bcDirPath);
 
 
         return co1VatLieuKhongTonTai;

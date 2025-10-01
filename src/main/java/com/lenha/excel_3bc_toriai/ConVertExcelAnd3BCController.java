@@ -178,6 +178,13 @@ public class ConVertExcelAnd3BCController implements Initializable {
         System.out.println("link toriai 3bc " + SetupData.getInstance().getSetup().getLink3bcToriaiFile());
         System.out.println("link 3bc dir " + SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
 
+        extracted(linkExcelFile);
+        extracted(link3bcDir);
+        extracted(link3bcToriaiFile);
+        extracted(linkExcelResultDir);
+
+
+
         // bind list view với list các file chl đã tạo
         csvFIleList.setItems(SetupData.getInstance().getExcelFiles());
         // cài đặt các cell của list view
@@ -261,6 +268,24 @@ public class ConVertExcelAnd3BCController implements Initializable {
         if (file3bcDiv.isDirectory()) {
             link3bcDir.setText(SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
         }
+    }
+
+    /**
+     * cho text của tf hiển thị phần cuối text, phần đầu nếu không đủ chỗ thì ẩn đi
+     */
+    private void extracted(TextField linkExcelFileTf) {
+        // 1) Căn phần hiển thị sang phải — đảm bảo phần cuối luôn thấy
+        linkExcelFileTf.setAlignment(Pos.CENTER_RIGHT); // hoặc Pos.BASELINE_RIGHT
+
+        // 2) Mỗi lần text thay đổi thì đặt caret về cuối (để TextField tự cuộn)
+        linkExcelFileTf.textProperty().addListener((obs, oldText, newText) -> {
+            Platform.runLater(() -> linkExcelFileTf.positionCaret(newText == null ? 0 : newText.length()));
+        });
+
+        // 3) Khi focus thay đổi (ví dụ click vào/ra), cũng đảm bảo caret ở cuối
+        linkExcelFileTf.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            Platform.runLater(() -> linkExcelFileTf.positionCaret(linkExcelFileTf.getText() == null ? 0 : linkExcelFileTf.getText().length()));
+        });
     }
 
     /**
@@ -359,37 +384,58 @@ public class ConVertExcelAnd3BCController implements Initializable {
         if (file != null && file.isFile()) {
             // địa chỉ file
             String link = file.getAbsolutePath();
-            // nếu địa chỉ link của file được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file chl đã được tạo(file cũ là excel)
+            // nếu địa chỉ link của file được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file excel đã được tạo(file cũ là excel)
             if (!link.equals(SetupData.getInstance().getSetup().getLinkExcelFile())) {
                 SetupData.getInstance().getExcelFiles().clear();
             }
+
+            // kiểm tra tính hợp lệ của file, nếu không hợp thì yêu cầu chọn lại hoặc thoát
+            try {
+                // biến nhớ file không hợp lệ là false
+                boolean checkExcelFile = false;
+                // nếu file tồn tại
+                if (file != null) {
+                    // gán biến nhớ kết quả kiểm tra hợp lệ
+                    checkExcelFile = ReadExcel.checkExcelcontent(file.getAbsolutePath());
+                }
+
+                // nếu không hợp lệ thì ném ngoại lệ để chỗ bắt ngoại lệ gọi hàm thông báo
+                // ngược lại nếu hợp lệ thì tiếp tục chương trình
+                if (!checkExcelFile){
+                    throw new IOException("File không đúng định dạng");
+                }
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                // hiển thị alert file không hợp lệ
+                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+                confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
+                confirmAlert.setHeaderText(CONFIRM_CHECK_EXCEL_FILE_HEADER);
+                confirmAlert.setContentText(CONFIRM_CHECK_EXCEL_FILE_CONTENT);
+
+                updateLangAlert(confirmAlert);
+
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // nếu là nút ok thì gọi lại hàm chọn file
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    getExcelFile();
+                }
+                return null;
+            }
+
             // cho hiển thị địa chỉ file rồi lưu vào đối tượng cài đặt và lưu vào file
             linkExcelFile.setText(link);
             SetupData.getInstance().setLinkExcelFile(link);
 
-//            // nếu địa chỉ thư mục chứa file excel sẽ tạo chưa được chọn thì chọn luôn thư mục của file excel vừa chọn
-//            // không đúng logic của app này
-//            if (link3bcDir.getText().isBlank()) {
-//                // phân tách địa chỉ file pdf
-//                String[] csvDirArr = link.split("\\\\");
-//                // địa chỉ thư mục chứa file chl
-//                String csvDir = "";
-//                // ghép lại link nhưng bỏ phần cuối cùng(tên file pdf) là ra địa chỉ thư mục chứa file pdf
-//                for (int i = 0; i < csvDirArr.length - 1; i++) {
-//                    csvDir = csvDir.concat(csvDirArr[i]).concat("\\");
-//                }
-//                // hiển thị địa chỉ thư mục
-//                link3bcDir.setText(csvDir);
-//                // lưu địa chỉ vào đối tượng setup và lưu vào file
-//                SetupData.getInstance().setLinkSave3bcFileDir(csvDir);
-//            }
         } else {
             System.out.println("không chọn file");
             return null;
         }
 
 //        while (true){
-            try {
+            /*try {
                 boolean checkExcelFile = false;
                 if (file != null) {
                     checkExcelFile = ReadExcel.checkExcelcontent(file.getAbsolutePath());
@@ -416,7 +462,10 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 if (result.isPresent() && result.get() == ButtonType.OK) {
                     getExcelFile();
                 }
-            }
+                // xóa địa chỉ file đã chọn để chọn lại từ đầu
+                linkExcelFile.setText(oldLinkExcelFile);
+                SetupData.getInstance().setLinkExcelFile(oldLinkExcelFile);
+            }*/
 
 
 

@@ -33,7 +33,7 @@ public class ReadExcel {
     private static final int CAC_THONG_SO_KHOI_LUONG_RIENG_VA_MA_VAT_LIEU = 7;
     private static XSSFWorkbook workbook;
 
-    public static boolean readExcel(String fileExcelPath, Map<String[], List<Map.Entry<Double, Integer>>> toriaiSheets) throws FileNotFoundException {
+    public static boolean readExcelFile(String fileExcelPath, Map<String[], List<Map.Entry<Double, Integer>>> toriaiSheets) throws FileNotFoundException {
         // lấy địa chỉ file excel
         excelPath = fileExcelPath;
 
@@ -70,6 +70,10 @@ public class ReadExcel {
                 String maDonHang = getFullStringCellValue(sheet.getRow(HANG_MA_DON).getCell(COT_MA_DON));
 
                 // tạo mảng chứa khối lượng riêng và mã vật liệu
+                // phần tử 1 là khối lượng riêng
+                // phần tử 2 là mã vật liệu
+                // phần tử 3 - 6 là các size cảu vật liệu
+                // phần tử 7 là mã đơn hàng
                 String[] kousyuVaKhoiLuongRiengArr = new String[CAC_THONG_SO_KHOI_LUONG_RIENG_VA_MA_VAT_LIEU];
                 // khởi tạo cho mảng để tránh bị null trong trường hợp vật liệu không có trong bộ vật liệu cho trước
                 // thì mảng chứa vật liệu này sẽ không được gán nên cần khởi tạo cho vật liệu các giá trị rỗng
@@ -412,12 +416,20 @@ public class ReadExcel {
         return -1; // Không tìm thấy dữ liệu
     }
 
+    /**
+     * kiểm tra xem file excel có hợp lệ không(có phải file tính vật liệu không)
+     * @param excelFilePath
+     * @return
+     * @throws IOException
+     */
     public static boolean checkExcelcontent(String excelFilePath) throws IOException {
         workbook = new XSSFWorkbook(excelFilePath);
         Sheet sheet1 = workbook.getSheetAt(0);
         // lấy số lượng sheets
         int sheetCount = workbook.getNumberOfSheets();
 
+        // nếu nhiều hơn 1 sheet thì kiểm tra xem 3 ô trong sheet 1 có giá trị khớp với giá trị của file tính vật liệu không
+        // nếu có thì trả về kết quả
         if (sheetCount > 0) {
             String tieuDeNgayThang = sheet1.getRow(HANG_NGAY_THANG).getCell(COT_CHECK_FILE_EXCEL_HOP_LE).getStringCellValue();
             String tieuDeMaDon = sheet1.getRow(HANG_MA_DON).getCell(COT_CHECK_FILE_EXCEL_HOP_LE).getStringCellValue();
@@ -434,6 +446,7 @@ public class ReadExcel {
 
         System.out.println("file không hợp lệ");
 
+        // đến đây thì tức là file không vượt qua kiểm tra thì trả về false
         return false;
     }
 }

@@ -12,8 +12,11 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class ZipEditor {
+    // địa chỉ file sẽ được copy từ file gốc
     public static final Path copyFile = Paths.get("C:\\Users\\HuanTech PC\\Desktop\\testConvertTo3BC\\NC_Excel_to_3BC.zip");
+    // lấy địa chỉ tuyệt đối của file copy
     public static final String zipFilePath = copyFile.toAbsolutePath().toString();
+    // tên file trong file nén sẽ được edit
     public static final String fileNameToEdit = "Excel_to_3BC/Products/Product.dat";
     public static final String newText = """
             FILE_VERSION=1\r
@@ -138,7 +141,10 @@ public class ZipEditor {
                 throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
             }
 
+            // lấy địa chỉ file sẽ được copy
             File copy = copyFile.toFile();
+
+            // nếu file đã tồn tại thì xóa nó
             if (copy.exists()) {
                 if (copy.delete()) {
                     System.out.println("File đã được xóa thành công.");
@@ -149,28 +155,34 @@ public class ZipEditor {
                 System.out.println("File không tồn tại.");
             }
 
+            // tạo file copy từ file gốc
             Files.copy(sourceFile, copyFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
-            // Đọc tệp ZIP
+            // Đọc tệp ZIP của file copy
             FileInputStream fis = new FileInputStream(zipFilePath);
             ZipInputStream zis = new ZipInputStream(fis);
             ZipEntry entry;
 
+            // ghi tệp ZIP của file copy
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ZipOutputStream zos = new ZipOutputStream(baos, Charset.forName("MS932"));
 
+            // duyệt qua các file hoặc thư mục cùng cấp trong file nén đang edit
             while ((entry = zis.getNextEntry()) != null) {
-                // Nếu là file cần chỉnh sửa
                 System.out.println(entry.getName());
+
+                // entry là file và tệp đang lặp trong file nén đang edit
+                // Nếu là file cần chỉnh sửa, tức là tên entry trùng với tên file cần chỉnh sửa
                 if (entry.getName().equals(fileNameToEdit)) {
                     ByteArrayOutputStream tempBaos = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int len;
                     // đọc các byte data của file cần chỉnh này lưu vào buffer
+                    // hàm sẽ đọc data và ghi vào buffer
                     // zis.read(buffer) trả về độ dài của data đã đọc
                     // các đoạn buffer được tempBaos ghi lại để tổng hợp thành nội dung hoàn chỉnh
                     while ((len = zis.read(buffer)) > 0) {
@@ -208,7 +220,9 @@ public class ZipEditor {
             zis.close();
             zos.close();
 
-            // Ghi tệp ZIP mới vào đĩa
+            // Ghi tệp ZIP mới vào đĩa là file copy
+            // baos bao gồm zos đã lấy được thông tin ở bên trên
+            // sau đó ghi vào fos với đường dẫn là file copy
             FileOutputStream fos = new FileOutputStream(zipFilePath);
             baos.writeTo(fos);
             fos.close();
