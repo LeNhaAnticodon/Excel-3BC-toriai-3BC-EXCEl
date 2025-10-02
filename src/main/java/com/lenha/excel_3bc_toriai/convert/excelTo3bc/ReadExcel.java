@@ -67,7 +67,24 @@ public class ReadExcel {
                 Cell khoiLuongRiengCell = sheet.getRow(HANG_KHOI_LUONG_RIENG).getCell(COT_KHOI_LUONG_RIENG);
                 khoiLuongRieng = Double.parseDouble(getStringNumberCellValue(khoiLuongRiengCell));
 
-                String maDonHang = getFullStringCellValue(sheet.getRow(HANG_MA_DON).getCell(COT_MA_DON));
+                // lấy mã đơn hàng, bỏ qua chữ chỉ lấy số
+                String maDonHang = getStringNumberCellValue(sheet.getRow(HANG_MA_DON).getCell(COT_MA_DON)).trim();
+                // nếu mã rỗng thì đặt tên mặc định
+                if (maDonHang.isBlank()){
+                    maDonHang = "No_Name";
+                }
+                int maDonHangLength = maDonHang.length();
+                // nếu mã đơn hàng dài hơn 30 kí tự thì cắt cho còn 30
+                if (maDonHangLength > 30){
+                    maDonHang = maDonHang.substring(0, 30);
+                }
+
+                // nếu mã đơn hàng ít hơn 20 kí tự thì cộng thêm các khoảng trống cho đủ 30 kí tự
+                for (int i = maDonHangLength; i < 30; i++) {
+                    maDonHang = maDonHang.concat(" ");
+                }
+
+
 
                 // tạo mảng chứa khối lượng riêng và mã vật liệu
                 // phần tử 1 là khối lượng riêng
@@ -85,7 +102,6 @@ public class ReadExcel {
                 kousyuVaKhoiLuongRiengArr[5] = "";
                 kousyuVaKhoiLuongRiengArr[6] = maDonHang;
 //                System.out.println("khoi tao" + kousyuVaKhoiLuongRiengArr[0]);
-
 
                 // gọi hàm phân tách các thông số của vật liệu rồi gán nó + khối lượng riêng vào mảng kousyuVaKhoiLuongRiengArr
                 // chứa các thông số vật liệu để phục vụ cho chuyển đổi sang 3bc
@@ -361,7 +377,7 @@ public class ReadExcel {
                     System.out.println("Ô không chứa dữ liệu hợp lệ.");
             }
         }
-        return null;
+        return "";
     }
 
     /**
@@ -383,7 +399,7 @@ public class ReadExcel {
                     System.out.println("Ô không chứa dữ liệu hợp lệ.");
             }
         }
-        return null;
+        return "";
     }
 
 
