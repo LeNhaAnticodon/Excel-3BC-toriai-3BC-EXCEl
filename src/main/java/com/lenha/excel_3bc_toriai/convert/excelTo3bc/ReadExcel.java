@@ -489,7 +489,7 @@ public class ReadExcel {
      * @return
      * @throws IOException
      */
-    public static boolean checkExcelcontent(String excelFilePath) throws IOException {
+    public static boolean checkExcelcontent(String excelFilePath) throws Exception {
         workbook = new XSSFWorkbook(excelFilePath);
         Sheet sheet1 = workbook.getSheetAt(0);
         // lấy số lượng sheets

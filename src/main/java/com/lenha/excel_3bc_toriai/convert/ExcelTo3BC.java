@@ -3,6 +3,7 @@ package com.lenha.excel_3bc_toriai.convert;
 import com.lenha.excel_3bc_toriai.convert.excelTo3bc.ReadExcel;
 import com.lenha.excel_3bc_toriai.convert.excelTo3bc.Write3BC;
 
+import java.io.IOException;
 import java.util.*;
 
 public class ExcelTo3BC {
@@ -13,7 +14,7 @@ public class ExcelTo3BC {
     // List<Map.Entry<Double, Integer>> thì không như vậy
     private static final Map<String[], List<Map.Entry<Double, Integer>>> toriaiSheets = new LinkedHashMap<>();
 
-    public static boolean convertExcelTo3bc(String fileExcelPath, String file3bcDirPath) {
+    public static boolean convertExcelTo3bc(String fileExcelPath, String file3bcDirPath) throws IOException {
 
         // biến kiểm tra trong danh sách các sheet tính vật liệu có sheet nào đó có vật liệu không giống với các vật liệu đã cài đặt sẵn trong chương trình không,
         // nếu có thì sẽ thay vật liệu của toàn bộ các sheet bằng bộ vật liệu tự cho trong danh sách dự phòng đã tạo khi khởi tạo chương trình

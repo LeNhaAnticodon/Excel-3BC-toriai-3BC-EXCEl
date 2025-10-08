@@ -368,7 +368,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
         // file excel
         File file;
-        // chọn file pdf nếu không có lỗi địa chỉ khởi đầu thì thoát,nếu không cho địa chỉ khởi đầu là null và chọn lại đến khi hết lỗi
+        // chọn file excel nếu không có lỗi địa chỉ khởi đầu thì thoát,nếu không cho địa chỉ khởi đầu là null và chọn lại đến khi hết lỗi
         while (true) {
             try {
                 // lấy file excel
@@ -408,6 +408,22 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
             } catch (IOException e) {
                 e.printStackTrace();
+                // hiển thị alert file không hợp lệ
+                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+                confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
+                confirmAlert.setHeaderText(CONFIRM_CHECK_EXCEL_FILE_HEADER);
+                confirmAlert.setContentText(CONFIRM_CHECK_EXCEL_FILE_CONTENT);
+
+                updateLangAlert(confirmAlert);
+
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // nếu là nút ok thì gọi lại hàm chọn file
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    getExcelFile();
+                }
+                return null;
+            } catch (Exception e) {
                 // hiển thị alert file không hợp lệ
                 confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
                 confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
@@ -1476,6 +1492,12 @@ public class ConVertExcelAnd3BCController implements Initializable {
                     confirmAlert.getButtonTypes().add(ButtonType.CANCEL);
 
                     return;
+                }
+
+                // nếu là sự kiện không đọc ghi do không tạo được file 3bc
+                // thì
+                if (e instanceof IOException) {
+
                 }
 
                 // 3BC KHÔNG CÓ LỖI NÀY NHƯ CHL
