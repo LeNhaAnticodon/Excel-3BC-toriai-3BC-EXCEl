@@ -34,8 +34,6 @@ public class ExcelTo3BC {
 //                    });
                 });
 
-            // ghi file 3bc
-            Write3BC.write3BCFile(file3bcDirPath);
 
             // reset lại map các tính vật liệu mỗi khi chạy xong, tránh tình trạng thực hiện hàm này lần 2 thì giá trị cũ chưa bị xóa làm tăng gấp đôi giá trị
             toriaiSheets.clear();
@@ -43,7 +41,8 @@ public class ExcelTo3BC {
             e.printStackTrace();
         }
 
-        Write3BC.write3BCFile(file3bcDirPath);
+        // ghi file 3bc
+        Write3BC.write3BCFile(file3bcDirPath, toriaiSheets);
 
 
         return co1VatLieuKhongTonTai;

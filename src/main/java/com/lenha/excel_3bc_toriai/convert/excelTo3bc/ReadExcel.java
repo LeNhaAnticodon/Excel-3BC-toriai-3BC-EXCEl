@@ -24,13 +24,17 @@ public class ReadExcel {
     private static String excelPath = "";
 
     private static final int HANG_MA_VAT_LIEU = 2;
+    private static final int HANG_TEN_KHACH_HANG = 0;
+    private static final int HANG_NOI_GIAO_HANG = 1;
     private static final int COT_MA_VAT_LIEU = 8;
+    private static final int COT_TEN_KHACH_HANG = 8;
+    private static final int COT_NOI_GIAO_HANG = 8;
     private static final int HANG_KHOI_LUONG_RIENG = 6;
     private static final int COT_KHOI_LUONG_RIENG = 1;
     private static final int COT_CHIEU_DAI_SAN_PHAM = 0;
     // lấy hàng đầu tiên chứa chiều dài số lượng sản phẩm
     private static final int HANG_DAU_TIEN_CHUA_SAN_PHAM = 9;
-    private static final int CAC_THONG_SO_KHOI_LUONG_RIENG_VA_MA_VAT_LIEU = 7;
+        private static final int CAC_THONG_SO_CUA_DON_HANG = 9;
     private static XSSFWorkbook workbook;
 
     public static boolean readExcelFile(String fileExcelPath, Map<String[], List<Map.Entry<Double, Integer>>> toriaiSheets) throws FileNotFoundException {
@@ -62,51 +66,69 @@ public class ReadExcel {
             for (Sheet sheet : workbook) {
                 // lấy mã vật liệu
                 String kousyu = getFullStringCellValue(sheet.getRow(HANG_MA_VAT_LIEU).getCell(COT_MA_VAT_LIEU));
+
+                // lấy tên khách hàng
+                String tenKhachHang = getFullStringCellValue(sheet.getRow(HANG_TEN_KHACH_HANG).getCell(COT_TEN_KHACH_HANG));
+
+                // lấy nơi giao hàng
+                String noiGiaoHang = getFullStringCellValue(sheet.getRow(HANG_NOI_GIAO_HANG).getCell(COT_NOI_GIAO_HANG));
+
                 // lấy khối lượng riêng
                 double khoiLuongRieng;
                 Cell khoiLuongRiengCell = sheet.getRow(HANG_KHOI_LUONG_RIENG).getCell(COT_KHOI_LUONG_RIENG);
                 khoiLuongRieng = Double.parseDouble(getStringNumberCellValue(khoiLuongRiengCell));
 
-                // lấy mã đơn hàng, bỏ qua chữ chỉ lấy số
+                // lấy mã đơn hàng, bỏ qua chữ chỉ lấy số, chuyển toàn bộ số tiếng Nhật nếu có sang latin
                 String maDonHang = getStringNumberCellValue(sheet.getRow(HANG_MA_DON).getCell(COT_MA_DON)).trim();
+
+
                 // nếu mã rỗng thì đặt tên mặc định
                 if (maDonHang.isBlank()){
                     maDonHang = "No_Name";
                 }
+
+                // gọi hàm chuẩn hóa tên tiếng Nhật
+                tenKhachHang = chuanHoaTextTiengNhatSangLatin(tenKhachHang);
+                noiGiaoHang = chuanHoaTextTiengNhatSangLatin(noiGiaoHang);
+
                 int maDonHangLength = maDonHang.length();
-                // nếu mã đơn hàng dài hơn 30 kí tự thì cắt cho còn 30
-                if (maDonHangLength > 30){
-                    maDonHang = maDonHang.substring(0, 30);
+                // nếu mã đơn hàng dài hơn 40 kí tự thì cắt cho còn 40
+                if (maDonHangLength > 40){
+                    maDonHang = maDonHang.substring(0, 40);
                 }
 
-                // nếu mã đơn hàng ít hơn 20 kí tự thì cộng thêm các khoảng trống cho đủ 30 kí tự
-                for (int i = maDonHangLength; i < 30; i++) {
+                // nếu mã đơn hàng ít hơn 40 kí tự thì cộng thêm các khoảng trống cho đủ 40 kí tự
+                for (int i = maDonHangLength; i < 40; i++) {
                     maDonHang = maDonHang.concat(" ");
                 }
 
 
 
-                // tạo mảng chứa khối lượng riêng và mã vật liệu
+                // tạo mảng chứa khối lượng riêng, mã vật liệu và các thông số khác của đơn hàng
                 // phần tử 1 là khối lượng riêng
                 // phần tử 2 là mã vật liệu
                 // phần tử 3 - 6 là các size cảu vật liệu
                 // phần tử 7 là mã đơn hàng
-                String[] kousyuVaKhoiLuongRiengArr = new String[CAC_THONG_SO_KHOI_LUONG_RIENG_VA_MA_VAT_LIEU];
+                // phần tử 8 là tên khách hàng
+                // phần tử 9 là nơi giao hàng
+                String[] cacThongSoCuaDonHang = new String[CAC_THONG_SO_CUA_DON_HANG];
                 // khởi tạo cho mảng để tránh bị null trong trường hợp vật liệu không có trong bộ vật liệu cho trước
                 // thì mảng chứa vật liệu này sẽ không được gán nên cần khởi tạo cho vật liệu các giá trị rỗng
-                kousyuVaKhoiLuongRiengArr[0] = "";
-                kousyuVaKhoiLuongRiengArr[1] = "";
-                kousyuVaKhoiLuongRiengArr[2] = "";
-                kousyuVaKhoiLuongRiengArr[3] = "";
-                kousyuVaKhoiLuongRiengArr[4] = "";
-                kousyuVaKhoiLuongRiengArr[5] = "";
-                kousyuVaKhoiLuongRiengArr[6] = maDonHang;
-//                System.out.println("khoi tao" + kousyuVaKhoiLuongRiengArr[0]);
+                cacThongSoCuaDonHang[0] = "";
+                cacThongSoCuaDonHang[1] = "";
+                cacThongSoCuaDonHang[2] = "";
+                cacThongSoCuaDonHang[3] = "";
+                cacThongSoCuaDonHang[4] = "";
+                cacThongSoCuaDonHang[5] = "";
+                cacThongSoCuaDonHang[6] = maDonHang;
+                cacThongSoCuaDonHang[7] = tenKhachHang;
+                cacThongSoCuaDonHang[8] = noiGiaoHang;
+//                System.out.println("khoi tao" + cacThongSoCuaDonHang[0]);
 
-                // gọi hàm phân tách các thông số của vật liệu rồi gán nó + khối lượng riêng vào mảng kousyuVaKhoiLuongRiengArr
+                // gọi hàm phân tách các thông số của vật liệu rồi gán nó + khối lượng riêng vào mảng cacThongSoCuaDonHang
                 // chứa các thông số vật liệu để phục vụ cho chuyển đổi sang 3bc
                 // lấy kết quả vật liệu của sheet tính vật liệu này có trong bộ vật liệu cho trước không
-                boolean vatLieuTonTai = convertKousyuVaKhoiLuongRiengExcelTo3bc(kousyu, khoiLuongRieng, kousyuVaKhoiLuongRiengArr);
+                boolean vatLieuTonTai = convertKousyuVaKhoiLuongRiengExcelTo3bc(kousyu, khoiLuongRieng, cacThongSoCuaDonHang);
 
                 // nếu sheet này vật liệu không có trong bộ vật liệu cho trước thì cho biến kiểm tra là true
                 if (!vatLieuTonTai) {
@@ -137,7 +159,7 @@ public class ReadExcel {
                 }
 
                 // thêm toriai của sheet đang duyệt vào map các toriai
-                toriaiSheets.put(kousyuVaKhoiLuongRiengArr, seihins);
+                toriaiSheets.put(cacThongSoCuaDonHang, seihins);
 
             }
             System.out.println("có vật liệu không tồn tại trong bộ vật liệu cho trước: " + co1VatLieuKhongTonTai);
@@ -183,6 +205,35 @@ public class ReadExcel {
         }
 
         return co1VatLieuKhongTonTai;
+    }
+
+    /**
+     * chuuyển đổi các tên tiếng Nhật về định dạng đọc được trong 3bc, dúng  40 kí tự(chũ nhật tính 2 kí tự) nếu quá sẽ bị cắt cho nhỏ hơn hoặc bằng 40 kí tự
+     * @param tenTiengNhat tên gốc
+     * @return tên định dạng lại
+     */
+    private static String chuanHoaTextTiengNhatSangLatin(String tenTiengNhat) {
+        int tenTiengNhatLength = WidthCalculatorJapanText.computeWidth(tenTiengNhat);
+
+        int khoangCachToiGioiHanTenKhachHang = tenTiengNhatLength - 40;
+
+        if (khoangCachToiGioiHanTenKhachHang > 0){
+            try {
+                tenTiengNhat = tenTiengNhat.substring(0, tenTiengNhat.length() - khoangCachToiGioiHanTenKhachHang);
+
+            } catch (Exception e){
+                tenTiengNhat = "                                        ";
+                System.out.println("lỗi cắt tên");
+            }
+        }else if (khoangCachToiGioiHanTenKhachHang < 0) {
+            // nếu tên khách hàng ít hơn 40 kí tự thì cộng thêm các khoảng trống cho đủ 40 kí tự
+            for (int i = 0; i < Math.abs(khoangCachToiGioiHanTenKhachHang); i++) {
+                tenTiengNhat = tenTiengNhat.concat(" ");
+            }
+        }
+
+        System.out.println("độ dài theo tiếng nhật: " + tenTiengNhatLength);
+        return tenTiengNhat;
     }
 
     /**
