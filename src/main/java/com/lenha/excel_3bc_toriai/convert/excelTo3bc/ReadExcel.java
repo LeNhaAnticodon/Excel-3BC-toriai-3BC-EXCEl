@@ -16,6 +16,7 @@ public class ReadExcel {
     private static final int HANG_NGAY_THANG = 0;
     private static final int HANG_KAKOU_NO = 2;
     private static final int COT_CHECK_FILE_EXCEL_HOP_LE = 0;
+    private static final int COT_NGAY_THANG = 2;
     private static final String TEXT_NGAY_THANG = "納期  ［";
     private static final String TEXT_MA_DON = "受注NO  ［";
     private static final String TEXT_KAKOU_NO = "加工指示NO  ［";
@@ -34,7 +35,7 @@ public class ReadExcel {
     private static final int COT_CHIEU_DAI_SAN_PHAM = 0;
     // lấy hàng đầu tiên chứa chiều dài số lượng sản phẩm
     private static final int HANG_DAU_TIEN_CHUA_SAN_PHAM = 9;
-        private static final int CAC_THONG_SO_CUA_DON_HANG = 9;
+    private static final int CAC_THONG_SO_CUA_DON_HANG = 10;
     private static XSSFWorkbook workbook;
 
     public static boolean readExcelFile(String fileExcelPath, Map<String[], List<Map.Entry<Double, Integer>>> toriaiSheets) throws FileNotFoundException {
@@ -73,6 +74,19 @@ public class ReadExcel {
                 // lấy nơi giao hàng
                 String noiGiaoHang = getFullStringCellValue(sheet.getRow(HANG_NOI_GIAO_HANG).getCell(COT_NOI_GIAO_HANG));
 
+                // lấy ngày tháng
+                // lấy giá trị text của ngày tháng rồi đổi sang số thực vì ô này là số thực có phần thập phân ẩn không hiển thị trên excel nên không thể đổi sang ngày tháng
+                // sau đó đổi sang số nguyên rồi đổi sang ngày tháng
+                // không thể dùng hàm chuyển ô này sang String toàn số luôn vì nó đổi phần thập phân từ dấu , sang dấu . khiến nó không thể chuyển đổi sang double
+                // khi người dùng sửa giá trị ô này nó sẽ chuyển về định dạng String Không phải numeric nữa, nếu có chữ nó sẽ lấy ra chữ và chuyển đổi
+                // dang số thực sẽ bị lỗi, chương trình xử lý lỗi và thông báo file không hợp lệ cho người dùng để họ sửa lại
+                double ngayThang = Double.parseDouble((getFullStringCellValue(sheet.getRow(HANG_NGAY_THANG).getCell(COT_NGAY_THANG))));
+                int ngayThangInt = (int) ngayThang;
+                String ngayThangString = String.valueOf(ngayThangInt);
+                if(ngayThangString.length()  != 8){
+                    throw new NumberFormatException("Ngày tháng không hợp lệ");
+                }
+
                 // lấy khối lượng riêng
                 double khoiLuongRieng;
                 Cell khoiLuongRiengCell = sheet.getRow(HANG_KHOI_LUONG_RIENG).getCell(COT_KHOI_LUONG_RIENG);
@@ -83,7 +97,7 @@ public class ReadExcel {
 
 
                 // nếu mã rỗng thì đặt tên mặc định
-                if (maDonHang.isBlank()){
+                if (maDonHang.isBlank()) {
                     maDonHang = "No_Name";
                 }
 
@@ -93,7 +107,7 @@ public class ReadExcel {
 
                 int maDonHangLength = maDonHang.length();
                 // nếu mã đơn hàng dài hơn 40 kí tự thì cắt cho còn 40
-                if (maDonHangLength > 40){
+                if (maDonHangLength > 40) {
                     maDonHang = maDonHang.substring(0, 40);
                 }
 
@@ -103,7 +117,6 @@ public class ReadExcel {
                 }
 
 
-
                 // tạo mảng chứa khối lượng riêng, mã vật liệu và các thông số khác của đơn hàng
                 // phần tử 1 là khối lượng riêng
                 // phần tử 2 là mã vật liệu
@@ -111,6 +124,7 @@ public class ReadExcel {
                 // phần tử 7 là mã đơn hàng
                 // phần tử 8 là tên khách hàng
                 // phần tử 9 là nơi giao hàng
+                // phần tử 10 là ngày tháng
                 String[] cacThongSoCuaDonHang = new String[CAC_THONG_SO_CUA_DON_HANG];
                 // khởi tạo cho mảng để tránh bị null trong trường hợp vật liệu không có trong bộ vật liệu cho trước
                 // thì mảng chứa vật liệu này sẽ không được gán nên cần khởi tạo cho vật liệu các giá trị rỗng
@@ -123,6 +137,7 @@ public class ReadExcel {
                 cacThongSoCuaDonHang[6] = maDonHang;
                 cacThongSoCuaDonHang[7] = tenKhachHang;
                 cacThongSoCuaDonHang[8] = noiGiaoHang;
+                cacThongSoCuaDonHang[9] = ngayThangString;
 //                System.out.println("khoi tao" + cacThongSoCuaDonHang[0]);
 
                 // gọi hàm phân tách các thông số của vật liệu rồi gán nó + khối lượng riêng vào mảng cacThongSoCuaDonHang
@@ -209,6 +224,7 @@ public class ReadExcel {
 
     /**
      * chuuyển đổi các tên tiếng Nhật về định dạng đọc được trong 3bc, dúng  40 kí tự(chũ nhật tính 2 kí tự) nếu quá sẽ bị cắt cho nhỏ hơn hoặc bằng 40 kí tự
+     *
      * @param tenTiengNhat tên gốc
      * @return tên định dạng lại
      */
@@ -217,15 +233,15 @@ public class ReadExcel {
 
         int khoangCachToiGioiHanTenKhachHang = tenTiengNhatLength - 40;
 
-        if (khoangCachToiGioiHanTenKhachHang > 0){
+        if (khoangCachToiGioiHanTenKhachHang > 0) {
             try {
                 tenTiengNhat = tenTiengNhat.substring(0, tenTiengNhat.length() - khoangCachToiGioiHanTenKhachHang);
 
-            } catch (Exception e){
+            } catch (Exception e) {
                 tenTiengNhat = "                                        ";
                 System.out.println("lỗi cắt tên");
             }
-        }else if (khoangCachToiGioiHanTenKhachHang < 0) {
+        } else if (khoangCachToiGioiHanTenKhachHang < 0) {
             // nếu tên khách hàng ít hơn 40 kí tự thì cộng thêm các khoảng trống cho đủ 40 kí tự
             for (int i = 0; i < Math.abs(khoangCachToiGioiHanTenKhachHang); i++) {
                 tenTiengNhat = tenTiengNhat.concat(" ");
@@ -485,6 +501,7 @@ public class ReadExcel {
 
     /**
      * kiểm tra xem file excel có hợp lệ không(có phải file tính vật liệu không)
+     *
      * @param excelFilePath
      * @return
      * @throws IOException
@@ -496,15 +513,32 @@ public class ReadExcel {
         int sheetCount = workbook.getNumberOfSheets();
 
         // nếu nhiều hơn 1 sheet thì kiểm tra xem 3 ô trong sheet 1 có giá trị khớp với giá trị của file tính vật liệu không
+        // xem giá trị ngày tháng có đủ 8 chữ số không
         // nếu có thì trả về kết quả
         if (sheetCount > 0) {
             String tieuDeNgayThang = sheet1.getRow(HANG_NGAY_THANG).getCell(COT_CHECK_FILE_EXCEL_HOP_LE).getStringCellValue();
             String tieuDeMaDon = sheet1.getRow(HANG_MA_DON).getCell(COT_CHECK_FILE_EXCEL_HOP_LE).getStringCellValue();
             String tieuDeKakouNO = sheet1.getRow(HANG_KAKOU_NO).getCell(COT_CHECK_FILE_EXCEL_HOP_LE).getStringCellValue();
 
-            if (tieuDeNgayThang.equalsIgnoreCase(TEXT_NGAY_THANG) &&
-                    tieuDeMaDon.equalsIgnoreCase(TEXT_MA_DON) &&
-                    tieuDeKakouNO.equalsIgnoreCase(TEXT_KAKOU_NO)) {
+            // lấy giá trị text của ngày tháng rồi đổi sang số thực vì ô này là số thực có phần thập phân ẩn không hiển thị trên excel nên không thể đổi sang ngày tháng
+            // sau đó đổi sang số nguyên rồi đổi sang ngày tháng
+            // không thể dùng hàm chuyển ô này sang String toàn số luôn vì nó đổi phần thập phân từ dấu , sang dấu . khiến nó không thể chuyển đổi sang double
+            // khi người dùng sửa giá trị ô này nó sẽ chuyển về định dạng String Không phải numeric nữa, nếu có chữ nó sẽ lấy ra chữ và chuyển đổi
+            // dang số thực sẽ bị lỗi, chương trình xử lý lỗi và thông báo file không hợp lệ cho người dùng để họ sửa lại
+            // khi sửa lại về toàn số thì sẽ đọc được nhưng vẫn phải đảm bảo chỉ có 8 chữ số
+            double ngayThang = Double.parseDouble((getFullStringCellValue(sheet1.getRow(HANG_NGAY_THANG).getCell(COT_NGAY_THANG))));
+            int ngayThangInt = (int) ngayThang;
+
+            String ngayThangString = String.valueOf(ngayThangInt);
+            System.out.println("ngay thang: " + ngayThangString);
+
+            if (
+                    tieuDeNgayThang.equalsIgnoreCase(TEXT_NGAY_THANG) &&
+                            tieuDeMaDon.equalsIgnoreCase(TEXT_MA_DON) &&
+                            tieuDeKakouNO.equalsIgnoreCase(TEXT_KAKOU_NO) &&
+                            ngayThangString.length() == 8
+
+            ) {
                 System.out.println("file hợp lệ");
 
                 return true;

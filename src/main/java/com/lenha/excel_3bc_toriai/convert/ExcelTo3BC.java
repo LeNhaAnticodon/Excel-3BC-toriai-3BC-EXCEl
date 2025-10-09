@@ -20,30 +20,26 @@ public class ExcelTo3BC {
         // nếu có thì sẽ thay vật liệu của toàn bộ các sheet bằng bộ vật liệu tự cho trong danh sách dự phòng đã tạo khi khởi tạo chương trình
         // bộ vật liệu dự phòng lấy từ file excel VAT_LIEU_DU_PHONG.xlsx
         boolean co1VatLieuKhongTonTai = false;
-        try {
-            // đọc file excel
-            co1VatLieuKhongTonTai = ReadExcel.readExcelFile(fileExcelPath, toriaiSheets);
+        // đọc file excel
+        co1VatLieuKhongTonTai = ReadExcel.readExcelFile(fileExcelPath, toriaiSheets);
 
-                toriaiSheets.forEach((vatLieu, sanPhams) ->{
-                    System.out.println(Arrays.toString(vatLieu));
+        toriaiSheets.forEach((vatLieu, sanPhams) -> {
+            System.out.println(Arrays.toString(vatLieu));
 
-                    for (Map.Entry<Double, Integer> sanPham: sanPhams) {
-                        System.out.println(sanPham.getKey() + ": " + sanPham.getValue());
-                    }
+            for (Map.Entry<Double, Integer> sanPham : sanPhams) {
+                System.out.println(sanPham.getKey() + ": " + sanPham.getValue());
+            }
 //                    sanPham.forEach((chieuDai, soLuong) ->{
 //                        System.out.println(chieuDai + ": " + soLuong);
 //                    });
-                });
+        });
 
 
-            // reset lại map các tính vật liệu mỗi khi chạy xong, tránh tình trạng thực hiện hàm này lần 2 thì giá trị cũ chưa bị xóa làm tăng gấp đôi giá trị
-            toriaiSheets.clear();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // reset lại map các tính vật liệu mỗi khi chạy xong, tránh tình trạng thực hiện hàm này lần 2 thì giá trị cũ chưa bị xóa làm tăng gấp đôi giá trị
+        toriaiSheets.clear();
 
         // ghi file 3bc
-        Write3BC.write3BCFile(file3bcDirPath, toriaiSheets);
+//        Write3BC.write3BCFile(file3bcDirPath, toriaiSheets);
 
 
         return co1VatLieuKhongTonTai;

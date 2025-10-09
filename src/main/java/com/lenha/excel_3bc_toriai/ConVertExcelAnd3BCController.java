@@ -424,6 +424,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 }
                 return null;
             } catch (Exception e) {
+                e.printStackTrace();
                 // hiển thị alert file không hợp lệ
                 confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
                 confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
