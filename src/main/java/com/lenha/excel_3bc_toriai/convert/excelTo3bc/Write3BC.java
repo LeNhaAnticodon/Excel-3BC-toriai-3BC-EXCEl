@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -17,8 +18,26 @@ import java.util.zip.ZipOutputStream;
 public class Write3BC {
     private static String _3bcDirPath;
     public static Path copyFile = null;
+    private static String oldFolderName = "Excel_to_3BC";
 
     public static void write3BCFile(String file3bcDirPath, Map<String[], List<Map.Entry<Double, Integer>>> toriaiSheets) throws IOException {
+        String[] thongTinDonHang = null;
+
+        // lấy ra thông tin đơn hàng bằng cách lấy thông tin ở sheet đầu tiên
+        for (Map.Entry<String[], List<Map.Entry<Double, Integer>>> entry : toriaiSheets.entrySet()) {
+            thongTinDonHang = entry.getKey();
+            break;
+        }
+        if (thongTinDonHang == null){
+            throw new IOException("Không có thông tin đơn hàng");
+        }
+
+        // lấy mã đơn
+        String maDon = thongTinDonHang[6].trim();
+        // nếu mã đơn hàng dài hơn 30 kí tự thì cắt cho còn 30, vì khi nhập tên trên ô nhập của máy 3bc chỉ cho tối đa 30 kí tự
+        if (maDon.length() > 30) {
+            maDon = maDon.substring(0, 30);
+        }
 
         // lấy đi chỉ thư mục chứa 3bc
         _3bcDirPath = file3bcDirPath;
@@ -28,23 +47,7 @@ public class Write3BC {
                 throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
             }
 
-            String[] thongTinDonHang = null;
 
-            // lấy ra thông tin đơn hàng bằng cách lấy thông tin ở sheet đầu tiên
-            for (Map.Entry<String[], List<Map.Entry<Double, Integer>>> entry : toriaiSheets.entrySet()) {
-                thongTinDonHang = entry.getKey();
-                break;
-            }
-            if (thongTinDonHang == null){
-                throw new IOException("Không có thông tin đơn hàng");
-            }
-
-            // lấy mã đơn
-            String maDon = thongTinDonHang[6].trim();
-            // nếu mã đơn hàng dài hơn 30 kí tự thì cắt cho còn 30, vì khi nhập tên trên ô nhập của máy 3bc chỉ cho tối đa 30 kí tự
-            if (maDon.length() > 30) {
-                maDon = maDon.substring(0, 30);
-            }
 
             // tạo tên file 3bc theo đúng cấu trúc
             String copyFileName = "\\NC_" + maDon + ".zip";
@@ -84,10 +87,27 @@ public class Write3BC {
         while ((entry = zis.getNextEntry()) != null) {
             System.out.println(entry.getName());
 
+            String fileEditName = entry.getName();
+
+            // Kiểm tra nếu entry thuộc thư mục hoặc file cần đổi tên, do đây là file mẫu nên cần đổi tên thư mục gốc thành tên mã đơn để đồng bộ, không làm file
+            // bị lỗi khi nhập vào 3bc
+            // trong trường hợp này là thư mục đầu tiên trong file nén, nó trùng với tên của file nén luôn, cũng chính là mã đơn như đã quy ước
+            if (entry.getName().startsWith(oldFolderName + "/")) {
+                // Đổi tên thư mục hoặc file để khi ghi lại tai đoạn zos.putNextEntry(name) sẽ ghi thành file mới với tên này
+                fileEditName = maDon + entry.getName().substring(oldFolderName.length());
+            }
+
+            // tạo link file chuẩn của file sản phẩm, chỉ khi nào thư mục gốc của file nén đã được đổi tên đúng thì các file con trong thư mục đó mới có thể chỉnh sửa
+            // vì các đoạn code dưới tuân theo tên này
+            String fileSanPham = maDon + "/Products/Product.dat";
+
             // entry là file và tệp đang lặp trong file nén đang edit
             // Nếu là file cần chỉnh sửa, tức là tên entry trùng với tên file cần chỉnh sửa
-            if (entry.getName().equals(fileNameToEdit)) {
-                ByteArrayOutputStream tempBaos = new ByteArrayOutputStream();
+            // trường hợp này là file chứa các sản phẩm
+            if (fileEditName.equals(fileSanPham)) {
+
+                // đoạn mã này chỉ có chức năng đọc lại dữ liệu của file cũ, không có tác dụng mấy nếu không cần dữ liệu cũ
+                /*ByteArrayOutputStream tempBaos = new ByteArrayOutputStream();
                 byte[] buffer = new byte[1024];
                 int len;
                 // đọc các byte data của file cần chỉnh này lưu vào buffer
@@ -100,21 +120,24 @@ public class Write3BC {
 
                 // lấy ra dữ liệu cũ của file đã đọc trong tempBaos
                 String oldContent = tempBaos.toString(StandardCharsets.UTF_8);
-                System.out.println(oldContent);
+                System.out.println(oldContent);*/
+
+
+
                 // tạo đoạn dữ liệu mới muốn ghi đè vào file đang lặp
-                String newContent = newText;
+                String newContent = Arrays.toString(thongTinDonHang);
 
                 // Viết file đã chỉnh sửa vào tệp ZIP mới
                 // gán entry của file đang lặp cho trình ghi zip
-                zos.putNextEntry(new ZipEntry(entry.getName()));
+                zos.putNextEntry(new ZipEntry(fileEditName));
                 // ghi đè dữ liệu của file đang lặp bằng newContent
                 zos.write(newContent.getBytes());
 
                 zos.closeEntry();
             } else {
                 // Copy các file không chỉnh sửa vào tệp ZIP mới
-                // gán entry của file đang lặp cho trình ghi zip
-                zos.putNextEntry(new ZipEntry(entry.getName()));
+                // gán tên entry của file đang lặp cho trình ghi zip
+                zos.putNextEntry(new ZipEntry(fileEditName));
                 byte[] buffer = new byte[1024];
                 int len;
                 // lấy mảng byte đọc được từ file cũ ghi lại vào file mới

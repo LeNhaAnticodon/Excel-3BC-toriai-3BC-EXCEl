@@ -178,6 +178,8 @@ public class ZipEditor {
                 // entry là file và tệp đang lặp trong file nén đang edit
                 // Nếu là file cần chỉnh sửa, tức là tên entry trùng với tên file cần chỉnh sửa
                 if (entry.getName().equals(fileNameToEdit)) {
+
+
                     ByteArrayOutputStream tempBaos = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int len;
@@ -192,11 +194,15 @@ public class ZipEditor {
                     // lấy ra dữ liệu cũ của file đã đọc trong tempBaos
                     String oldContent = tempBaos.toString(StandardCharsets.UTF_8);
                     System.out.println(oldContent);
+                    // đoạn trên chỉ có chức năng đọc lại dữ liệu của file cũ, không có tác dụng mấy nếu không cần dữ liệu cũ
+
+
+
                     // tạo đoạn dữ liệu mới muốn ghi đè vào file đang lặp
                     String newContent = newText;
 
                     // Viết file đã chỉnh sửa vào tệp ZIP mới
-                    // gán entry của file đang lặp cho trình ghi zip
+                    // gán tên entry của file đang lặp cho trình ghi zip
                     zos.putNextEntry(new ZipEntry(entry.getName()));
                     // ghi đè dữ liệu của file đang lặp bằng newContent
                     zos.write(newContent.getBytes());
