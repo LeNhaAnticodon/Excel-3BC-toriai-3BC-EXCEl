@@ -17,6 +17,7 @@ import java.util.zip.ZipOutputStream;
 public class Write3BC {
     private static String _3bcDirPath;
     public static Path copyFile = null;
+
     public static void write3BCFile(String file3bcDirPath, Map<String[], List<Map.Entry<Double, Integer>>> toriaiSheets) throws IOException {
 
         // lấy đi chỉ thư mục chứa 3bc
@@ -26,7 +27,29 @@ public class Write3BC {
             if (sourceFile == null) {
                 throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
             }
-            copyFile = Paths.get(_3bcDirPath);
+
+            String[] thongTinDonHang = null;
+
+            // lấy ra thông tin đơn hàng bằng cách lấy thông tin ở sheet đầu tiên
+            for (Map.Entry<String[], List<Map.Entry<Double, Integer>>> entry : toriaiSheets.entrySet()) {
+                thongTinDonHang = entry.getKey();
+                break;
+            }
+            if (thongTinDonHang == null){
+                throw new IOException("Không có thông tin đơn hàng");
+            }
+
+            // lấy mã đơn
+            String maDon = thongTinDonHang[6].trim();
+            // nếu mã đơn hàng dài hơn 30 kí tự thì cắt cho còn 30, vì khi nhập tên trên ô nhập của máy 3bc chỉ cho tối đa 30 kí tự
+            if (maDon.length() > 30) {
+                maDon = maDon.substring(0, 30);
+            }
+
+            // tạo tên file 3bc theo đúng cấu trúc
+            String copyFileName = "\\NC_" + maDon + ".zip";
+
+            copyFile = Paths.get(_3bcDirPath + copyFileName);
 
             // lấy địa chỉ file sẽ được copy
             File copy = copyFile.toFile();
@@ -46,74 +69,72 @@ public class Write3BC {
             Files.copy(sourceFile, copyFile);
         }
 
-//        try {
-//            // Đọc tệp ZIP của file copy
-//            FileInputStream fis = new FileInputStream(zipFilePath);
-//            ZipInputStream zis = new ZipInputStream(fis);
-//            ZipEntry entry;
-//
-//            // ghi tệp ZIP của file copy
-//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//            ZipOutputStream zos = new ZipOutputStream(baos, Charset.forName("MS932"));
-//
-//            // duyệt qua các file hoặc thư mục cùng cấp trong file nén đang edit
-//            while ((entry = zis.getNextEntry()) != null) {
-//                System.out.println(entry.getName());
-//
-//                // entry là file và tệp đang lặp trong file nén đang edit
-//                // Nếu là file cần chỉnh sửa, tức là tên entry trùng với tên file cần chỉnh sửa
-//                if (entry.getName().equals(fileNameToEdit)) {
-//                    ByteArrayOutputStream tempBaos = new ByteArrayOutputStream();
-//                    byte[] buffer = new byte[1024];
-//                    int len;
-//                    // đọc các byte data của file cần chỉnh này lưu vào buffer
-//                    // hàm sẽ đọc data và ghi vào buffer
-//                    // zis.read(buffer) trả về độ dài của data đã đọc
-//                    // các đoạn buffer được tempBaos ghi lại để tổng hợp thành nội dung hoàn chỉnh
-//                    while ((len = zis.read(buffer)) > 0) {
-//                        tempBaos.write(buffer, 0, len);
-//                    }
-//
-//                    // lấy ra dữ liệu cũ của file đã đọc trong tempBaos
-//                    String oldContent = tempBaos.toString(StandardCharsets.UTF_8);
-//                    System.out.println(oldContent);
-//                    // tạo đoạn dữ liệu mới muốn ghi đè vào file đang lặp
-//                    String newContent = newText;
-//
-//                    // Viết file đã chỉnh sửa vào tệp ZIP mới
-//                    // gán entry của file đang lặp cho trình ghi zip
-//                    zos.putNextEntry(new ZipEntry(entry.getName()));
-//                    // ghi đè dữ liệu của file đang lặp bằng newContent
-//                    zos.write(newContent.getBytes());
-//
-//                    zos.closeEntry();
-//                } else {
-//                    // Copy các file không chỉnh sửa vào tệp ZIP mới
-//                    // gán entry của file đang lặp cho trình ghi zip
-//                    zos.putNextEntry(new ZipEntry(entry.getName()));
-//                    byte[] buffer = new byte[1024];
-//                    int len;
-//                    // lấy mảng byte đọc được từ file cũ ghi lại vào file mới
-//                    while ((len = zis.read(buffer)) > 0) {
-//                        zos.write(buffer, 0, len);
-//                    }
-//                    zos.closeEntry();
-//                }
-//            }
-//
-//            // Đóng các stream
-//            zis.close();
-//            zos.close();
-//
-//            // Ghi tệp ZIP mới vào đĩa là file copy
-//            // baos bao gồm zos đã lấy được thông tin ở bên trên
-//            // sau đó ghi vào fos với đường dẫn là file copy
-//            FileOutputStream fos = new FileOutputStream(zipFilePath);
-//            baos.writeTo(fos);
-//            fos.close();
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        String zipFilePath = copyFile.toAbsolutePath().toString();
+
+        // Đọc tệp ZIP của file copy
+        FileInputStream fis = new FileInputStream(zipFilePath);
+        ZipInputStream zis = new ZipInputStream(fis);
+        ZipEntry entry;
+
+        // ghi tệp ZIP của file copy
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(baos, Charset.forName("MS932"));
+
+        // duyệt qua các file hoặc thư mục cùng cấp trong file nén đang edit
+        while ((entry = zis.getNextEntry()) != null) {
+            System.out.println(entry.getName());
+
+            // entry là file và tệp đang lặp trong file nén đang edit
+            // Nếu là file cần chỉnh sửa, tức là tên entry trùng với tên file cần chỉnh sửa
+            if (entry.getName().equals(fileNameToEdit)) {
+                ByteArrayOutputStream tempBaos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                // đọc các byte data của file cần chỉnh này lưu vào buffer
+                // hàm sẽ đọc data và ghi vào buffer
+                // zis.read(buffer) trả về độ dài của data đã đọc
+                // các đoạn buffer được tempBaos ghi lại để tổng hợp thành nội dung hoàn chỉnh
+                while ((len = zis.read(buffer)) > 0) {
+                    tempBaos.write(buffer, 0, len);
+                }
+
+                // lấy ra dữ liệu cũ của file đã đọc trong tempBaos
+                String oldContent = tempBaos.toString(StandardCharsets.UTF_8);
+                System.out.println(oldContent);
+                // tạo đoạn dữ liệu mới muốn ghi đè vào file đang lặp
+                String newContent = newText;
+
+                // Viết file đã chỉnh sửa vào tệp ZIP mới
+                // gán entry của file đang lặp cho trình ghi zip
+                zos.putNextEntry(new ZipEntry(entry.getName()));
+                // ghi đè dữ liệu của file đang lặp bằng newContent
+                zos.write(newContent.getBytes());
+
+                zos.closeEntry();
+            } else {
+                // Copy các file không chỉnh sửa vào tệp ZIP mới
+                // gán entry của file đang lặp cho trình ghi zip
+                zos.putNextEntry(new ZipEntry(entry.getName()));
+                byte[] buffer = new byte[1024];
+                int len;
+                // lấy mảng byte đọc được từ file cũ ghi lại vào file mới
+                while ((len = zis.read(buffer)) > 0) {
+                    zos.write(buffer, 0, len);
+                }
+                zos.closeEntry();
+            }
+        }
+
+        // Đóng các stream
+        zis.close();
+        zos.close();
+
+        // Ghi tệp ZIP mới vào đĩa là file copy
+        // baos bao gồm zos đã lấy được thông tin ở bên trên
+        // sau đó ghi vào fos với đường dẫn là file copy
+        FileOutputStream fos = new FileOutputStream(zipFilePath);
+        baos.writeTo(fos);
+        fos.close();
+
     }
 }
