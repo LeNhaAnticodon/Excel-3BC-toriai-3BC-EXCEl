@@ -19,9 +19,9 @@ public class ExcelTo3BC {
         // biến kiểm tra trong danh sách các sheet tính vật liệu có sheet nào đó có vật liệu không giống với các vật liệu đã cài đặt sẵn trong chương trình không,
         // nếu có thì sẽ thay vật liệu của toàn bộ các sheet bằng bộ vật liệu tự cho trong danh sách dự phòng đã tạo khi khởi tạo chương trình
         // bộ vật liệu dự phòng lấy từ file excel VAT_LIEU_DU_PHONG.xlsx
-        boolean co1VatLieuKhongTonTai = false;
+        boolean co1VatLieuKhongTonTaiHoacVatLieuTrungNhau = false;
         // đọc file excel
-        co1VatLieuKhongTonTai = ReadExcel.readExcelFile(fileExcelPath, toriaiSheets);
+        co1VatLieuKhongTonTaiHoacVatLieuTrungNhau = ReadExcel.readExcelFile(fileExcelPath, toriaiSheets);
 
         toriaiSheets.forEach((vatLieu, sanPhams) -> {
             System.out.println(Arrays.toString(vatLieu));
@@ -42,6 +42,6 @@ public class ExcelTo3BC {
         // ghi file 3bc
 
 
-        return co1VatLieuKhongTonTai;
+        return co1VatLieuKhongTonTaiHoacVatLieuTrungNhau;
     }
 }

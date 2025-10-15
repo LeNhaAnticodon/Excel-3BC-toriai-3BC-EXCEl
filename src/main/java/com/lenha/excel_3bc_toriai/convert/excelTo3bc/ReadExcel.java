@@ -45,7 +45,7 @@ public class ReadExcel {
         // biến kiểm tra trong danh sách các sheet tính vật liệu có sheet nào đó có vật liệu không giống với các vật liệu đã cài đặt sẵn trong chương trình không,
         // nếu có thì sẽ thay vật liệu của toàn bộ các sheet bằng bộ vật liệu tự cho trong danh sách dự phòng đã tạo khi khởi tạo chương trình
         // bộ vật liệu dự phòng lấy từ file excel VAT_LIEU_DU_PHONG.xlsx
-        boolean co1VatLieuKhongTonTai = false;
+        boolean co1VatLieuKhongTonTaiHoacVatLieuTrungNhau = false;
 
         try (FileInputStream excelFileFis = new FileInputStream(excelPath)) {
             workbook = new XSSFWorkbook(excelFileFis);
@@ -62,6 +62,11 @@ public class ReadExcel {
             // lấy số lượng sheets
             int sheetCount = workbook.getNumberOfSheets();
 
+            // tạo set để lưu các loại vật liệu trên các sheet
+            // nếu có 2 vật liệu giống nhau sẽ bị gộp làm 1, có thể là giống vật liệu nhưng khác màu
+            // khi đấy sẽ so sánh số vật liệu trong set và số sheet, nếu khác nhau tức là có 2 loại vật liệu trùng nhau
+            // nếu nhập vào 3bc sẽ không đúng nữa do trùng vật liệu nhưng khác màu, giải pháp là thay tất cả các vật liệu trong các sheet bằng vật liệu thay thế
+            Set<String> cacVatLieu = new HashSet<>();
 
             // lặp qua các sheet trong excel
             for (Sheet sheet : workbook) {
@@ -140,14 +145,15 @@ public class ReadExcel {
                 cacThongSoCuaDonHang[9] = ngayThangString;
 //                System.out.println("khoi tao" + cacThongSoCuaDonHang[0]);
 
+
                 // gọi hàm phân tách các thông số của vật liệu rồi gán nó + khối lượng riêng vào mảng cacThongSoCuaDonHang
                 // chứa các thông số vật liệu để phục vụ cho chuyển đổi sang 3bc
                 // lấy kết quả vật liệu của sheet tính vật liệu này có trong bộ vật liệu cho trước không
-                boolean vatLieuTonTai = convertKousyuVaKhoiLuongRiengExcelTo3bc(kousyu, khoiLuongRieng, cacThongSoCuaDonHang);
+                boolean vatLieuTonTai = convertKousyuVaKhoiLuongRiengExcelTo3bc(kousyu, khoiLuongRieng, cacThongSoCuaDonHang, cacVatLieu);
 
                 // nếu sheet này vật liệu không có trong bộ vật liệu cho trước thì cho biến kiểm tra là true
                 if (!vatLieuTonTai) {
-                    co1VatLieuKhongTonTai = true;
+                    co1VatLieuKhongTonTaiHoacVatLieuTrungNhau = true;
                 }
 
                 // lấy hàng cuối cùng chứa dữ liệu trong cột a, chính là hàng cuối cùng chứa chiều dài số lượng sản phẩm
@@ -177,16 +183,25 @@ public class ReadExcel {
                 toriaiSheets.put(cacThongSoCuaDonHang, seihins);
 
             }
-            System.out.println("có vật liệu không tồn tại trong bộ vật liệu cho trước: " + co1VatLieuKhongTonTai);
 
-            if (toriaiSheets.size() > 100) {
-                throw new VerifyError();
+            System.out.println("list vat lieu: " + cacVatLieu);
+            // so sánh số vật liệu và số sheet, nếu nhỏ hơn số sheet tức là có vật liêu trùng nhau, có thể trùng nhưng khác màu
+            // thì gán cho biến cảnh báo
+            if (cacVatLieu.size() < sheetCount) {
+                co1VatLieuKhongTonTaiHoacVatLieuTrungNhau = true;
             }
+
+            System.out.println("có vật liệu không tồn tại hoặc có vật liệu trùng nhau trong bộ vật liệu cho trước: " + co1VatLieuKhongTonTaiHoacVatLieuTrungNhau);
+
+            // giới hạn số lượng vật liệu là 100
+            /*if (toriaiSheets.size() > 100) {
+                throw new VerifyError();
+            }*/
 
             // nếu có vật liệu dự phòng thì thay thế tất cả vật liệu của các sheet tính vật liệu sang bộ vật liệu dự phông
             // phải thay đổi tất cả các vật liệu vì nếu chỉ thay đổi vật liệu không có kia thì vật liệu dự phòng đã thay đổi có thể trùng với
             // vật liệu đang tồn tại trong 1 tính vật liệu của sheet khác, khi này tính vật liệu sẽ không còn đúng nữa
-            if (co1VatLieuKhongTonTai) {
+            if (co1VatLieuKhongTonTaiHoacVatLieuTrungNhau) {
                 // tạo biến đếm để gọi đúng thứ tự vật liệu dự phòng trong list dự phòng
                 // phải dùng đến AtomicInteger chứ ko phải int vì int không dùng được trong biểu thức lamda ở dưới
                 AtomicInteger thuTuVatLieuDuPhong = new AtomicInteger();
@@ -219,7 +234,9 @@ public class ReadExcel {
             throw new RuntimeException(e);
         }
 
-        return co1VatLieuKhongTonTai;
+
+
+        return co1VatLieuKhongTonTaiHoacVatLieuTrungNhau;
     }
 
     /**
@@ -259,7 +276,7 @@ public class ReadExcel {
      * @param khoiLuongRieng            khối lượng riêng của Excel
      * @param kousyuVaKhoiLuongRiengArr mảng để ghi vào 3bc
      */
-    private static boolean convertKousyuVaKhoiLuongRiengExcelTo3bc(String kousyu, double khoiLuongRieng, String[] kousyuVaKhoiLuongRiengArr) {
+    private static boolean convertKousyuVaKhoiLuongRiengExcelTo3bc(String kousyu, double khoiLuongRieng, String[] kousyuVaKhoiLuongRiengArr, Set<String> cacVatLieu) {
         // kí hiệu vật liệu khi dùng trên 3bc
         String kiHieu3bc = "";
 
@@ -298,7 +315,7 @@ public class ReadExcel {
                 // lấy ra ký hiệu kiểu 3bc tương ứng của nó
                 kiHieu3bc = capKyHieu[1];
                 // gọi hàm phân tách vật liệu excel thành các size riêng biệt rồi thêm các size đó + khối lượng riêng + ký hiệu kiêu 3bc vào mảng thông tin
-                themKosyuVaKhoiLuongRiengVaoMangCua3bc(kousyu, khoiLuongRieng, kousyuVaKhoiLuongRiengArr, kiHieuExcel, kiHieu3bc);
+                themKosyuVaKhoiLuongRiengVaoMangCua3bc(kousyu, khoiLuongRieng, kousyuVaKhoiLuongRiengArr, kiHieuExcel, kiHieu3bc, cacVatLieu);
                 break;
             }
         }
@@ -317,7 +334,7 @@ public class ReadExcel {
      * @param kiHieuExcel               ký hiệu kiểu excel
      * @param kiHieu3bc                 ký hiệu kiểu 3bc
      */
-    private static void themKosyuVaKhoiLuongRiengVaoMangCua3bc(String kousyu, double khoiLuongRieng, String[] kousyuVaKhoiLuongRiengArr, String kiHieuExcel, String kiHieu3bc) {
+    private static void themKosyuVaKhoiLuongRiengVaoMangCua3bc(String kousyu, double khoiLuongRieng, String[] kousyuVaKhoiLuongRiengArr, String kiHieuExcel, String kiHieu3bc, Set<String> cacVatLieu) {
         // mảng sau khi phân tách vật liệu thành các thành phần sau khi tách vật liệu thành các thành phần thông qua kí hiệu kiểu excel
         String[] kousyuMarkArr;
         // mảng chứa các size của vật liệu
@@ -352,6 +369,7 @@ public class ReadExcel {
         kousyuVaKhoiLuongRiengArr[3] = size2;
         kousyuVaKhoiLuongRiengArr[4] = size3;
         kousyuVaKhoiLuongRiengArr[5] = size4;
+        cacVatLieu.add(kiHieu3bc + size1 + size2 + size3 + size4);
 //        System.out.println(Arrays.toString(kousyuVaKhoiLuongRiengArr));
 
     }

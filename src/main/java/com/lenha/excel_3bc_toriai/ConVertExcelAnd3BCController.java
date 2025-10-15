@@ -144,7 +144,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     // NEW
     private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_HEADER = "Đã chuyển xong file EXCEL sang file 3BC";
     private static final String CONFIRM_CHECK_EXCEL_FILE_HEADER = "File excel này không phải tính vật liệu";
-    private static final String CO_VAT_LIEU_KHONG_TON_TAI = "Có tồn tại vật liệu không nằm trong danh sách";
+    private static final String CO_VAT_LIEU_KHONG_TON_TAI = "Có tồn tại vật liệu không nằm trong danh sách hoặc có vật liệu trùng nhau";
     private static final String CONFIRM_CONVERT_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa các file CHL và\ntự động copy địa chỉ không?";
     // NEW
     private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa file 3BC và\ntự động copy địa chỉ không?";
@@ -1430,10 +1430,10 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 // biến kiểm tra trong danh sách các sheet tính vật liệu có sheet nào đó có vật liệu không giống với các vật liệu đã cài đặt sẵn trong chương trình không,
                 // nếu có thì sẽ thay vật liệu của toàn bộ các sheet bằng bộ vật liệu tự cho trong danh sách dự phòng đã tạo khi khởi tạo chương trình
                 // bộ vật liệu dự phòng lấy từ file excel VAT_LIEU_DU_PHONG.xlsx
-                boolean co1VatLieuKhongTonTai = false;
+                boolean co1VatLieuKhongTonTaiHoacVatLieuTrungNhau = false;
 
-                co1VatLieuKhongTonTai = ExcelTo3BC.convertExcelTo3bc(excelFile.getAbsolutePath(), _3bcFileDir.getAbsolutePath());
-                if (co1VatLieuKhongTonTai){
+                co1VatLieuKhongTonTaiHoacVatLieuTrungNhau = ExcelTo3BC.convertExcelTo3bc(excelFile.getAbsolutePath(), _3bcFileDir.getAbsolutePath());
+                if (co1VatLieuKhongTonTaiHoacVatLieuTrungNhau){
                     // hiển thị alert cảnh báo đã đổi vật liệu không có trong danh sách sang bộ vật liệu dự phòng
                     confirmAlert.setAlertType(Alert.AlertType.WARNING);
                     confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
