@@ -193,10 +193,10 @@ public class ReadExcel {
 
             System.out.println("có vật liệu không tồn tại hoặc có vật liệu trùng nhau trong bộ vật liệu cho trước: " + co1VatLieuKhongTonTaiHoacVatLieuTrungNhau);
 
-            // giới hạn số lượng vật liệu là 100
-            /*if (toriaiSheets.size() > 100) {
+            // giới hạn số lượng vật liệu là 99
+            if (toriaiSheets.size() > 99) {
                 throw new VerifyError();
-            }*/
+            }
 
             // nếu có vật liệu dự phòng thì thay thế tất cả vật liệu của các sheet tính vật liệu sang bộ vật liệu dự phông
             // phải thay đổi tất cả các vật liệu vì nếu chỉ thay đổi vật liệu không có kia thì vật liệu dự phòng đã thay đổi có thể trùng với
