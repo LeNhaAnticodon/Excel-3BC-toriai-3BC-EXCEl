@@ -17,6 +17,32 @@ import java.util.zip.ZipOutputStream;
 
 public class Write3BC {
     private static String _3bcDirPath;
+    private static String doanBatDauFileSanPham = "FILE_VERSION=1\n";
+    private static String tieuDeSttSanPham = "PRODUCT=000";
+    private static String codeChungCuaCacSanPham = "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
+            "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
+            "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
+            "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
+            "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
+            "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
+            "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
+            "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r" +
+            "    MID=0,  \r";
+    private static String ketThucFileSanPham = "END\n" +
+            "\"\"\"";
+
+
     public static Path copyFile = null;
     private static String oldFolderName = "Excel_to_3BC";
 
@@ -124,14 +150,23 @@ public class Write3BC {
 
 
 
-                // tạo đoạn dữ liệu mới muốn ghi đè vào file đang lặp
-                String newContent = Arrays.toString(thongTinDonHang);
+                // tạo dữ liệu chứa các sản phẩm của đơn
+                String textSanPham = "";
+                textSanPham = textSanPham.concat(doanBatDauFileSanPham);
+
+                // lấy ra thông tin các sản phẩm
+                for (Map.Entry<String[], List<Map.Entry<Double, Integer>>> entry1 : toriaiSheets.entrySet()) {
+                    String[] thongTin = entry1.getKey();
+                    List<Map.Entry<Double, Integer>> cacSanPham = entry1.getValue();
+
+                }
+
 
                 // Viết file đã chỉnh sửa vào tệp ZIP mới
                 // gán entry của file đang lặp cho trình ghi zip
                 zos.putNextEntry(new ZipEntry(fileEditName));
-                // ghi đè dữ liệu của file đang lặp bằng newContent
-                zos.write(newContent.getBytes());
+                // ghi đè dữ liệu của file đang lặp bằng textSanPham
+                zos.write(textSanPham.getBytes());
 
                 zos.closeEntry();
             } else {
