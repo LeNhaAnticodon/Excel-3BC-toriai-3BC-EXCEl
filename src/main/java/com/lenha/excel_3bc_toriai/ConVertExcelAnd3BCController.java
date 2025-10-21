@@ -1425,6 +1425,56 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 System.out.println("LINK 3BC DIR: " + _3bcFileDir.getAbsolutePath());
             }
 
+            // kiểm tra tính hợp lệ của file, nếu không hợp thì yêu cầu chọn lại hoặc thoát
+            try {
+                // biến nhớ file không hợp lệ là false
+                boolean checkExcelFile = false;
+
+                    // gán biến nhớ kết quả kiểm tra hợp lệ
+                    checkExcelFile = ReadExcel.checkExcelcontent(excelFile.getAbsolutePath());
+
+                // nếu không hợp lệ thì ném ngoại lệ để chỗ bắt ngoại lệ gọi hàm thông báo
+                // ngược lại nếu hợp lệ thì tiếp tục chương trình
+                if (!checkExcelFile){
+                    throw new IOException("File không đúng định dạng");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                // hiển thị alert file không hợp lệ
+                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+                confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
+                confirmAlert.setHeaderText(CONFIRM_CHECK_EXCEL_FILE_HEADER);
+                confirmAlert.setContentText(CONFIRM_CHECK_EXCEL_FILE_CONTENT);
+
+                updateLangAlert(confirmAlert);
+
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // nếu là nút ok thì gọi lại hàm chọn file
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    getExcelFile();
+                }
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+                // hiển thị alert file không hợp lệ
+                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+                confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
+                confirmAlert.setHeaderText(CONFIRM_CHECK_EXCEL_FILE_HEADER);
+                confirmAlert.setContentText(CONFIRM_CHECK_EXCEL_FILE_CONTENT);
+
+                updateLangAlert(confirmAlert);
+
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // nếu là nút ok thì gọi lại hàm chọn file
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    getExcelFile();
+                }
+                return;
+            }
+
             // gọi hàm chuyển file từ class static ReadPDFToExcel
             try {
                 // biến kiểm tra trong danh sách các sheet tính vật liệu có sheet nào đó có vật liệu không giống với các vật liệu đã cài đặt sẵn trong chương trình không,

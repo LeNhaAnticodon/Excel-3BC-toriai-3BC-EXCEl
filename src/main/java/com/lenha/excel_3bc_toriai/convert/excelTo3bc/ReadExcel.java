@@ -95,7 +95,7 @@ public class ReadExcel {
                 // lấy khối lượng riêng
                 double khoiLuongRieng;
                 Cell khoiLuongRiengCell = sheet.getRow(HANG_KHOI_LUONG_RIENG).getCell(COT_KHOI_LUONG_RIENG);
-                khoiLuongRieng = Double.parseDouble(getStringNumberCellValue(khoiLuongRiengCell));
+                khoiLuongRieng = Math.abs(Double.parseDouble(getStringNumberCellValue(khoiLuongRiengCell)));
 
                 // lấy mã đơn hàng, bỏ qua chữ chỉ lấy số, chuyển toàn bộ số tiếng Nhật nếu có sang latin
                 String maDonHang = getStringNumberCellValue(sheet.getRow(HANG_MA_DON).getCell(COT_MA_DON)).trim();
@@ -125,7 +125,7 @@ public class ReadExcel {
                 // tạo mảng chứa khối lượng riêng, mã vật liệu và các thông số khác của đơn hàng
                 // phần tử 1 là khối lượng riêng
                 // phần tử 2 là mã vật liệu
-                // phần tử 3 - 6 là các size cảu vật liệu
+                // phần tử 3 - 6 là các size của vật liệu
                 // phần tử 7 là mã đơn hàng
                 // phần tử 8 là tên khách hàng
                 // phần tử 9 là nơi giao hàng
@@ -168,9 +168,9 @@ public class ReadExcel {
                 for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
                     Row row = sheet.getRow(i);
                     // lấy chiều dài sản phẩm
-                    Double seihinZenchou = Double.valueOf(getStringNumberCellValue(row.getCell(0)));
+                    Double seihinZenchou = Math.abs(Double.parseDouble(getStringNumberCellValue(row.getCell(0))));
                     // lấy số lượng sản phẩm
-                    Integer seihinHonsuu = (int) Double.parseDouble(getStringNumberCellValue(row.getCell(1)));// do có thể kết quả trả về là số thực nên cần chuyển String sang số thực trước rồi mới chuyển sang int
+                    Integer seihinHonsuu = Math.abs((int) Double.parseDouble(getStringNumberCellValue(row.getCell(1))));// do có thể kết quả trả về là số thực nên cần chuyển String sang số thực trước rồi mới chuyển sang int
 
 //                    System.out.println(seihinZenchou + " : " + seihinHonsuu);
                     // thêm các thông số sản phẩm vào map
@@ -340,10 +340,10 @@ public class ReadExcel {
         // mảng chứa các size của vật liệu
         String[] kousyuSizeArr;
         // tạo 4 size vì chỉ có tối đa 4 size
-        String size1 = "0";
-        String size2 = "0";
-        String size3 = "0";
-        String size4 = "0";
+        int size1 = 0;
+        int size2 = 0;
+        int size3 = 0;
+        int size4 = 0;
 
         // lấy mảng sau khi phân tách vật liệu
         kousyuMarkArr = kousyu.split(kiHieuExcel);
@@ -354,10 +354,10 @@ public class ReadExcel {
         // do size 4 không chắc có hay không nên cần phải bắt lỗi
         // nếu không có thì size 4 vẫn được gán giá trị từ trước
         try {
-            size1 = extractNumberString(kousyuSizeArr[0]);
-            size2 = extractNumberString(kousyuSizeArr[1]);
-            size3 = extractNumberString(kousyuSizeArr[2]);
-            size4 = extractNumberString(kousyuSizeArr[3]);
+            size1 = Math.abs(Integer.parseInt(extractNumberString(kousyuSizeArr[0]))) ;
+            size2 = Math.abs(Integer.parseInt(extractNumberString(kousyuSizeArr[1])));
+            size3 = Math.abs(Integer.parseInt(extractNumberString(kousyuSizeArr[2])));
+            size4 = Math.abs(Integer.parseInt(extractNumberString(kousyuSizeArr[3])));
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("phần tử này đã vượt giới hạn chứa các size");
         }
@@ -365,10 +365,10 @@ public class ReadExcel {
         // gán các thông số size + khối lượng riêng + ký hiệu kiêu 3bc đã tìm được vào mảng thông tin
         kousyuVaKhoiLuongRiengArr[0] = String.valueOf(khoiLuongRieng);
         kousyuVaKhoiLuongRiengArr[1] = kiHieu3bc;
-        kousyuVaKhoiLuongRiengArr[2] = size1;
-        kousyuVaKhoiLuongRiengArr[3] = size2;
-        kousyuVaKhoiLuongRiengArr[4] = size3;
-        kousyuVaKhoiLuongRiengArr[5] = size4;
+        kousyuVaKhoiLuongRiengArr[2] = String.valueOf(size1);
+        kousyuVaKhoiLuongRiengArr[3] = String.valueOf(size2);
+        kousyuVaKhoiLuongRiengArr[4] = String.valueOf(size3);
+        kousyuVaKhoiLuongRiengArr[5] = String.valueOf(size4);
         cacVatLieu.add(kiHieu3bc + size1 + size2 + size3 + size4);
 //        System.out.println(Arrays.toString(kousyuVaKhoiLuongRiengArr));
 

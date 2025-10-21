@@ -1,8 +1,11 @@
 package com.lenha.excel_3bc_toriai.convert.excelTo3bc;
 
+import com.lenha.excel_3bc_toriai.convert.ReadPDFToExcel;
 import com.lenha.excel_3bc_toriai.test.ZipEditor;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -10,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -17,8 +21,8 @@ import java.util.zip.ZipOutputStream;
 
 public class Write3BC {
     private static String _3bcDirPath;
-    private static String doanBatDauFileSanPham = "FILE_VERSION=1\n";
-    private static String tieuDeSttSanPham = "PRODUCT=000";
+    private static String doanBatDauFileSanPham = "FILE_VERSION=1\r";
+    private static String tieuDeSttSanPham = "PRODUCT=";
     private static String codeChungCuaCacSanPham = "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
             "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
             "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
@@ -39,8 +43,7 @@ public class Write3BC {
             "    MID=0,  \r" +
             "    MID=0,  \r" +
             "    MID=0,  \r";
-    private static String ketThucFileSanPham = "END\n" +
-            "\"\"\"";
+    private static String ketThucFileSanPham = "END";
 
 
     public static Path copyFile = null;
@@ -54,7 +57,7 @@ public class Write3BC {
             thongTinDonHang = entry.getKey();
             break;
         }
-        if (thongTinDonHang == null){
+        if (thongTinDonHang == null) {
             throw new IOException("Không có thông tin đơn hàng");
         }
 
@@ -72,7 +75,6 @@ public class Write3BC {
             if (sourceFile == null) {
                 throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
             }
-
 
 
             // tạo tên file 3bc theo đúng cấu trúc
@@ -149,17 +151,65 @@ public class Write3BC {
                 System.out.println(oldContent);*/
 
 
-
                 // tạo dữ liệu chứa các sản phẩm của đơn
                 String textSanPham = "";
                 textSanPham = textSanPham.concat(doanBatDauFileSanPham);
 
+                int stt = 1;
                 // lấy ra thông tin các sản phẩm
                 for (Map.Entry<String[], List<Map.Entry<Double, Integer>>> entry1 : toriaiSheets.entrySet()) {
                     String[] thongTin = entry1.getKey();
                     List<Map.Entry<Double, Integer>> cacSanPham = entry1.getValue();
+                    if (cacSanPham.size() > 9999) {
+                        throw new IOException("số lượng sản phẩm vượt 999");
+                    }
 
+                    int size1 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[2], 10);
+                    int size2 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[3], 10);
+                    int size3 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[4], 10);
+                    int size4 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[5], 10);
+
+                    if (size1 > 99999 || size2 > 99999 || size3 > 99999 || size4 > 99999 ){
+                        throw new IOException("kích thước vật liệu vượt 99999");
+                    }
+
+                    // Dùng Double.toString để tránh lỗi binary-floating representation
+                    BigDecimal bd = new BigDecimal(thongTin[0]);
+                    bd = bd.setScale(3, RoundingMode.DOWN); // làm tròn tới 3 chữ số thập phân
+                    String khoiLuongRieng = bd.toPlainString();
+
+                    for (Map.Entry<Double, Integer> sanPham : cacSanPham) {
+                        String sttSanPham = String.format("%04d", stt);
+
+                        int chieuDai = ReadPDFToExcel.convertStringToIntAndMulNotRound(sanPham.getKey().toString(), 10);
+                        if (chieuDai > 125000){
+                            throw new IOException("chiều dài sản phẩm vượt 125000");
+                        }
+                        int soLuong = sanPham.getValue();
+                        if (soLuong > 125000){
+                            throw new IOException("số lượng sản phẩm vượt 125000");
+                        }
+
+                        // Dùng Double.toString để tránh lỗi binary-floating representation
+                        BigDecimal bdChieuDai = new BigDecimal(chieuDai);
+                        bdChieuDai = bdChieuDai.divide(new BigDecimal(20)).add(new BigDecimal("1.15"));
+                        bdChieuDai = bdChieuDai.setScale(1, RoundingMode.DOWN); // cắt (không làm tròn)
+                        String soPhuThuocChieuDai =  String.format(Locale.US, "%.1f", bdChieuDai.doubleValue());
+
+                        textSanPham = textSanPham.concat(tieuDeSttSanPham) + sttSanPham + "\r";
+
+                        textSanPham = textSanPham.concat(",,") + thongTin[1] + "," + size1 + "," + size2 + ","
+                                + size3 + "," + size4 + ",0,0," + chieuDai + "," + soLuong
+                                + ",0,0.0,0.0,0,0,0,0,0,0," + khoiLuongRieng + "," + soPhuThuocChieuDai + ",0,,,,1\r"
+                                + codeChungCuaCacSanPham;
+
+                        stt++;
+                    }
                 }
+
+                textSanPham = textSanPham.concat(ketThucFileSanPham);
+
+                System.out.println("danh sách các sản phẩm: \n" + textSanPham);
 
 
                 // Viết file đã chỉnh sửa vào tệp ZIP mới
