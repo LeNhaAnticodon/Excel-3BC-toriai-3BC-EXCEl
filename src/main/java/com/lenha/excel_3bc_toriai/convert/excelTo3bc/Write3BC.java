@@ -11,6 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -129,7 +132,7 @@ public class Write3BC {
             // vì các đoạn code dưới tuân theo tên này
             String fileSanPham = maDon + "/Products/Product.dat";
             // tạo link của file chứa các thông tin đơn hàng
-            String fileThongTinDon = maDon + "/Products/Koji.dat";
+            String fileThongTinDon = maDon + "/Koji.dat";
 
             // entry là file và tệp đang lặp trong file nén đang edit
             // Nếu là file cần chỉnh sửa, tức là tên entry trùng với tên file cần chỉnh sửa
@@ -177,7 +180,7 @@ public class Write3BC {
                     int size4 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[5], 10);
 
                     // đặt giới hạn cho các size
-                    if (size1 > 99999 || size2 > 99999 || size3 > 99999 || size4 > 99999 ){
+                    if (size1 > 99999 || size2 > 99999 || size3 > 99999 || size4 > 99999) {
                         throw new IOException("kích thước vật liệu vượt 99999");
                     }
 
@@ -195,11 +198,11 @@ public class Write3BC {
                         // lấy chiều dài sản phẩm đã nhân với 10
                         int chieuDai = ReadPDFToExcel.convertStringToIntAndMul(sanPham.getKey().toString(), 10);
                         //đặt giới hạn chiều dài và số lượng
-                        if (chieuDai > 125000){
+                        if (chieuDai > 125000) {
                             throw new IOException("chiều dài sản phẩm vượt 125000");
                         }
                         int soLuong = sanPham.getValue();
-                        if (soLuong > 125000){
+                        if (soLuong > 125000) {
                             throw new IOException("số lượng sản phẩm vượt 125000");
                         }
 
@@ -209,7 +212,7 @@ public class Write3BC {
                         BigDecimal bdChieuDai = new BigDecimal(chieuDai);
                         bdChieuDai = bdChieuDai.divide(new BigDecimal(20)).add(new BigDecimal("1.15"));
                         bdChieuDai = bdChieuDai.setScale(1, RoundingMode.DOWN); // cắt (không làm tròn)
-                        String soPhuThuocChieuDai =  String.format(Locale.US, "%.1f", bdChieuDai.doubleValue());
+                        String soPhuThuocChieuDai = String.format(Locale.US, "%.1f", bdChieuDai.doubleValue());
 
                         // thêm đoạn stt sản phẩm
                         textSanPham = textSanPham.concat(tieuDeSttSanPham) + sttSanPham + "\r";
@@ -239,9 +242,44 @@ public class Write3BC {
                 zos.write(textSanPham.getBytes());
 
                 zos.closeEntry();
-            }if (fileEditName.equals(fileSanPham)) {
+            }
+            else if (fileEditName.equals(fileThongTinDon)) {
+                // tạo dữ liệu chứa thông tin đơn hàng
+                String textThongTinDon = "";
 
+//                ZoneId zone = ZoneId.of("Asia/Bangkok"); // hoặc ZoneId.systemDefault()
+                ZoneId zone = ZoneId.systemDefault();
+                LocalDateTime now = LocalDateTime.now(zone);
 
+                DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("yyyyMMdd");
+                DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HHmmss"); // HH = 24-hour (00-23), hh là định dạng 12 giờ
+
+                String date = now.format(dateFmt); // vd: "20251022"
+                String time = now.format(timeFmt); // vd: "230507" cho 23:05:07, "000507" cho 00:05:07
+
+                // tạo thông tin đơn hàng theo định dạng
+                /* mẫu là
+                3 8288488                               20251006                                皆越鉄工12                              20251001  124850    沢野商会12
+                1.	Vàng là tên đơn
+                2.	Xanh lá cây là ngày của đơn
+                3.	Xám là nơi giao hàng
+                4.	Xanh da trời là ngày tạo đơn
+                5.	Tím là giờ phút tạo đơn
+                6.	Xanh đậm là tên khách hàng
+
+                1, 2, 3, 6 đều có tối đa 40 kí tự, nếu chữ nhật thì cứ 1 chữ tính 2 kí tự, nghĩa là nếu toàn chữ nhật thì chỉ được tối đa 20 kí tự
+
+                4 và 5 thì được tính 10 kí tự */
+                textThongTinDon = textThongTinDon.concat(thongTinDonHang[6] + thongTinDonHang[9] +
+                        thongTinDonHang[8] + date + "  " + time + "  " + "  " + thongTinDonHang[7]);
+
+                // Viết file đã chỉnh sửa vào tệp ZIP mới
+                // gán entry của file đang lặp cho trình ghi zip
+                zos.putNextEntry(new ZipEntry(fileEditName));
+                // ghi đè dữ liệu của file đang lặp bằng textThongTinDon
+                zos.write(textThongTinDon.getBytes());
+
+                zos.closeEntry();
             } else {
                 // Copy các file không chỉnh sửa vào tệp ZIP mới
                 // gán tên entry của file đang lặp cho trình ghi zip

@@ -88,8 +88,14 @@ public class ReadExcel {
                 double ngayThang = Double.parseDouble((getFullStringCellValue(sheet.getRow(HANG_NGAY_THANG).getCell(COT_NGAY_THANG))));
                 int ngayThangInt = (int) ngayThang;
                 String ngayThangString = String.valueOf(ngayThangInt);
-                if(ngayThangString.length()  != 8){
+                int ngayThangLength = ngayThangString.length();
+                if(ngayThangLength  != 8){
                     throw new NumberFormatException("Ngày tháng không hợp lệ");
+                }
+
+                // thêm đoạn text trắng vào ngày tháng cho đủ 40 kí tự
+                for (int i = ngayThangLength; i < 40; i++) {
+                    ngayThangString = ngayThangString.concat(" ");
                 }
 
                 // lấy khối lượng riêng
