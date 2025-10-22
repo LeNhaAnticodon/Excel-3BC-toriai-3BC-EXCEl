@@ -1150,34 +1150,9 @@ public class ReadPDFToExcel {
         }
         if (bigDecimalNum != null) {
             // Làm tròn đến số nguyên gần nhất
-            return bigDecimalNum.setScale(0, RoundingMode.HALF_UP).intValueExact();
-        }
-        return 0;
-    }
-
-    /**
-     * chuyển đổi text nhập vào sang số BigDecimal rồi nhân với hệ số và trả về với kiểu int
-     *
-     * @param textNum    text cần chuyển
-     * @param multiplier hệ số
-     * @return số int đã nhân với hệ số
-     */
-    public static int convertStringToIntAndMulNotRound(String textNum, int multiplier) {
-        BigDecimal bigDecimalNum = null;
-        try {
-            bigDecimalNum = new BigDecimal(textNum);
-            // nhân số thực num với hệ số truyền vào
-            bigDecimalNum = bigDecimalNum.multiply(new BigDecimal(multiplier));
-
-        } catch (NumberFormatException e) {
-            System.out.println("Lỗi chuyển đổi chuỗi không phải số thực sang số");
-            System.out.println(textNum);
-
-        }
-        if (bigDecimalNum != null) {
-            // không làm tròn
             return bigDecimalNum.setScale(0, RoundingMode.DOWN).intValueExact();
         }
         return 0;
     }
+
 }

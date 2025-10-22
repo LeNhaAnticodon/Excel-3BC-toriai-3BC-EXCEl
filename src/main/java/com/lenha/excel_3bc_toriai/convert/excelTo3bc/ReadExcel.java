@@ -84,7 +84,7 @@ public class ReadExcel {
                 // sau đó đổi sang số nguyên rồi đổi sang ngày tháng
                 // không thể dùng hàm chuyển ô này sang String toàn số luôn vì nó đổi phần thập phân từ dấu , sang dấu . khiến nó không thể chuyển đổi sang double
                 // khi người dùng sửa giá trị ô này nó sẽ chuyển về định dạng String Không phải numeric nữa, nếu có chữ nó sẽ lấy ra chữ và chuyển đổi
-                // dang số thực sẽ bị lỗi, chương trình xử lý lỗi và thông báo file không hợp lệ cho người dùng để họ sửa lại
+                // dạng số thực sẽ bị lỗi, chương trình xử lý lỗi và thông báo file không hợp lệ cho người dùng để họ sửa lại
                 double ngayThang = Double.parseDouble((getFullStringCellValue(sheet.getRow(HANG_NGAY_THANG).getCell(COT_NGAY_THANG))));
                 int ngayThangInt = (int) ngayThang;
                 String ngayThangString = String.valueOf(ngayThangInt);

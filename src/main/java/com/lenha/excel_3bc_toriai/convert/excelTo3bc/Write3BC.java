@@ -128,6 +128,8 @@ public class Write3BC {
             // tạo link file chuẩn của file sản phẩm, chỉ khi nào thư mục gốc của file nén đã được đổi tên đúng thì các file con trong thư mục đó mới có thể chỉnh sửa
             // vì các đoạn code dưới tuân theo tên này
             String fileSanPham = maDon + "/Products/Product.dat";
+            // tạo link của file chứa các thông tin đơn hàng
+            String fileThongTinDon = maDon + "/Products/Koji.dat";
 
             // entry là file và tệp đang lặp trong file nén đang edit
             // Nếu là file cần chỉnh sửa, tức là tên entry trùng với tên file cần chỉnh sửa
@@ -153,35 +155,46 @@ public class Write3BC {
 
                 // tạo dữ liệu chứa các sản phẩm của đơn
                 String textSanPham = "";
+                // thêm đoạn đầu file
                 textSanPham = textSanPham.concat(doanBatDauFileSanPham);
 
                 int stt = 1;
                 // lấy ra thông tin các sản phẩm
                 for (Map.Entry<String[], List<Map.Entry<Double, Integer>>> entry1 : toriaiSheets.entrySet()) {
+                    // lấy các thông tin của vật liệu đang duyệt
                     String[] thongTin = entry1.getKey();
+                    // lấy ra list các sản phẩm
                     List<Map.Entry<Double, Integer>> cacSanPham = entry1.getValue();
+                    // đặt giới hạn số lượng sản phẩm
                     if (cacSanPham.size() > 9999) {
                         throw new IOException("số lượng sản phẩm vượt 999");
                     }
 
+                    // lấy ra các size của vật liệu x 10
                     int size1 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[2], 10);
                     int size2 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[3], 10);
                     int size3 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[4], 10);
                     int size4 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[5], 10);
 
+                    // đặt giới hạn cho các size
                     if (size1 > 99999 || size2 > 99999 || size3 > 99999 || size4 > 99999 ){
                         throw new IOException("kích thước vật liệu vượt 99999");
                     }
 
+                    // lấy ra khối lượng riêng và fomat cho hiển thị 3 chữ số phần thập phân
                     // Dùng Double.toString để tránh lỗi binary-floating representation
                     BigDecimal bd = new BigDecimal(thongTin[0]);
                     bd = bd.setScale(3, RoundingMode.DOWN); // làm tròn tới 3 chữ số thập phân
                     String khoiLuongRieng = bd.toPlainString();
 
+                    // lặp qua các cặp chiều dài, số lượng và thêm nó vào text sản phẩm
                     for (Map.Entry<Double, Integer> sanPham : cacSanPham) {
+                        // fomat số thứ tự sản phẩm về dạng số tự nhiên hiển thị  tối đa 4 chữ
                         String sttSanPham = String.format("%04d", stt);
 
-                        int chieuDai = ReadPDFToExcel.convertStringToIntAndMulNotRound(sanPham.getKey().toString(), 10);
+                        // lấy chiều dài sản phẩm đã nhân với 10
+                        int chieuDai = ReadPDFToExcel.convertStringToIntAndMul(sanPham.getKey().toString(), 10);
+                        //đặt giới hạn chiều dài và số lượng
                         if (chieuDai > 125000){
                             throw new IOException("chiều dài sản phẩm vượt 125000");
                         }
@@ -190,19 +203,26 @@ public class Write3BC {
                             throw new IOException("số lượng sản phẩm vượt 125000");
                         }
 
+                        // lấy số phụ thuộc vào chiều dài, nó bằng chiều dài gốc(chưa x 10) / 2 + 1.15, làm tròn đến 1 chữ số phần thập phân
+                        // phải dùng BigDecimal vì double chia bình thường sẽ có sai số
                         // Dùng Double.toString để tránh lỗi binary-floating representation
                         BigDecimal bdChieuDai = new BigDecimal(chieuDai);
                         bdChieuDai = bdChieuDai.divide(new BigDecimal(20)).add(new BigDecimal("1.15"));
                         bdChieuDai = bdChieuDai.setScale(1, RoundingMode.DOWN); // cắt (không làm tròn)
                         String soPhuThuocChieuDai =  String.format(Locale.US, "%.1f", bdChieuDai.doubleValue());
 
+                        // thêm đoạn stt sản phẩm
                         textSanPham = textSanPham.concat(tieuDeSttSanPham) + sttSanPham + "\r";
 
+                        // thêm các thông tin sản phẩm theo cấu trúc tên,,mã vật liệu,size1,size2,size3,size4,bo góc 1, bo góc 2
+                        // ,chiều dài, số lượng,0,0.0,0.0,0,0,0,0,0,0,khối lượng riêng, số phụ thuộc chiều dài,0,,,,1 + đoạn code chung cho các sản phẩm
+                        // đoạn này chỉ áp dụng chi sản phẩm không tạo lỗ
                         textSanPham = textSanPham.concat(",,") + thongTin[1] + "," + size1 + "," + size2 + ","
                                 + size3 + "," + size4 + ",0,0," + chieuDai + "," + soLuong
                                 + ",0,0.0,0.0,0,0,0,0,0,0," + khoiLuongRieng + "," + soPhuThuocChieuDai + ",0,,,,1\r"
                                 + codeChungCuaCacSanPham;
 
+                        // tăng số thứ tự sản phẩm lên 1
                         stt++;
                     }
                 }
@@ -219,6 +239,9 @@ public class Write3BC {
                 zos.write(textSanPham.getBytes());
 
                 zos.closeEntry();
+            }if (fileEditName.equals(fileSanPham)) {
+
+
             } else {
                 // Copy các file không chỉnh sửa vào tệp ZIP mới
                 // gán tên entry của file đang lặp cho trình ghi zip
