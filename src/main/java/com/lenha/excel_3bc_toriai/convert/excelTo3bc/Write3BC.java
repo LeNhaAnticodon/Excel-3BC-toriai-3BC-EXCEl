@@ -24,9 +24,14 @@ import java.util.zip.ZipOutputStream;
 
 public class Write3BC {
     private static String _3bcDirPath;
-    private static String doanBatDauFileSanPham = "FILE_VERSION=1\r";
-    private static String tieuDeSttSanPham = "PRODUCT=";
-    private static String codeChungCuaCacSanPham = "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
+    private static String doanBatDauFileSanPham = """
+            FILE_VERSION=1\r
+            """;
+    private static String tieuDeSttSanPham = """
+            PRODUCT=
+            """.stripIndent();
+
+  /*  private static String codeChungCuaCacSanPham = "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
             "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
             "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
             "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
@@ -45,8 +50,33 @@ public class Write3BC {
             "    MID=0,  \r" +
             "    MID=0,  \r" +
             "    MID=0,  \r" +
-            "    MID=0,  \r";
-    private static String ketThucFileSanPham = "END";
+            "    MID=0,  \r";*/
+
+    public static final String codeChungCuaCacSanPham = """
+                0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r
+                0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r
+                0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r
+                0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r
+                0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r
+                0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r
+                0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r
+                0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+                MID=0,  \r
+            """;
+    private static String ketThucFileSanPham = """
+            END\r
+            """;
 
 
     public static Path copyFile = null;
@@ -113,6 +143,7 @@ public class Write3BC {
         // ghi tệp ZIP của file copy
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ZipOutputStream zos = new ZipOutputStream(baos, Charset.forName("MS932"));
+//        ZipOutputStream zos = new ZipOutputStream(baos);
 
         // duyệt qua các file hoặc thư mục cùng cấp trong file nén đang edit
         while ((entry = zis.getNextEntry()) != null) {
