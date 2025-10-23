@@ -24,12 +24,15 @@ import java.util.zip.ZipOutputStream;
 
 public class Write3BC {
     private static String _3bcDirPath;
+    // không rõ vì lý do gì mà các đoạn text này không hiển thị khi dùng lệnh in và cũng không nhận khi nhập vào 3bc
+    // đùng đoạn mã 3 dấu " bao quanh text thì vấn đề được giải quyết, áp dụng cho các đoạn text có xuống dòng ở đuôi
     private static String doanBatDauFileSanPham = """
             FILE_VERSION=1\r
             """;
+    // cùng lý do trên với biến doanBatDauFileSanPham nhưng đoạn text này không có xuống dòng ở đuôi nên phải dùng .stripIndent() để
+    // in ra đọc được và máy 3bc chấp nhận
     private static String tieuDeSttSanPham = """
-            PRODUCT=
-            """.stripIndent();
+            PRODUCT=""".stripIndent();
 
   /*  private static String codeChungCuaCacSanPham = "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
             "    0, 0, ,0,       0.0,  0,  0,    0.0,    0.0,    0.0,    0.0, 0,    0.0\r" +
@@ -83,6 +86,10 @@ public class Write3BC {
     private static String oldFolderName = "Excel_to_3BC";
 
     public static void write3BCFile(String file3bcDirPath, Map<String[], List<Map.Entry<Double, Integer>>> toriaiSheets) throws IOException {
+        // Text block theo cú pháp thường để lại newline cuối. Để loại bỏ nó sau khi tạo
+        String nl = System.lineSeparator();
+        if (tieuDeSttSanPham.endsWith(nl)) tieuDeSttSanPham = tieuDeSttSanPham.substring(0, tieuDeSttSanPham.length() - nl.length());
+
         String[] thongTinDonHang = null;
 
         // lấy ra thông tin đơn hàng bằng cách lấy thông tin ở sheet đầu tiên
@@ -209,6 +216,11 @@ public class Write3BC {
                     int size2 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[3], 10);
                     int size3 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[4], 10);
                     int size4 = ReadPDFToExcel.convertStringToIntAndMul(thongTin[5], 10);
+                    String size4Fomat = size4 + "";
+                    if (size4 == 0) {
+                        // fomat size 4 hiển thị 2 số, trong trường hợp này là 00
+                        size4Fomat = "";
+                    }
 
                     // đặt giới hạn cho các size
                     if (size1 > 99999 || size2 > 99999 || size3 > 99999 || size4 > 99999) {
@@ -245,15 +257,17 @@ public class Write3BC {
                         bdChieuDai = bdChieuDai.setScale(1, RoundingMode.DOWN); // cắt (không làm tròn)
                         String soPhuThuocChieuDai = String.format(Locale.US, "%.1f", bdChieuDai.doubleValue());
 
+                        sttSanPham = sttSanPham +  "\r".stripIndent();
+
                         // thêm đoạn stt sản phẩm
-                        textSanPham = textSanPham.concat(tieuDeSttSanPham) + sttSanPham + "\r";
+                        textSanPham = textSanPham.concat(tieuDeSttSanPham) + sttSanPham.stripIndent();;
 
                         // thêm các thông tin sản phẩm theo cấu trúc tên,,mã vật liệu,size1,size2,size3,size4,bo góc 1, bo góc 2
                         // ,chiều dài, số lượng,0,0.0,0.0,0,0,0,0,0,0,khối lượng riêng, số phụ thuộc chiều dài,0,,,,1 + đoạn code chung cho các sản phẩm
                         // đoạn này chỉ áp dụng chi sản phẩm không tạo lỗ
-                        textSanPham = textSanPham.concat(",,") + thongTin[1] + "," + size1 + "," + size2 + ","
-                                + size3 + "," + size4 + ",0,0," + chieuDai + "," + soLuong
-                                + ",0,0.0,0.0,0,0,0,0,0,0," + khoiLuongRieng + "," + soPhuThuocChieuDai + ",0,,,,1\r"
+                        textSanPham = textSanPham.concat(",,".trim()) + thongTin[1] + "," + size1 + "," + size2 + ","
+                                + size3 + "," + size4Fomat + ",0,0," + chieuDai + "," + soLuong
+                                + ",0,0.0,0.0,0,0,0,0,0,0," + khoiLuongRieng + "," + soPhuThuocChieuDai + ",0,,,,1\r" + "\n".stripIndent()
                                 + codeChungCuaCacSanPham;
 
                         // tăng số thứ tự sản phẩm lên 1
@@ -262,6 +276,7 @@ public class Write3BC {
                 }
 
                 textSanPham = textSanPham.concat(ketThucFileSanPham);
+
 
                 System.out.println("danh sách các sản phẩm: \n" + textSanPham);
 
@@ -302,7 +317,8 @@ public class Write3BC {
 
                 4 và 5 thì được tính 10 kí tự */
                 textThongTinDon = textThongTinDon.concat(thongTinDonHang[6] + thongTinDonHang[9] +
-                        thongTinDonHang[8] + date + "  " + time + "  " + "  " + thongTinDonHang[7]);
+                        thongTinDonHang[8] + date + "  " + time + "  " + "  " + thongTinDonHang[7]).stripIndent();
+                System.out.println("Thông tin đơn hàng: " + textThongTinDon);
 
                 // Viết file đã chỉnh sửa vào tệp ZIP mới
                 // gán entry của file đang lặp cho trình ghi zip

@@ -289,7 +289,7 @@ public class ReadExcel {
         // tạo list chứa các cặp ký hiệu  gồm mã vật liệu trên excel và mã tương ứng của nó trên 3bc
         ArrayList<String[]> cacCapKyHieuVatLieuExCelVa3bc = new ArrayList<>();
         String[] maVLExcel1 = {"アングル", "L"};
-        String[] maVLExcel2 = {"チャンネル", "U"};
+        String[] maVLExcel2 = {"チャンネル", "M"};
         String[] maVLExcel3 = {"H形鋼", "H"};
         String[] maVLExcel4 = {"I形鋼", "H"};
         String[] maVLExcel5 = {"平鋼", "FB"};
@@ -368,6 +368,11 @@ public class ReadExcel {
             System.out.println("phần tử này đã vượt giới hạn chứa các size");
         }
 
+        // nếu vật liệu là M tức là U trong 3bc, thì cần cho gán giá trị cho size4 vì
+        // khi lấy các size từ excel thì U chỉ có 3 size trong khi 3bc yêu cầu 4 size nên gán mặc định size4 cho U để máy 3bc chấp nhận
+        if (kiHieu3bc.equalsIgnoreCase("M")){
+            size4 = 10;
+        }
         // gán các thông số size + khối lượng riêng + ký hiệu kiêu 3bc đã tìm được vào mảng thông tin
         kousyuVaKhoiLuongRiengArr[0] = String.valueOf(khoiLuongRieng);
         kousyuVaKhoiLuongRiengArr[1] = kiHieu3bc;
