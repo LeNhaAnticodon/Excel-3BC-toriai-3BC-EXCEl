@@ -326,6 +326,7 @@ public class Write3BC {
                 // ghi đè dữ liệu của file đang lặp bằng textThongTinDon
                 // khi ghi cần mã hóa lại đoạn text thông tin đơn theo chuẩn tiếng Nhật bằng Charset.forName("MS932")
                 // mặc dù đã chọn mã hóa ở trên rồi nhưng nó chỉ mã hóa tên file chứ không phải nội dung bên trong nên cần mã hóa lại
+                // các đoạn text khác chưa biết dùng cách này có giải quyết được vấn đề hay không hay phải dùng cách đã làm
                 zos.write(textThongTinDon.getBytes(Charset.forName("MS932")));
 
                 zos.closeEntry();
