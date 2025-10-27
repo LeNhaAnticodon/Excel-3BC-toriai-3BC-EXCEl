@@ -73,12 +73,12 @@ public class SetupData {
         languageMap.put("Xác nhận địa chỉ file PDF", "Confirm_the_PDF_address_file");
         languageMap.put("Địa chỉ của file PDF chưa được xác nhận", "The_address_of_the_PDF_file_has_not_been_confirmed");
         languageMap.put("Hãy chọn file PDF để tiếp tục!", "Please_select_the_PDF_file_to_continue");
-        languageMap.put("Xác nhận thư mục chứa các file CHL", "Confirm_the_folder_containing_CHL_files");
-        languageMap.put("Địa chỉ thư mục chứa các file CHL chưa được xác nhận", "Folder_address_containing_unconfirmed_CHL_files");
+        languageMap.put("Xác nhận thư mục chứa file EXCEL", "Confirm_the_folder_containing_EXCEL_files");
+        languageMap.put("Địa chỉ thư mục chứa file EXCEL chưa được xác nhận", "Folder_address_containing_unconfirmed_EXCEL_file");
         languageMap.put("Hãy chọn thư mục chứa để tiếp tục!", "Please_select_the_containing_folder_to_continue");
         languageMap.put("Thông tin hoạt động chuyển file", "Information_on_file_transfer_activities");
-        languageMap.put("Đã chuyển xong file PDF sang các file CHL", "Finished_converting_PDF_files_to_CHL_files");
-        languageMap.put("Bạn có muốn mở thư mục chứa các file CHL và\ntự động copy địa chỉ không?", "Do_you_want_to_open_a_folder_containing_CHL_files_and_automatically_copy_the_address");
+        languageMap.put("Đã chuyển xong file PDF sang file EXCEL", "Finished_converting_PDF_files_to_EXCEL_file");
+        languageMap.put("Bạn có muốn mở thư mục chứa file EXCEL và\ntự động copy địa chỉ không?", "Do_you_want_to_open_a_folder_containing_EXCEL_file_and_automatically_copy_the_address");
         languageMap.put("Thông báo lỗi chuyển file", "File_transfer_error_message");
         languageMap.put("Nội dung file PDF không phải là tính toán vật liệu hoặc file không được phép truy cập", "The_PDF_file_content_is_not_a_material_calculation_or_the_file_is_not_authorized_to_be_accessed");
         languageMap.put("Bạn có muốn chọn file khác và thực hiện lại không?", "Do_you_want_to_select_another_file_and_do_it_again");
@@ -96,8 +96,8 @@ public class SetupData {
         languageMap.put("Cách sử dụng:", "Using");
         languageMap.put("chọn địa chỉ file PDF có nội dung tính vật liệu trên máy và chọn địa chỉ thư mục sẽ chứa các file CHL khi chuyển xong. Các link này sau khi được chọn sẽ hiển thị ở các ô bên trái. Sau đó ấn vào nút chuyển để thực hiện. Các file CHL tạo ra sẽ hiển thị trong danh sách bên trái. Có thể nhấn nút Copy link thư mục sẽ chứa các file CHL hoặc ấn nút mở thư mục chứa các file CHL để mở cửa sổ thư mục này.", "Select_the_PDF");
         languageMap.put("Thực hiện: Lê Nhã", "copyright");
-        languageMap.put("Tên file CHL đang tạo: (\"\") trùng tên với 1 file CHL khác đang được mở nên không thể ghi đè", "Name_of_the_CHL");
-        languageMap.put("Hãy đóng file CHL đang mở để tiếp tục!", "Please_close_the_open_CHL_file_to_continue");
+        languageMap.put("Tên file EXCEL đang tạo: (\"\") trùng tên với 1 file EXCEL khác đang được mở nên không thể ghi đè", "Name_of_the_EXCEL");
+        languageMap.put("Hãy đóng file EXCEL đang mở để tiếp tục!", "Please_close_the_open_EXCEL_file_to_continue");
         languageMap.put("File CHL đang tạo: (\"\") trong một boZai duy nhất có số dòng sản phẩm cần ghi lớn hơn 99 nên không thể ghi", "CHL_file_being_created");
         languageMap.put("Hãy chỉnh sửa lại dữ liệu vật liệu đang chuyển để tiếp tục!", "Please_edit_the_transferring_material_data_to_continue");
 
@@ -117,12 +117,12 @@ public class SetupData {
         languageMap.put("PDFファイルの場所を確認", "Confirm_the_PDF_address_file");
         languageMap.put("PDFファイルのアドレスは未確認です", "The_address_of_the_PDF_file_has_not_been_confirmed");
         languageMap.put("続行するには PDF ファイルを選択してください。", "Please_select_the_PDF_file_to_continue");
-        languageMap.put("CHLファイルが入っているフォルダを確認", "Confirm_the_folder_containing_CHL_files");
-        languageMap.put("未確認のCHLファイルが入っているフォルダアドレス", "Folder_address_containing_unconfirmed_CHL_files");
+        languageMap.put("EXCELファイルが入っているフォルダを確認", "Confirm_the_folder_containing_EXCEL_files");
+        languageMap.put("未確認のEXCELファイルが入っているフォルダアドレス", "Folder_address_containing_unconfirmed_EXCEL_file");
         languageMap.put("続行するには、含まれているフォルダーを選択してください。", "Please_select_the_containing_folder_to_continue");
         languageMap.put("ファイル転送アクティビティに関する情報", "Information_on_file_transfer_activities");
-        languageMap.put("PDFファイルからCHLファイルへの変換が完了しました", "Finished_converting_PDF_files_to_CHL_files");
-        languageMap.put("CHL ファイルを含むフォルダーを開いて、アドレスを自動的にコピーしますか?", "Do_you_want_to_open_a_folder_containing_CHL_files_and_automatically_copy_the_address");
+        languageMap.put("PDFファイルからEXCELファイルへの変換が完了しました", "Finished_converting_PDF_files_to_EXCEL_file");
+        languageMap.put("EXCELファイルを含むフォルダーを開いて、アドレスを自動的にコピーしますか?", "Do_you_want_to_open_a_folder_containing_EXCEL_file_and_automatically_copy_the_address");
         languageMap.put("ファイル転送エラーメッセージ", "File_transfer_error_message");
         languageMap.put("PDFファイルの内容が材料計算ではないか、ファイルへのアクセスが許可されていません", "The_PDF_file_content_is_not_a_material_calculation_or_the_file_is_not_authorized_to_be_accessed");
         languageMap.put("別のファイルを選択してやり直しますか?", "Do_you_want_to_select_another_file_and_do_it_again");
@@ -140,8 +140,8 @@ public class SetupData {
         languageMap.put("使用方法:", "Using");
         languageMap.put("パソコン上の材料計算コンテンツが含まれる PDF ファイルのアドレスを選択し、転送が完了したときに CHL ファイルが含まれるフォルダーのアドレスを選択します。これらのリンクを選択すると、左側のボックスに表示されます。その後、スイッチボタンを押して実行します。作成したCHLファイルが左側のリストに表示されます。 CHL ファイルを含むフォルダーへのリンクのコピー ボタンを押すか、CHL ファイルを含むフォルダーを開くボタンを押して、このフォルダー ウィンドウを開くことができます。", "Select_the_PDF");
         languageMap.put("作者: ル・ニャ", "copyright");
-        languageMap.put("作成されているCHLファイルの名前: (\"\") は開いている別の CHL ファイルと同じ名前なので、上書きできません。", "Name_of_the_CHL");
-        languageMap.put("続行するには、この開いている CHL ファイルを閉じてください。", "Please_close_the_open_CHL_file_to_continue");
+        languageMap.put("作成されているEXCELファイルの名前: (\"\") は開いている別のEXCELファイルと同じ名前なので、上書きできません。", "Name_of_the_EXCEL");
+        languageMap.put("続行するには、この開いているEXCELファイルを閉じてください。", "Please_close_the_open_EXCEL_file_to_continue");
         languageMap.put("CHL ファイルを作成中: (\"\") 1つの母材では、記録する製品ライン数が99を超えるため、記録できません。", "CHL_file_being_created");
         languageMap.put("続行するには、転送中の鋼種データを編集してください。", "Please_edit_the_transferring_material_data_to_continue");
 
@@ -161,12 +161,12 @@ public class SetupData {
         languageMap.put("Confirm the PDF address file", "Confirm_the_PDF_address_file");
         languageMap.put("The address of the PDF file has not been confirmed", "The_address_of_the_PDF_file_has_not_been_confirmed");
         languageMap.put("Please select the PDF file to continue!", "Please_select_the_PDF_file_to_continue");
-        languageMap.put("Confirm the folder containing CHL files", "Confirm_the_folder_containing_CHL_files");
-        languageMap.put("Folder address containing unconfirmed CHL files", "Folder_address_containing_unconfirmed_CHL_files");
+        languageMap.put("Confirm the folder containing EXCEL file", "Confirm_the_folder_containing_EXCEL_files");
+        languageMap.put("Folder address containing unconfirmed EXCEL file", "Folder_address_containing_unconfirmed_EXCEL_file");
         languageMap.put("Please select the containing folder to continue!", "Please_select_the_containing_folder_to_continue");
         languageMap.put("Information on file transfer activities", "Information_on_file_transfer_activities");
-        languageMap.put("Finished converting PDF files to CHL files", "Finished_converting_PDF_files_to_CHL_files");
-        languageMap.put("Do you want to open a folder containing CHL files and automatically copy the address?", "Do_you_want_to_open_a_folder_containing_CHL_files_and_automatically_copy_the_address");
+        languageMap.put("Finished converting PDF files to EXCEL file", "Finished_converting_PDF_files_to_EXCEL_file");
+        languageMap.put("Do you want to open a folder containing EXCEL file and automatically copy the address?", "Do_you_want_to_open_a_folder_containing_EXCEL_file_and_automatically_copy_the_address");
         languageMap.put("File transfer error message", "File_transfer_error_message");
         languageMap.put("The PDF file content is not a material calculation or the file is not authorized to be accessed", "The_PDF_file_content_is_not_a_material_calculation_or_the_file_is_not_authorized_to_be_accessed");
         languageMap.put("Do you want to select another file and do it again?", "Do_you_want_to_select_another_file_and_do_it_again");
@@ -184,8 +184,8 @@ public class SetupData {
         languageMap.put("Using:", "Using");
         languageMap.put("Select the PDF file address containing the material calculation content on your computer and select the folder address that will contain the CHL files when the transfer is complete. These links, once selected, will be displayed in the boxes on the left. Then press the switch button to execute. The created CHL files will display in the list on the left. You can press the Copy link button to the folder that will contain CHL files or press the button to open the folder containing CHL files to open this folder window.", "Select_the_PDF");
         languageMap.put("copyright ©: Le Nha", "copyright");
-        languageMap.put("Name of the CHL file being created: (\"\") has the same name as another CHL file that is currently open, so it cannot be overwritten", "Name_of_the_CHL");
-        languageMap.put("Please close the open CHL file to continue!", "Please_close_the_open_CHL_file_to_continue");
+        languageMap.put("Name of the EXCEL file being created: (\"\") has the same name as another EXCEL file that is currently open, so it cannot be overwritten", "Name_of_the_EXCEL");
+        languageMap.put("Please close the open EXCEL file to continue!", "Please_close_the_open_EXCEL_file_to_continue");
         languageMap.put("CHL file being created: (\"\") in a single bozai, the number of product lines to be recorded is greater than 99, so it cannot be recorded", "CHL_file_being_created");
         languageMap.put("Please edit the transferring material data to continue!", "Please_edit_the_transferring_material_data_to_continue");
 
@@ -326,7 +326,7 @@ public class SetupData {
     /**
      * @return list chứa các file chl đã tạo
      */
-    public ObservableList<ExcelFile> getExcelFiles() {
+    public ObservableList<ExcelFile> getExcelFile() {
         return excelFiles;
     }
 

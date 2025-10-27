@@ -57,7 +57,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     @FXML
     public Button setExcelFileBtn;
     @FXML
-    public TextField link3bcDir;
+    public TextField linkExcelDir;
     @FXML
     public Button setSave3bcFileDirBtn;
     @FXML
@@ -130,9 +130,9 @@ public class ConVertExcelAnd3BCController implements Initializable {
     private static final String CONFIRM_EXCEL_FILE_LINK_HEADER = "Địa chỉ của file Excel chưa được xác nhận";
     private static final String CONFIRM_EXCEL_FILE_LINK_CONTENT = "Hãy chọn file Excel để tiếp tục!";
 
-    private static final String CONFIRM_CHL_FILE_DIR_TITLE = "Xác nhận thư mục chứa các file CHL";
-    private static final String CONFIRM_CHL_FILE_DIR_HEADER = "Địa chỉ thư mục chứa các file CHL chưa được xác nhận";
-    private static final String CONFIRM_CHL_FILE_DIR_CONTENT = "Hãy chọn thư mục chứa để tiếp tục!";
+    private static final String CONFIRM_EXCEL_FILE_DIR_TITLE = "Xác nhận thư mục chứa file EXCEL";
+    private static final String CONFIRM_EXCEL_FILE_DIR_HEADER = "Địa chỉ thư mục chứa file EXCEL chưa được xác nhận";
+    private static final String CONFIRM_EXCEL_FILE_DIR_CONTENT = "Hãy chọn thư mục chứa để tiếp tục!";
 
     private static final String CONFIRM_3BC_FILE_DIR_TITLE = "Xác nhận thư mục chứa các file 3BC";
     private static final String CONFIRM_3BC_FILE_DIR_HEADER = "Địa chỉ thư mục chứa các file 3BC chưa được xác nhận";
@@ -140,12 +140,12 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
     private static final String CONFIRM_CONVERT_COMPLETE_TITLE = "Thông tin hoạt động chuyển file";
     private static final String CONFIRM_CHECK_EXCEL_FILE = "Thông báo kết quả kiểm tra file";
-    private static final String CONFIRM_CONVERT_COMPLETE_HEADER = "Đã chuyển xong file PDF sang các file CHL";
+    private static final String CONFIRM_CONVERT_COMPLETE_HEADER = "Đã chuyển xong file PDF sang file EXCEL";
     // NEW
     private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_HEADER = "Đã chuyển xong file EXCEL sang file 3BC";
     private static final String CONFIRM_CHECK_EXCEL_FILE_HEADER = "File excel này không phải tính vật liệu";
     private static final String CO_VAT_LIEU_KHONG_TON_TAI = "Có tồn tại vật liệu không nằm trong danh sách hoặc có vật liệu trùng nhau";
-    private static final String CONFIRM_CONVERT_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa các file CHL và\ntự động copy địa chỉ không?";
+    private static final String CONFIRM_CONVERT_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa file EXCEL và\ntự động copy địa chỉ không?";
     // NEW
     private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_CONTENT = "Bạn có muốn mở thư mục chứa file 3BC và\ntự động copy địa chỉ không?";
     private static final String CONFIRM_CHECK_EXCEL_FILE_CONTENT = "Bạn có muốn chọn lại file excel khác không?";
@@ -179,14 +179,14 @@ public class ConVertExcelAnd3BCController implements Initializable {
         System.out.println("link 3bc dir " + SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
 
         extracted(linkExcelFile);
-        extracted(link3bcDir);
+        extracted(linkExcelDir);
         extracted(link3bcToriaiFile);
         extracted(linkExcelResultDir);
 
 
 
         // bind list view với list các file chl đã tạo
-        csvFIleList.setItems(SetupData.getInstance().getExcelFiles());
+        csvFIleList.setItems(SetupData.getInstance().getExcelFile());
         // cài đặt các cell của list view
         setupCellChlFIleList();
 
@@ -249,8 +249,8 @@ public class ConVertExcelAnd3BCController implements Initializable {
         link3bcToriaiFile.textProperty().addListener((observableValue, oldValue, newValue) -> {
             setBorderColorTF(link3bcToriaiFile);
         });
-        link3bcDir.textProperty().addListener((observableValue, oldValue, newValue) -> {
-            setBorderColorTF(link3bcDir);
+        linkExcelDir.textProperty().addListener((observableValue, oldValue, newValue) -> {
+            setBorderColorTF(linkExcelDir);
         });
 
         // lấy địa chỉ đã chọn lần gần nhất của thư mục sẽ lưu file 3bc
@@ -266,7 +266,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
         // nếu địa chỉ đúng là thư mục thì cho hiển thị trên màn hình
         if (file3bcDiv.isDirectory()) {
-            link3bcDir.setText(SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
+            linkExcelDir.setText(SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
         }
     }
 
@@ -386,7 +386,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
             String link = file.getAbsolutePath();
             // nếu địa chỉ link của file được chọn khác với địa chỉ cũ đang được chọn thì xóa danh sách list các file excel đã được tạo(file cũ là excel)
             if (!link.equals(SetupData.getInstance().getSetup().getLinkExcelFile())) {
-                SetupData.getInstance().getExcelFiles().clear();
+                SetupData.getInstance().getExcelFile().clear();
             }
 
             // kiểm tra tính hợp lệ của file, nếu không hợp thì yêu cầu chọn lại hoặc thoát
@@ -511,24 +511,24 @@ public class ConVertExcelAnd3BCController implements Initializable {
         if (!oldLinkPdfFile.isBlank()) {
             // tách link tại các đoạn phân tách địa chỉ
             String[] oldLinkPdfFileArr = oldLinkPdfFile.split("\\\\");
-            // link thư mục chứa file pdf
+            // link thư mục chứa toriai3bcDir pdf
             String linkPdfFileDir = "";
-            // ghép lại link nhưng bỏ phần cuối cùng(tên file pdf) là ra địa chỉ thư mục chứa file pdf
+            // ghép lại link nhưng bỏ phần cuối cùng(tên toriai3bcDir pdf) là ra địa chỉ thư mục chứa toriai3bcDir pdf
             for (int i = 0; i < oldLinkPdfFileArr.length - 1; i++) {
                 linkPdfFileDir = linkPdfFileDir.concat(oldLinkPdfFileArr[i]).concat("\\");
             }
 
-            // tạo file thư mục chứa file pdf
-            File file = new File(linkPdfFileDir);
-            // nếu file là thư mục thì cho trình chọn file pdf bắt đầu chọn file từ thư mục này
-            if (file.isDirectory()) {
-                fileChooser.setInitialDirectory(file);
+            // tạo toriai3bcDir thư mục chứa toriai3bcDir pdf
+            File toriai3bcDir = new File(linkPdfFileDir);
+            // nếu toriai3bcDir là thư mục thì cho trình chọn toriai3bcDir pdf bắt đầu chọn toriai3bcDir từ thư mục này
+            if (toriai3bcDir.isDirectory()) {
+                fileChooser.setInitialDirectory(toriai3bcDir);
             }
         }
 
         // file pdf
         File file;
-        // chọn file pdf nếu không có lỗi địa chỉ khởi đầu thì thoát,nếu không cho địa chỉ khơ đầu là null và chọn lại đến khi hết lỗi
+        // chọn file pdf nếu không có lỗi địa chỉ khởi đầu thì thoát,nếu không cho địa chỉ khởi đầu là null và chọn lại đến khi hết lỗi
         while (true) {
             try {
                 // lấy file pdf
@@ -588,7 +588,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
 //            }
 
             // hiển thị link
-            link3bcDir.setText(link);
+            linkExcelDir.setText(link);
             // lưu vào đối tượng setup và lưu vào file
             SetupData.getInstance().setLinkSave3bcFileDir(link);
         } else {
@@ -642,23 +642,23 @@ public class ConVertExcelAnd3BCController implements Initializable {
     public void convertFilePdfToriaiToExcel(ActionEvent actionEvent) {
         // link file pdf
         String pdfFilePath;
-        // link thư mục chứa các file chl
-        String chlFileDirPath;
+        // link thư mục chứa file excel
+        String excelFileDirPath;
 
         // yêu cầu chọn địa chỉ file và thư mục khi 2 địa chỉ này chưa được chọn
         // nếu chọn xong thì phải chuyển dữ liệu thành công thì mới thoát được vòng lặp
         while (true) {
             // lấy link từ các ô đang hiển thị
             pdfFilePath = linkExcelFile.getText();
-            chlFileDirPath = link3bcDir.getText();
+            excelFileDirPath = linkExcelDir.getText();
 
             // tạo file theo các link trên
             File pdfFile = new File(pdfFilePath);
-            File chlFileDir = new File(chlFileDirPath);
+            File excelFileDir = new File(excelFileDirPath);
 
             // kiểm tra hợp lệ địa chỉ file và thư mục
             boolean isFilePDF = pdfFile.isFile();
-            boolean isDir = chlFileDir.isDirectory();
+            boolean isDir = excelFileDir.isDirectory();
 
             // nếu không phải là file pdf thì yêu cầu chọn lại
             if (!isFilePDF) {
@@ -698,12 +698,12 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 /* nếu địa chỉ file pdf đã xác nhận thì nó sẽ tự động lấy địa chỉ thư mục chứa file pdf đó nhập vào
                  linkCvsDir, mà trước đó đã xác nhận chưa chọn thư mục chứa file đã chuyển nên cần xóa text của
                  linkCvsDir đi để người dùng xác nhận lại, tránh hiển thị địa chỉ mặc định trên ỏ linkCvsDir làm khó hiểu */
-                link3bcDir.setText("");
+                linkExcelDir.setText("");
                 SetupData.getInstance().setLinkSave3bcFileDir("");
                 // hiển thị alert yêu cầu chọn lại
-                confirmAlert.setTitle(CONFIRM_CHL_FILE_DIR_TITLE);
-                confirmAlert.setHeaderText(CONFIRM_CHL_FILE_DIR_HEADER);
-                confirmAlert.setContentText(CONFIRM_CHL_FILE_DIR_CONTENT);
+                confirmAlert.setTitle(CONFIRM_EXCEL_FILE_DIR_TITLE);
+                confirmAlert.setHeaderText(CONFIRM_EXCEL_FILE_DIR_HEADER);
+                confirmAlert.setContentText(CONFIRM_EXCEL_FILE_DIR_CONTENT);
                 updateLangAlert(confirmAlert);
                 Optional<ButtonType> result = confirmAlert.showAndWait();
 
@@ -718,10 +718,10 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
                     /* sau khi đã chọn xong thư mục thì gán luôn thư mục do hàm chọn trả về để hàm lấy thư mục cho việc chuyển bên dưới
                      hoạt động đúng mà không phải thêm 1 vòng lặp nữa tính lại thư mục */
-                    chlFileDir = dirSelected;
+                    excelFileDir = dirSelected;
 
                     // nếu thư mục trả về không đúng thì nhảy sang sang vòng lặp mới và chọn lại từ đầu
-                    if (!chlFileDir.isDirectory()) {
+                    if (!excelFileDir.isDirectory()) {
                         continue;
                     }
                 }
@@ -732,15 +732,15 @@ public class ConVertExcelAnd3BCController implements Initializable {
             }
 
             // đến đây nếu không bị return thì đã chọn xong 2 địa chỉ file
-            if (pdfFile.isFile() && chlFileDir.isDirectory()) {
+            if (pdfFile.isFile() && excelFileDir.isDirectory()) {
                 System.out.println("đã chọn xong 2 địa chỉ");
                 System.out.println(pdfFile.getAbsolutePath());
-                System.out.println(chlFileDir.getAbsolutePath());
+                System.out.println(excelFileDir.getAbsolutePath());
             }
 
             // gọi hàm chuyển file từ class static ReadPDFToExcel
             try {
-                ReadPDFToExcel.convertPDFToExcel(pdfFile.getAbsolutePath(), chlFileDir.getAbsolutePath(), SetupData.getInstance().getExcelFiles());
+                ReadPDFToExcel.convertPDFToExcel(pdfFile.getAbsolutePath(), excelFileDir.getAbsolutePath(), SetupData.getInstance().getExcelFile());
                 // hiển thị alert chuyển file thành công
                 confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_CONVERT_COMPLETE_HEADER);
@@ -750,11 +750,11 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
                 Optional<ButtonType> result = confirmAlert.showAndWait();
 
-                // nếu là nút ok thì copy đường dẫn thư mục chứa file chl vào clipboard và mở thư mục này
+                // nếu là nút ok thì copy đường dẫn thư mục chứa file excel vào clipboard và mở thư mục này
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    copyContentToClipBoard(chlFileDir.getAbsolutePath());
+                    copyContentToClipBoard(excelFileDir.getAbsolutePath());
                     // mở thư mục chứa file chl
-                    Desktop.getDesktop().open(chlFileDir);
+                    Desktop.getDesktop().open(excelFileDir);
                 }
 
                 return;
@@ -773,13 +773,13 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 // cập nhật ngôn ngữ cho alert
                 updateLangAlert(confirmAlert);
 
-                // nếu là sự kiện không ghi được file chl do file trùng tên với file sắp tạo đang được mở
+                // nếu là sự kiện không ghi được file excel do file trùng tên với file sắp tạo đang được mở
                 // th in ra cảnh báo và thoát
                 if (e instanceof FileNotFoundException) {
                     confirmAlert.getButtonTypes().clear();
                     confirmAlert.getButtonTypes().add(ButtonType.OK);
-                    confirmAlert.setHeaderText("Tên file CHL đang tạo: (\"" + ReadPDFToExcel.fileName + "\") trùng tên với 1 file CHL khác đang được mở nên không thể ghi đè");
-                    confirmAlert.setContentText("Hãy đóng file CHL đang mở để tiếp tục!");
+                    confirmAlert.setHeaderText("Tên file EXCEL đang tạo: (\"" + ReadPDFToExcel.fileExcelName + ".xlsx" + "\") trùng tên với 1 file EXCEL khác đang được mở nên không thể ghi đè");
+                    confirmAlert.setContentText("Hãy đóng file EXCEL đang mở để tiếp tục!");
                     System.out.println("File đang được mở bởi người dùng khác");
                     updateLangAlert(confirmAlert);
                     confirmAlert.showAndWait();
@@ -885,7 +885,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     @FXML
     public void open3bcFileDir(ActionEvent actionEvent) {
         // lấy địa chỉ thư mục đang hiển thị gán vào file
-        File _3bcFileDir = new File(link3bcDir.getText());
+        File _3bcFileDir = new File(linkExcelDir.getText());
         // nếu file là thư mục thì mở thư mục bằng cửa sổ của window
         // nếu không thì thông báo lỗi
         if (_3bcFileDir.isDirectory()) {
@@ -1084,7 +1084,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     private void copylinkExcelResultFolder() {
 
         // lấy địa chỉ thư mục chứa file excel
-        File chlFileDir = new File(link3bcDir.getText());
+        File chlFileDir = new File(linkExcelDir.getText());
         // nếu thư mục chứa các file chl là thư mục thì copy địa chỉ thư mục chứa các file chl vào clipboard
         // hiển thị label thông báo đã copy trong 3 giây
         if (chlFileDir.isDirectory()) {
@@ -1337,7 +1337,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
         while (true) {
             // lấy link từ các ô đang hiển thị
             excelFilePath = linkExcelFile.getText();
-            _3bcFileDirPath = link3bcDir.getText();
+            _3bcFileDirPath = linkExcelDir.getText();
 
             // tạo file theo các link trên
             File excelFile = new File(excelFilePath);
@@ -1385,7 +1385,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 /* nếu địa chỉ file 3BC đã xác nhận thì nó sẽ tự động lấy địa chỉ thư mục chứa file 3BC đó nhập vào
                  link3bcDir, mà trước đó đã xác nhận chưa chọn thư mục chứa file đã chuyển nên cần xóa text của
                  link3bcDir đi để người dùng xác nhận lại, tránh hiển thị địa chỉ mặc định trên ỏ link3bcDir làm khó hiểu */
-                link3bcDir.setText("");
+                linkExcelDir.setText("");
                 SetupData.getInstance().setLinkSave3bcFileDir("");
                 // hiển thị alert yêu cầu chọn lại
                 confirmAlert.setTitle(CONFIRM_3BC_FILE_DIR_TITLE);
