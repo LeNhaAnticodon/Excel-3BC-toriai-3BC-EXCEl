@@ -101,7 +101,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     @FXML
     public Button set3bcToriaiFileBtn;
     @FXML
-    public TextField linkExcelResultDir;
+    public TextField linkExcelCopyResultDir;
     @FXML
     public Button setLinkExcelResultDirBtn;
 
@@ -178,10 +178,10 @@ public class ConVertExcelAnd3BCController implements Initializable {
         System.out.println("link toriai 3bc " + SetupData.getInstance().getSetup().getLink3bcToriaiFile());
         System.out.println("link 3bc dir " + SetupData.getInstance().getSetup().getLinkSave3BCFileDir());
 
-        extracted(linkExcelFile);
-        extracted(linkExcelDir);
-        extracted(link3bcToriaiFile);
-        extracted(linkExcelResultDir);
+        checkExcelRootFile(linkExcelFile);
+        checkExcelRootFile(linkExcelDir);
+        checkExcelRootFile(link3bcToriaiFile);
+        checkExcelRootFile(linkExcelCopyResultDir);
 
 
 
@@ -261,7 +261,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
         // nếu địa chỉ đúng là thư mục thì cho hiển thị trên màn hình
         if (fileExcelDiv.isDirectory()) {
-            linkExcelResultDir.setText(SetupData.getInstance().getSetup().getLinkSaveExcelFileDir());
+            linkExcelCopyResultDir.setText(SetupData.getInstance().getSetup().getLinkSaveExcelFileDir());
         }
 
         // nếu địa chỉ đúng là thư mục thì cho hiển thị trên màn hình
@@ -273,7 +273,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     /**
      * cho text của tf hiển thị phần cuối text, phần đầu nếu không đủ chỗ thì ẩn đi
      */
-    private void extracted(TextField linkExcelFileTf) {
+    private void checkExcelRootFile(TextField linkExcelFileTf) {
         // 1) Căn phần hiển thị sang phải — đảm bảo phần cuối luôn thấy
         linkExcelFileTf.setAlignment(Pos.CENTER_RIGHT); // hoặc Pos.BASELINE_RIGHT
 
@@ -599,7 +599,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     }
 
 
-    public File setSaveExcelFileDir(ActionEvent actionEvent) {
+    public File setSaveExcelFileDir() {
         // trình chọn thư mục
         DirectoryChooser directoryChooser = new DirectoryChooser();
         // thư mục chứa file 3bc lần trước
@@ -625,7 +625,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
 //            }
 
             // hiển thị link
-            linkExcelResultDir.setText(link);
+            linkExcelCopyResultDir.setText(link);
             // lưu vào đối tượng setup và lưu vào file
             SetupData.getInstance().setLinkSaveExcelFileDir(link);
         } else {
@@ -640,25 +640,66 @@ public class ConVertExcelAnd3BCController implements Initializable {
      */
     @FXML
     public void convertFilePdfToriaiToExcel(ActionEvent actionEvent) {
+        // link file excel
+        String excelRootFilePath;
         // link file pdf
         String pdfFilePath;
-        // link thư mục chứa file excel
-        String excelFileDirPath;
+        // link thư mục chứa file excel sẽ được copy từ file gốc
+        String excelCopyFileDirPath;
 
         // yêu cầu chọn địa chỉ file và thư mục khi 2 địa chỉ này chưa được chọn
         // nếu chọn xong thì phải chuyển dữ liệu thành công thì mới thoát được vòng lặp
         while (true) {
             // lấy link từ các ô đang hiển thị
+            excelRootFilePath = linkExcelFile.getText();
             pdfFilePath = link3bcToriaiFile.getText();
-            excelFileDirPath = linkExcelResultDir.getText();
+            excelCopyFileDirPath = linkExcelCopyResultDir.getText();
 
             // tạo file theo các link trên
+            File excelRootFile = new File(excelRootFilePath);
             File pdfFile = new File(pdfFilePath);
-            File excelFileDir = new File(excelFileDirPath);
+            File excelCopyFileDir = new File(excelCopyFileDirPath);
 
             // kiểm tra hợp lệ địa chỉ file và thư mục
+            boolean isFileExcelRoot = excelRootFile.isFile();
             boolean isFilePDF = pdfFile.isFile();
-            boolean isDir = excelFileDir.isDirectory();
+            boolean isEXcelCopyDir = excelCopyFileDir.isDirectory();
+
+            // nếu không phải là file excel để copy thì yêu cầu chọn lại
+            if (!isFileExcelRoot) {
+                // hiển thị alert yêu cầu chọn lại file excel
+                confirmAlert.setTitle(CONFIRM_EXCEL_FILE_LINK_TITLE);
+                confirmAlert.setHeaderText(CONFIRM_EXCEL_FILE_LINK_HEADER);
+                confirmAlert.setContentText(CONFIRM_EXCEL_FILE_LINK_CONTENT);
+                updateLangAlert(confirmAlert);
+                Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                // nếu đồng ý thì gọi lại hàm chọn file
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                    File fileSelected = getExcelFile();
+                    // nếu file đã chọn null nghĩa là người dùng click vào nút cancel khi chọn file
+                    // thì thoát và không làm gì nữa
+                    if (fileSelected == null) {
+                        return;
+                    }
+
+                    /* sau khi đã chọn xong file EXCEL thì gán luôn file do hàm chọn trả về để hàm lấy file cho việc chuyển bên dưới
+                     hoạt động đúng mà không phải thêm 1 vòng lặp nữa tính lại file */
+                    excelRootFile = fileSelected;
+
+                    // nếu file chọn không đúng thì nhảy sang sang vòng lặp mới và chọn lại từ đầu
+                    if (!excelRootFile.isFile()) {
+                        continue;
+                    }
+                }
+                // nếu không đồng ý thì thoát hàm
+                else {
+                    return;
+                }
+            }
+
+            // kiểm tra tính hợp lệ của file excel, nếu không hợp thì yêu cầu chọn lại hoặc thoát
+            if (checkExcelRootFile(excelRootFile)) return;
 
             // nếu không phải là file pdf thì yêu cầu chọn lại
             if (!isFilePDF) {
@@ -671,7 +712,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
                 // nếu đồng ý thì gọi hàm chọn file
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    File fileSelected = getExcelFile();
+                    File fileSelected = get3bcToriaiFile();
                     // nếu file đã chọn null nghĩa là người dùng click vào nút cancel khi chọn file
                     // thì thoát và không làm gì nữa
                     if (fileSelected == null) {
@@ -694,12 +735,12 @@ public class ConVertExcelAnd3BCController implements Initializable {
             }
 
             // nếu không phải là thư mục thì yêu cầu chọn lại
-            if (!isDir) {
+            if (!isEXcelCopyDir) {
                 /* nếu địa chỉ file pdf đã xác nhận thì nó sẽ tự động lấy địa chỉ thư mục chứa file pdf đó nhập vào
                  linkCvsDir, mà trước đó đã xác nhận chưa chọn thư mục chứa file đã chuyển nên cần xóa text của
                  linkCvsDir đi để người dùng xác nhận lại, tránh hiển thị địa chỉ mặc định trên ỏ linkCvsDir làm khó hiểu */
-                linkExcelDir.setText("");
-                SetupData.getInstance().setLinkSave3bcFileDir("");
+                linkExcelCopyResultDir.setText("");
+                SetupData.getInstance().setLinkSaveExcelFileDir("");
                 // hiển thị alert yêu cầu chọn lại
                 confirmAlert.setTitle(CONFIRM_EXCEL_FILE_DIR_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_EXCEL_FILE_DIR_HEADER);
@@ -709,7 +750,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
                 // nếu là nút ok thì gọi hàm chọn thư mục
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    File dirSelected = setSave3bcFileDir();
+                    File dirSelected = setSaveExcelFileDir();
 
                     // nếu thư mục trả về null tức người dùng hủy chọn bằng nút cancel thì thoát hàm và không làm gì nữa
                     if (dirSelected == null) {
@@ -718,10 +759,10 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
                     /* sau khi đã chọn xong thư mục thì gán luôn thư mục do hàm chọn trả về để hàm lấy thư mục cho việc chuyển bên dưới
                      hoạt động đúng mà không phải thêm 1 vòng lặp nữa tính lại thư mục */
-                    excelFileDir = dirSelected;
+                    excelCopyFileDir = dirSelected;
 
                     // nếu thư mục trả về không đúng thì nhảy sang sang vòng lặp mới và chọn lại từ đầu
-                    if (!excelFileDir.isDirectory()) {
+                    if (!excelCopyFileDir.isDirectory()) {
                         continue;
                     }
                 }
@@ -731,16 +772,17 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 }
             }
 
-            // đến đây nếu không bị return thì đã chọn xong 2 địa chỉ file
-            if (pdfFile.isFile() && excelFileDir.isDirectory()) {
-                System.out.println("đã chọn xong 2 địa chỉ");
+            // đến đây nếu không bị return thì đã chọn xong 3 địa chỉ file
+            if (pdfFile.isFile() && excelCopyFileDir.isDirectory()) {
+                System.out.println("đã chọn xong 3 địa chỉ");
+                System.out.println("LINK EXCEL FILE: " + excelRootFile.getAbsolutePath());
                 System.out.println(pdfFile.getAbsolutePath());
-                System.out.println(excelFileDir.getAbsolutePath());
+                System.out.println(excelCopyFileDir.getAbsolutePath());
             }
 
-            // gọi hàm chuyển file từ class static ReadPDFToExcel
+            // gọi hàm chuyển file từ class static convertPDFToExcel
             try {
-                ReadPDFToExcel.convertPDFToExcel(pdfFile.getAbsolutePath(), excelFileDir.getAbsolutePath(), SetupData.getInstance().getExcelFile());
+                ReadPDFToExcel.convertPDFToExcel(excelRootFile.getAbsolutePath(), pdfFile.getAbsolutePath(), excelCopyFileDir.getAbsolutePath(), SetupData.getInstance().getExcelFile());
                 // hiển thị alert chuyển file thành công
                 confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_CONVERT_COMPLETE_HEADER);
@@ -752,9 +794,9 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
                 // nếu là nút ok thì copy đường dẫn thư mục chứa file excel vào clipboard và mở thư mục này
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    copyContentToClipBoard(excelFileDir.getAbsolutePath());
+                    copyContentToClipBoard(excelCopyFileDir.getAbsolutePath());
                     // mở thư mục chứa file chl
-                    Desktop.getDesktop().open(excelFileDir);
+                    Desktop.getDesktop().open(excelCopyFileDir);
                 }
 
                 return;
@@ -817,7 +859,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 // nếu chọn ok thì gọi lại hàm chọn file pdf để chọn file khác
                 // nếu chọn cancel thì thoát
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    File fileSelected2 = getExcelFile();
+                    File fileSelected2 = get3bcToriaiFile();
 
                     // nếu không chọn file thì thoát
                     if (fileSelected2 == null) {
@@ -847,7 +889,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
     @FXML
     public void openExcelDir(ActionEvent actionEvent) {
         // lấy địa chỉ thư mục đang hiển thị gán vào file
-        File excelFileDir = new File(linkExcelResultDir.getText());
+        File excelFileDir = new File(linkExcelCopyResultDir.getText());
         // nếu file là thư mục thì mở thư mục bằng cửa sổ của window
         // nếu không thì thông báo lỗi
         if (excelFileDir.isDirectory()) {
@@ -1425,55 +1467,8 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 System.out.println("LINK 3BC DIR: " + _3bcFileDir.getAbsolutePath());
             }
 
-            // kiểm tra tính hợp lệ của file, nếu không hợp thì yêu cầu chọn lại hoặc thoát
-            try {
-                // biến nhớ file không hợp lệ là false
-                boolean checkExcelFile = false;
-
-                    // gán biến nhớ kết quả kiểm tra hợp lệ
-                    checkExcelFile = ReadExcel.checkExcelcontent(excelFile.getAbsolutePath());
-
-                // nếu không hợp lệ thì ném ngoại lệ để chỗ bắt ngoại lệ gọi hàm thông báo
-                // ngược lại nếu hợp lệ thì tiếp tục chương trình
-                if (!checkExcelFile){
-                    throw new IOException("File không đúng định dạng");
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                // hiển thị alert file không hợp lệ
-                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
-                confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
-                confirmAlert.setHeaderText(CONFIRM_CHECK_EXCEL_FILE_HEADER);
-                confirmAlert.setContentText(CONFIRM_CHECK_EXCEL_FILE_CONTENT);
-
-                updateLangAlert(confirmAlert);
-
-                Optional<ButtonType> result = confirmAlert.showAndWait();
-
-                // nếu là nút ok thì gọi lại hàm chọn file
-                if (result.isPresent() && result.get() == ButtonType.OK) {
-                    getExcelFile();
-                }
-                return;
-            } catch (Exception e) {
-                e.printStackTrace();
-                // hiển thị alert file không hợp lệ
-                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
-                confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
-                confirmAlert.setHeaderText(CONFIRM_CHECK_EXCEL_FILE_HEADER);
-                confirmAlert.setContentText(CONFIRM_CHECK_EXCEL_FILE_CONTENT);
-
-                updateLangAlert(confirmAlert);
-
-                Optional<ButtonType> result = confirmAlert.showAndWait();
-
-                // nếu là nút ok thì gọi lại hàm chọn file
-                if (result.isPresent() && result.get() == ButtonType.OK) {
-                    getExcelFile();
-                }
-                return;
-            }
+            // kiểm tra tính hợp lệ của file excel, nếu không hợp thì yêu cầu chọn lại hoặc thoát
+            if (checkExcelRootFile(excelFile)) return;
 
             // gọi hàm chuyển file từ class static ReadPDFToExcel
             try {
@@ -1590,6 +1585,64 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 }
             }
         }
+    }
+
+    /**
+     * kiểm tra tính hợp lệ của file excel tính vật liệu
+     * @param excelFile
+     * @return
+     */
+    private boolean checkExcelRootFile(File excelFile) {
+        // kiểm tra tính hợp lệ của file, nếu không hợp thì yêu cầu chọn lại hoặc thoát
+        try {
+            // biến nhớ file không hợp lệ là false
+            boolean checkExcelFile = false;
+
+                // gán biến nhớ kết quả kiểm tra hợp lệ
+                checkExcelFile = ReadExcel.checkExcelcontent(excelFile.getAbsolutePath());
+
+            // nếu không hợp lệ thì ném ngoại lệ để chỗ bắt ngoại lệ gọi hàm thông báo
+            // ngược lại nếu hợp lệ thì tiếp tục chương trình
+            if (!checkExcelFile){
+                throw new IOException("File không đúng định dạng");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // hiển thị alert file không hợp lệ
+            confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
+            confirmAlert.setHeaderText(CONFIRM_CHECK_EXCEL_FILE_HEADER);
+            confirmAlert.setContentText(CONFIRM_CHECK_EXCEL_FILE_CONTENT);
+
+            updateLangAlert(confirmAlert);
+
+            Optional<ButtonType> result = confirmAlert.showAndWait();
+
+            // nếu là nút ok thì gọi lại hàm chọn file
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                getExcelFile();
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            // hiển thị alert file không hợp lệ
+            confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle(CONFIRM_CHECK_EXCEL_FILE);
+            confirmAlert.setHeaderText(CONFIRM_CHECK_EXCEL_FILE_HEADER);
+            confirmAlert.setContentText(CONFIRM_CHECK_EXCEL_FILE_CONTENT);
+
+            updateLangAlert(confirmAlert);
+
+            Optional<ButtonType> result = confirmAlert.showAndWait();
+
+            // nếu là nút ok thì gọi lại hàm chọn file
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                getExcelFile();
+            }
+            return true;
+        }
+        return false;
     }
 
 }

@@ -346,10 +346,10 @@ public class ReadExcel {
         // mảng chứa các size của vật liệu
         String[] kousyuSizeArr;
         // tạo 4 size vì chỉ có tối đa 4 size
-        int size1 = 0;
-        int size2 = 0;
-        int size3 = 0;
-        int size4 = 0;
+        double size1 = 0;
+        double size2 = 0;
+        double size3 = 0;
+        double size4 = 0;
 
         // lấy mảng sau khi phân tách vật liệu
         kousyuMarkArr = kousyu.split(kiHieuExcel);
@@ -360,10 +360,10 @@ public class ReadExcel {
         // do size 4 không chắc có hay không nên cần phải bắt lỗi
         // nếu không có thì size 4 vẫn được gán giá trị từ trước
         try {
-            size1 = Math.abs(Integer.parseInt(extractNumberString(kousyuSizeArr[0]))) ;
-            size2 = Math.abs(Integer.parseInt(extractNumberString(kousyuSizeArr[1])));
-            size3 = Math.abs(Integer.parseInt(extractNumberString(kousyuSizeArr[2])));
-            size4 = Math.abs(Integer.parseInt(extractNumberString(kousyuSizeArr[3])));
+            size1 = Math.abs(Double.parseDouble(extractNumberString(kousyuSizeArr[0]))) ;
+            size2 = Math.abs(Double.parseDouble(extractNumberString(kousyuSizeArr[1])));
+            size3 = Math.abs(Double.parseDouble(extractNumberString(kousyuSizeArr[2])));
+            size4 = Math.abs(Double.parseDouble(extractNumberString(kousyuSizeArr[3])));
         } catch (ArrayIndexOutOfBoundsException e) {
             System.out.println("phần tử này đã vượt giới hạn chứa các size");
         }

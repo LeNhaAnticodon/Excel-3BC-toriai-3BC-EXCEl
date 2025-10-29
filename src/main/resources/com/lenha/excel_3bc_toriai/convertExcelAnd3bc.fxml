@@ -144,7 +144,7 @@
             </HBox>
             <HBox alignment="CENTER" layoutX="10.0" layoutY="173.0" spacing="20.0">
                <children>
-                  <TextField fx:id="linkExcelResultDir" editable="false" HBox.hgrow="SOMETIMES" />
+                  <TextField fx:id="linkExcelCopyResultDir" editable="false" HBox.hgrow="SOMETIMES" />
                   <Button fx:id="setLinkExcelResultDirBtn" mnemonicParsing="false" onAction="#setSaveExcelFileDir" style="-fx-background-radius: 8;" text="Chọn thư mục chứa file EXCEL sẽ tạo" textFill="#0463e8">
                      <font>
                         <Font name="System Bold" size="12.0" />

@@ -68,7 +68,7 @@ public class ReadPDFToExcel {
     private static  double kouzaiChouGoukei = 0;
     private static double seiHinChouGoukei = 0;
 
-    private static String excelPath;
+    private static String excelCopyPath;
 
     // tên file excel sẽ tạo được ghi trong phần 工事名, chưa bao gồm loại vật liệu
     public static String fileExcelName = "name";
@@ -81,11 +81,12 @@ public class ReadPDFToExcel {
 
     /**
      * chuyển đổi pdf tính vật liệu thành các file chl theo từng vật liệu khác nhau
+     * @param fileExcelRootPath link file excel gốc
      * @param filePDFPath link file pdf
      * @param fileExcelDirPath link thư mục chứa file chl sẽ tạo
      * @param excelFileNames list chứa danh sách các file chl đã tạo
      */
-    public static void convertPDFToExcel(String filePDFPath, String fileExcelDirPath, ObservableList<ExcelFile> excelFileNames) throws FileNotFoundException, TimeoutException, IOException {
+    public static void convertPDFToExcel(String fileExcelRootPath, String filePDFPath, String fileExcelDirPath, ObservableList<ExcelFile> excelFileNames) throws FileNotFoundException, TimeoutException, IOException {
 /*        excelFileNames.add(new ExcelFile("test.", "", 0, 0));
         fileName = "test.sysc2";
         throw new TimeoutException();*/
@@ -144,9 +145,9 @@ public class ReadPDFToExcel {
         // đoạn code copy file này khác với app chl vì nó chỉ tạo 1 file nên chỉ chạy 1 lần ở đoạn đầu này
         // tạo path chứa file excel
         // mà không chạy trong vòng lặp bên dưới như trong hàm writeDataToChl
-        excelPath = excelDirPath + "\\" + fileExcelName + ".xlsx";
+        excelCopyPath = excelDirPath + "\\" + fileExcelName + ".xlsx";
         // Tạo đối tượng File đại diện cho file cần xóa
-        File file = new File(excelPath);
+        File file = new File(excelCopyPath);
         // Kiểm tra nếu file tồn tại và xóa nó
         // vì nếu file đang được mở thì không thể ghi đè nhưng do file là readonly nên có thể xóa dù đang mở
         // xóa xong file thì có thể ghi lại file mới mà không bị lỗi không thể ghi đè
@@ -158,8 +159,9 @@ public class ReadPDFToExcel {
             }
         }
         // path chứa địa chỉ file sẽ được dán từ file copy
-        Path copyFile = Paths.get(excelPath);
-        // Đọc file mẫu từ resources rồi copy file ra địa chỉ của copyFile
+        Path copyFile = Paths.get(excelCopyPath);
+
+        /*// Đọc file mẫu từ resources rồi copy file ra địa chỉ của copyFile
         try (InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/sample files.xlsx")) {
             if (sourceFile == null) {
                 throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
@@ -168,9 +170,24 @@ public class ReadPDFToExcel {
         } catch (IOException e) {
             e.printStackTrace();
             throw new FileNotFoundException();
+        }*/
+
+
+        // Đọc file excel gốc rồi tạo file copy ra địa chỉ theo link copyFile
+        try (InputStream sourceFile = new FileInputStream(fileExcelRootPath)) {
+            if (sourceFile == null) {
+                throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
+            }
+            Files.copy(sourceFile, copyFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new FileNotFoundException();
         }
+
+
         // thêm tên file vào list các sheet của file để hiển thị tên file
         excelFileNames.add(new ExcelFile("EXCEL: " + fileExcelName + ".xlsx", "", 0, 0));
+
 /*        // Đặt quyền chỉ đọc cho file
         File readOnly = new File(excelPath);
         if (readOnly.exists()) {
@@ -201,19 +218,19 @@ public class ReadPDFToExcel {
 //            writeDataToCSV(kaKouPairs, i - 1, excelFileNames);
             // ghi thông tin vào file định dạng .xlsx là file của excel
 //            writeDataToChl(kaKouPairs, i, excelFileNames);
-            writeDataToExcelToriai(kaKouPairs, i, excelFileNames);
+            writeDataToExcelToriai2(kaKouPairs, i, excelFileNames);
         }
 
         // tạo luồng đọc ghi file
-        try (FileInputStream fileExcel = new FileInputStream(excelPath)) {
+        try (FileInputStream fileExcel = new FileInputStream(excelCopyPath)) {
             Workbook workbook = new XSSFWorkbook(fileExcel);
 
             // ẩn sheet mẫu
-            workbook.removeSheetAt(0);
+//            workbook.removeSheetAt(0);
 
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
             ((XSSFWorkbook) workbook).setForceFormulaRecalculation(true);
-            try (FileOutputStream fileOut = new FileOutputStream(excelPath)) {
+            try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
                 workbook.write(fileOut);
 
                 workbook.close();
@@ -1318,6 +1335,13 @@ public class ReadPDFToExcel {
     }
 
 
+    /**
+     * chuyển các thông số của tính vật liệu trong file 3bc sang excel
+     * @param kaKouPairs thông số chiều dài vật liệu và chiều dài + số lượng của các sản phẩm tính cho cây vật liệu đó
+     * @param sheetIndex thứ tự tạo sheet
+     * @param excelFileNames tên file excel
+     * @throws FileNotFoundException
+     */
     private static void writeDataToExcelToriai(Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs, int sheetIndex, ObservableList<ExcelFile> excelFileNames) throws FileNotFoundException {
 
         // tổng chiều dài các kozai
@@ -1325,7 +1349,7 @@ public class ReadPDFToExcel {
         double seiHinChouGoukei = 0;
 
         // tạo luồng đọc ghi file
-        try (FileInputStream file = new FileInputStream(excelPath)) {
+        try (FileInputStream file = new FileInputStream(excelCopyPath)) {
             Workbook workbook = new XSSFWorkbook(file);
 
             // nếu tên vật liệu có chứa [ thì phải đổi sang U vì tên này sẽ đặt tên cho sheet nên [ không dùng được
@@ -1657,7 +1681,283 @@ public class ReadPDFToExcel {
 
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
             ((XSSFWorkbook) workbook).setForceFormulaRecalculation(true);
-            try (FileOutputStream fileOut = new FileOutputStream(excelPath)) {
+            try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
+                workbook.write(fileOut);
+
+                workbook.close();
+            }
+
+
+        } catch (IOException e) {
+            if (e instanceof FileNotFoundException) {
+                System.out.println("File đang được mở bởi người dùng khác");
+                throw new FileNotFoundException();
+            }
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+
+//        System.out.println("tong chieu dai bozai " + kouzaiChouGoukei);
+//        System.out.println("tong chieu dai san pham " + seiHinChouGoukei);
+        excelFileNames.add(new ExcelFile("Sheet " + sheetIndex + ": " + kouSyu, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));
+
+    }
+
+    /**
+     * chuyển các thông số của tính vật liệu trong file 3bc sang excel
+     * @param kaKouPairs thông số chiều dài vật liệu và chiều dài + số lượng của các sản phẩm tính cho cây vật liệu đó
+     * @param sheetIndex thứ tự tạo sheet
+     * @param excelFileNames tên file excel
+     * @throws FileNotFoundException
+     */
+    private static void writeDataToExcelToriai2(Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs, int sheetIndex, ObservableList<ExcelFile> excelFileNames) throws FileNotFoundException {
+
+        // tổng chiều dài các kozai
+        double kouzaiChouGoukei = 0;
+        double seiHinChouGoukei = 0;
+
+        // tạo luồng đọc ghi file
+        try (FileInputStream file = new FileInputStream(excelCopyPath)) {
+            Workbook workbook = new XSSFWorkbook(file);
+
+            // nếu tên vật liệu có chứa [ thì phải đổi sang U vì tên này sẽ đặt tên cho sheet nên [ không dùng được
+            if (kouSyu.contains("[")) {
+                kouSyu = kouSyu.replace("[", "U");
+            }
+
+            // Lấy index sheet gốc cần sao chép
+            int sheetSampleIndex = 0;
+            // sao chép sheet gốc sang một sheet mới
+            workbook.cloneSheet(sheetSampleIndex);
+            // đổi tên sheet mới theo tên vật liệu đang duyệt, sheetIndex là chỉ số của sheet mới
+            workbook.setSheetName(sheetIndex, kouSyu);
+            // lấy ra sheet mới
+            Sheet sheet = workbook.getSheetAt(sheetIndex);
+
+
+            Date currentDate = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+            String time = sdf.format(currentDate);
+            // Ghi thời gian hiện tại vào ô C1
+            sheet.getRow(0).getCell(2).setCellValue(time);
+
+            // Ghi tên khách hàng vào ô G6
+            sheet.getRow(0).getCell(6).setCellValue(kyakuSakiMei);
+
+            // Ghi bikou vào ô M12
+            sheet.getRow(0).getCell(12).setCellValue(bikou);
+
+            // Ghi shortNouKi vào ô S18
+            sheet.getRow(0).getCell(18).setCellValue(shortNouKi);
+
+            // Ghi saizu vào ô C2, chưa dùng
+            sheet.getRow(1).getCell(2).setCellValue("");
+
+            // Ghi chuyuBan vào ô I8
+            sheet.getRow(1).getCell(8).setCellValue(chuyuBan);
+            // Ghi teiHaiSha vào ô O14
+            sheet.getRow(1).getCell(14).setCellValue(teiHaiSha);
+
+            // lấy số loại bozai và sản phẩm
+            int soBoZai = kaKouPairs.size();
+            int soSanPham = seiHinList.size();
+
+            // nếu số bozai nhiều hơn 15 bao nhiêu thì thêm số cột bozai với số lượng đó
+            // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
+            if (soBoZai > 15) {
+
+                // thêm j lần các cột mới tại các cột công thức
+                for (int j = 0; j < soBoZai - 15; j++) {
+                    sheet.shiftColumns(4, sheet.getRow(6).getLastCellNum(), 1);
+                    sheet.shiftColumns(4 + 23 + j, sheet.getRow(6).getLastCellNum(), 1);
+                    sheet.shiftColumns(4 + 41 + 2 * j, sheet.getRow(6).getLastCellNum(), 1);
+//                System.out.println("last col: " + sheet.getRow(6).getLastCellNum());
+
+                    // dịch chuyển 3 hàng tiêu đề về vị trí ban đầu sau khi bị dịch chuyển sang phải 1 hàng
+                    for (int i = 0; i < 3; i++) {
+                        Row row = sheet.getRow(i);
+                        row.shiftCellsLeft(5, 10000, 1);
+                    }
+
+                    // sửa lại công thức tất cả các ô có giá trị L về K vì sau khi dịch chuyển 3 hàng tiêu đề về vị trí ban đầu
+                    // công thức bị sai
+                    for (int i = 26 + j; i <= 41 + 2 * j; i++) {
+                        // row index 6 tức là hàng 7 vì ban đầu chỉ có 1 hàng 7 có công thức do chưa thêm các hàng mới
+                        Row row = sheet.getRow(6);
+                        Cell cell = row.getCell(i);
+
+                        if (cell != null && cell.getCellType() == CellType.FORMULA) {
+                            String formula = cell.getCellFormula();
+                            formula = formula.replaceAll("\\$L\\$3", "\\$K\\$3");
+                            cell.setCellFormula(formula);
+                        }
+                    }
+
+                    Cell srcCell;
+                    Cell destCell;
+
+                    // sao chép ô từ cột 3 sang cột 4 từ hàng 3 đến hàng 9 trong 2 cột này
+                    // cần tạo cell ở cột 4 bị phép dịch chuyển cột ở trên thực chất chưa tạo cell mới
+                    for (int i = 3; i <= 9; i++) {
+                        Row row = sheet.getRow(i);
+                        // Sao chép ô từ cột srcColumn sang destColumn
+                        srcCell = row.getCell(3);
+                        destCell = row.createCell(4);
+                        copyCellWithFormulaUpdate(srcCell, destCell, 1);
+                    }
+
+                    // tại hàng 7 copy ô từ cột 26 sang 27
+                    Row row7Formula = sheet.getRow(6);
+                    srcCell = row7Formula.getCell(26 + j);
+                    destCell = row7Formula.createCell(27 + j);
+                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
+
+                    // tại hàng 7 copy ô từ cột 44 sang 45
+                    srcCell = row7Formula.getCell(44 + 2 * j);
+                    destCell = row7Formula.createCell(45 + 2 * j);
+                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
+
+                    // tại hàng 4 copy ô từ cột 44 sang 45
+                    Row row4Formula = sheet.getRow(3);
+                    srcCell = row4Formula.getCell(44 + 2 * j);
+                    destCell = row4Formula.createCell(45 + 2 * j);
+                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
+                }
+
+            }
+
+
+            // nếu số sản phẩm lớn hơn 1 bao nhiêu lần thì thêm số hàng sản phẩm số lần tương tự
+            if (soSanPham > 1) {
+                for (int j = 0; j < soSanPham - 1; j++) {
+                    // đẩy tất cả các hàng ở dưới hàng index 6 xuống 1 hàng để thừa ra hàng index 7 nhưng nó thực tế vẫn chưa được tạo
+                    // sau đó mới tạo hàng index 7
+                    sheet.shiftRows(7, sheet.getLastRowNum(), 1);
+                    Row srcRow = sheet.getRow(6);
+                    // tạo hàng index 7
+                    Row destRow = sheet.createRow(7);
+
+                    // Sao chép từng cell từ hàng nguồn sang hàng đích
+                    for (int i = 0; i < srcRow.getLastCellNum(); i++) {
+                        Cell sourceCell = srcRow.getCell(i);
+                        Cell targetCell = destRow.createCell(i);
+
+                        if (sourceCell != null) {
+                            copyRowCellWithFormulaUpdate(sourceCell, targetCell, 1);
+                        }
+                    }
+                }
+            }
+
+            // ghi tất cả sản phẩm vào excel
+            for (int i = 0; i < soSanPham; i++) {
+                Double length = seiHinList.get(i);
+                // ghi chiều dài sản phẩm
+                sheet.getRow(i + 6).getCell(0).setCellValue(length);
+                // ghi số lượng sản phẩm
+                sheet.getRow(i + 6).getCell(1).setCellValue(seiHinMap.get(length));
+            }
+
+
+
+
+            // ghi bozai và sản phẩm trong bozai
+            // thể hiện index cột bozai đang thực thi
+            int numBozai = 0;
+            // lặp qua các cặp tính vật liệu, mỗi cặp gồm "bozai-số lượng trong map kouZaiChouPairs(nằm trong map nhưng thực tế nó chỉ có 1 cặp)"
+            // và "các bộ chiều dài sản phẩm và số lượng trong map meiSyouPairs"
+            for (Map.Entry<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> entry : kaKouPairs.entrySet()) {
+
+                Map<StringBuilder, Integer> kouZaiChouPairs = entry.getKey();
+                Map<StringBuilder[], Integer> meiSyouPairs = entry.getValue();
+
+                // Ghi bozai và số lượng của nó
+                for (Map.Entry<StringBuilder, Integer> kouZaiEntry : kouZaiChouPairs.entrySet()) {
+
+                    sheet.getRow(3).getCell(3 + numBozai).setCellValue(String.valueOf(kouZaiEntry.getKey()));
+                    sheet.getRow(4).getCell(3 + numBozai).setCellValue(String.valueOf(kouZaiEntry.getValue()));
+
+                    kouzaiChouGoukei += Double.parseDouble(String.valueOf(kouZaiEntry.getKey())) * kouZaiEntry.getValue();
+                }
+
+                // lặp qua các chiều dài sản phẩm trong cặp tính vật liệu này và tìm trong hàng có chiều dài sản phẩm
+                // tương ứng trong cột sản phẩm, dóng sang cột bozai đang tạo là tìm được ô cần ghi sô lượng, sau đó ghi cộng dồn số lượng vào ô đó
+                for (Map.Entry<StringBuilder[], Integer> meiSyouEntry : meiSyouPairs.entrySet()) {
+                    // chiều dài sản phẩm
+                    Double length = Double.valueOf(meiSyouEntry.getKey()[1].toString());
+                    // số lượng sản phẩm
+                    int num = Integer.parseInt(meiSyouEntry.getValue().toString());
+
+                    // hàng chứa sản phẩm, +6 vì cột chứa sản phẩm bắt đầu chứa các sản phẩm từ hàng thứ 6
+                    int indexSeiHinRow = seiHinList.indexOf(length) + 6;
+
+                    // lấy cell chứa số lượng của sản phẩm
+                    Cell cellSoLuong = sheet.getRow(indexSeiHinRow).getCell(3 + numBozai);
+
+                    // lấy số lượng cũ của cell
+                    double oldNum = 0d;
+                    // nếu cell có type là số thì nó đã có số lượng từ trước thì gán nó cho số lượng cũ
+                    if (cellSoLuong.getCellType() == CellType.NUMERIC) {
+                        oldNum = cellSoLuong.getNumericCellValue();
+                    }
+
+                    // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
+                    // không thì ghi cell với số lượng hiện tại
+                    if (oldNum > 0d) {
+                        sheet.getRow(indexSeiHinRow).getCell(3 + numBozai).setCellValue(num + oldNum);
+                    } else {
+                        sheet.getRow(indexSeiHinRow).getCell(3 + numBozai).setCellValue(num);
+                    }
+
+                    // thống kê phục vụ cho hiển thị thông tin trên phầm mềm
+                    double totalLength = Double.parseDouble(String.valueOf(meiSyouEntry.getKey()[1])) * Double.parseDouble(meiSyouEntry.getValue().toString());
+                    Cell cellSoLuongBozai = sheet.getRow(4).getCell(3 + numBozai);
+                    if (cellSoLuongBozai.getCellType() == CellType.STRING) {
+                        totalLength *= Double.parseDouble(cellSoLuongBozai.getStringCellValue());
+                    }
+
+                    seiHinChouGoukei += totalLength;
+
+                }
+
+                numBozai++;
+            }
+
+            // số cột chứa thông tin tính toán tự tạo sẽ ẩn đi khi đã nhập xong tính vật liệu để tránh rối
+            int numColHide;
+            // nếu số bozai < 15 thì số cột cần ẩn là 15, nếu không thì số cột ẩn là số bozai
+            if (soBoZai < 15) {
+                numColHide = 15;
+            } else {
+                numColHide = soBoZai;
+            }
+            // ẩn tất cả các cột từ numColHide + 8
+            for (int i = numColHide + 8; i < sheet.getRow(6).getLastCellNum(); i++) {
+                sheet.setColumnHidden(i, true);
+            }
+
+            // hợp nhất các ô
+            // Xác định vùng cần hợp nhất (từ cột 6 đến cột 8 trên dòng 0)
+            CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, 6, 8);
+            sheet.addMergedRegion(cellRangeAddress);
+
+            cellRangeAddress = new CellRangeAddress(0, 0, 12, 14);
+            sheet.addMergedRegion(cellRangeAddress);
+
+            cellRangeAddress = new CellRangeAddress(1, 1, 2, 4);
+            sheet.addMergedRegion(cellRangeAddress);
+
+            cellRangeAddress = new CellRangeAddress(1, 1, 8, 10);
+            sheet.addMergedRegion(cellRangeAddress);
+
+            // Khóa sheet với mật khẩu
+            sheet.protectSheet("");
+
+            // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
+            ((XSSFWorkbook) workbook).setForceFormulaRecalculation(true);
+            try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
                 workbook.write(fileOut);
 
                 workbook.close();
