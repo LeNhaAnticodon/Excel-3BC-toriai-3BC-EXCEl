@@ -77,7 +77,7 @@ public class SetupData {
         languageMap.put("Địa chỉ thư mục chứa file EXCEL chưa được xác nhận", "Folder_address_containing_unconfirmed_EXCEL_file");
         languageMap.put("Hãy chọn thư mục chứa để tiếp tục!", "Please_select_the_containing_folder_to_continue");
         languageMap.put("Thông tin hoạt động chuyển file", "Information_on_file_transfer_activities");
-        languageMap.put("Đã chuyển xong file PDF sang file EXCEL", "Finished_converting_PDF_files_to_EXCEL_file");
+        languageMap.put("Đã chuyển xong file PDF sang file EXCEL", "Finished_converting_PDF_file_to_EXCEL_file");
         languageMap.put("Bạn có muốn mở thư mục chứa file EXCEL và\ntự động copy địa chỉ không?", "Do_you_want_to_open_a_folder_containing_EXCEL_file_and_automatically_copy_the_address");
         languageMap.put("Thông báo lỗi chuyển file", "File_transfer_error_message");
         languageMap.put("Nội dung file PDF không phải là tính toán vật liệu hoặc file không được phép truy cập", "The_PDF_file_content_is_not_a_material_calculation_or_the_file_is_not_authorized_to_be_accessed");
@@ -121,7 +121,7 @@ public class SetupData {
         languageMap.put("未確認のEXCELファイルが入っているフォルダアドレス", "Folder_address_containing_unconfirmed_EXCEL_file");
         languageMap.put("続行するには、含まれているフォルダーを選択してください。", "Please_select_the_containing_folder_to_continue");
         languageMap.put("ファイル転送アクティビティに関する情報", "Information_on_file_transfer_activities");
-        languageMap.put("PDFファイルからEXCELファイルへの変換が完了しました", "Finished_converting_PDF_files_to_EXCEL_file");
+        languageMap.put("PDFファイルからEXCELファイルへの変換が完了しました", "Finished_converting_PDF_file_to_EXCEL_file");
         languageMap.put("EXCELファイルを含むフォルダーを開いて、アドレスを自動的にコピーしますか?", "Do_you_want_to_open_a_folder_containing_EXCEL_file_and_automatically_copy_the_address");
         languageMap.put("ファイル転送エラーメッセージ", "File_transfer_error_message");
         languageMap.put("PDFファイルの内容が材料計算ではないか、ファイルへのアクセスが許可されていません", "The_PDF_file_content_is_not_a_material_calculation_or_the_file_is_not_authorized_to_be_accessed");
@@ -165,7 +165,7 @@ public class SetupData {
         languageMap.put("Folder address containing unconfirmed EXCEL file", "Folder_address_containing_unconfirmed_EXCEL_file");
         languageMap.put("Please select the containing folder to continue!", "Please_select_the_containing_folder_to_continue");
         languageMap.put("Information on file transfer activities", "Information_on_file_transfer_activities");
-        languageMap.put("Finished converting PDF files to EXCEL file", "Finished_converting_PDF_files_to_EXCEL_file");
+        languageMap.put("Finished converting PDF file to EXCEL file", "Finished_converting_PDF_file_to_EXCEL_file");
         languageMap.put("Do you want to open a folder containing EXCEL file and automatically copy the address?", "Do_you_want_to_open_a_folder_containing_EXCEL_file_and_automatically_copy_the_address");
         languageMap.put("File transfer error message", "File_transfer_error_message");
         languageMap.put("The PDF file content is not a material calculation or the file is not authorized to be accessed", "The_PDF_file_content_is_not_a_material_calculation_or_the_file_is_not_authorized_to_be_accessed");

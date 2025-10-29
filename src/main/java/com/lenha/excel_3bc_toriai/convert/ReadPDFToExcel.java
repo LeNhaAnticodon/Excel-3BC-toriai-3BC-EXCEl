@@ -50,7 +50,7 @@ public class ReadPDFToExcel {
     // link thư mục của file excel xlsx sẽ tạo
     private static String xlsxExcelPath = "";
     // link thư mục của file excel csv sẽ tạo
-    private static String csvExcelDirPath = "";
+    private static String excelDirPath = "";
     // link thư mục của file chl sẽ tạo
     private static String chlDirPath = "";
     // đếm số dòng sẽ tạo trên file chl
@@ -97,8 +97,8 @@ public class ReadPDFToExcel {
         pdfPath = filePDFPath;
         // lấy đi chỉ thư mục chứa file excel
 //        csvExcelDirPath = fileCSVDirPath;
-        // lấy đi chỉ thư mục chứa file excel csv
-        csvExcelDirPath = fileExcelDirPath;
+        // lấy đi chỉ thư mục chứa file excel
+        excelDirPath = fileExcelDirPath;
         // lấy đi chỉ thư mục chứa chl
         chlDirPath = fileExcelDirPath;
 
@@ -144,7 +144,7 @@ public class ReadPDFToExcel {
         // đoạn code copy file này khác với app chl vì nó chỉ tạo 1 file nên chỉ chạy 1 lần ở đoạn đầu này
         // tạo path chứa file excel
         // mà không chạy trong vòng lặp bên dưới như trong hàm writeDataToChl
-        excelPath = csvExcelDirPath + "\\" + fileExcelName + ".xlsx";
+        excelPath = excelDirPath + "\\" + fileExcelName + ".xlsx";
         // Tạo đối tượng File đại diện cho file cần xóa
         File file = new File(excelPath);
         // Kiểm tra nếu file tồn tại và xóa nó
@@ -160,7 +160,7 @@ public class ReadPDFToExcel {
         // path chứa địa chỉ file sẽ được dán từ file copy
         Path copyFile = Paths.get(excelPath);
         // Đọc file mẫu từ resources rồi copy file ra địa chỉ của copyFile
-        try (InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/example/convert_toriai_pdf_to_excel/sampleFiles/sample files.xlsx")) {
+        try (InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/sample files.xlsx")) {
             if (sourceFile == null) {
                 throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
             }
@@ -290,7 +290,7 @@ public class ReadPDFToExcel {
     }
 
     /**
-     * lấy các thông tin của đơn và ghi vào các biến nhớ toàn cục
+     * lấy các thông tin của đơn như ngày, tháng, tên và ghi vào các biến nhớ toàn cục
      * các thông tin nằm trong vùng xác định, dùng hàm extractValue để lấy
      *
      * @param header text chứa thông tin
@@ -805,7 +805,7 @@ public class ReadPDFToExcel {
 //        fileName = linkarr[linkarr.length - 1].split("\\.")[0] + " " + kouSyu + ".xlsx";
         fileName = fileChlName + " " + kouSyu + ".xlsx";
 //        String fileNameAndTime = linkarr[linkarr.length - 1].split("\\.")[0] + "(" + sdfSecond.format(currentDate) + ")--" + kouSyu + ".csv";
-        String excelPath = csvExcelDirPath + "\\" + fileName;
+        String excelPath = excelDirPath + "\\" + fileName;
 
         // Tạo đối tượng File đại diện cho file cần xóa
         File file = new File(excelPath);
@@ -878,8 +878,8 @@ public class ReadPDFToExcel {
         fileName = fileChlName + " " + kouSyu + ".csv";
 //        // tạo tên file có gắn thêm thời gian để không trùng với file trước đó
 //        String fileNameAndTime = linkarr[linkarr.length - 1].split("\\.")[0] + "(" + sdfSecond.format(currentDate) + ")--" + kouSyu + ".csv";
-        String csvPath = csvExcelDirPath + "\\" + fileName;
-        System.out.println("dir path: " + csvExcelDirPath);
+        String csvPath = excelDirPath + "\\" + fileName;
+        System.out.println("dir path: " + excelDirPath);
         System.out.println("filename: " + fileName);
 
         // Tạo đối tượng File đại diện cho file cần xóa
@@ -1060,7 +1060,7 @@ public class ReadPDFToExcel {
 //        String fileNameAndTime = linkarr[linkarr.length - 1].split("\\.")[0] + "(" + sdfSecond.format(currentDate) + ")--" + kouSyu + ".csv";
 
         String chlPath = chlDirPath + "\\" + fileName;
-        System.out.println("dir path: " + csvExcelDirPath);
+        System.out.println("dir path: " + excelDirPath);
         System.out.println("filename: " + fileName);
 
 

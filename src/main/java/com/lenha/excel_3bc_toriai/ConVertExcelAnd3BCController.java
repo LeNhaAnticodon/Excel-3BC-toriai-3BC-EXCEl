@@ -649,8 +649,8 @@ public class ConVertExcelAnd3BCController implements Initializable {
         // nếu chọn xong thì phải chuyển dữ liệu thành công thì mới thoát được vòng lặp
         while (true) {
             // lấy link từ các ô đang hiển thị
-            pdfFilePath = linkExcelFile.getText();
-            excelFileDirPath = linkExcelDir.getText();
+            pdfFilePath = link3bcToriaiFile.getText();
+            excelFileDirPath = linkExcelResultDir.getText();
 
             // tạo file theo các link trên
             File pdfFile = new File(pdfFilePath);
