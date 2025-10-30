@@ -1,5 +1,6 @@
 package com.lenha.excel_3bc_toriai.convert;
 
+import com.lenha.excel_3bc_toriai.convert.excelTo3bc.ReadExcel;
 import com.lenha.excel_3bc_toriai.model.ExcelFile;
 import com.opencsv.CSVWriter;
 import javafx.collections.FXCollections;
@@ -21,6 +22,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
+
+import static com.lenha.excel_3bc_toriai.convert.excelTo3bc.ReadExcel.*;
 
 public class ReadPDFToExcel {
 
@@ -65,7 +68,7 @@ public class ReadPDFToExcel {
     public static String fileName;
 
     // tổng chiều dài các kozai
-    private static  double kouzaiChouGoukei = 0;
+    private static double kouzaiChouGoukei = 0;
     private static double seiHinChouGoukei = 0;
 
     private static String excelCopyPath;
@@ -81,10 +84,11 @@ public class ReadPDFToExcel {
 
     /**
      * chuyển đổi pdf tính vật liệu thành các file chl theo từng vật liệu khác nhau
+     *
      * @param fileExcelRootPath link file excel gốc
-     * @param filePDFPath link file pdf
-     * @param fileExcelDirPath link thư mục chứa file chl sẽ tạo
-     * @param excelFileNames list chứa danh sách các file chl đã tạo
+     * @param filePDFPath       link file pdf
+     * @param fileExcelDirPath  link thư mục chứa file chl sẽ tạo
+     * @param excelFileNames    list chứa danh sách các file chl đã tạo
      */
     public static void convertPDFToExcel(String fileExcelRootPath, String filePDFPath, String fileExcelDirPath, ObservableList<ExcelFile> excelFileNames) throws FileNotFoundException, TimeoutException, IOException {
 /*        excelFileNames.add(new ExcelFile("test.", "", 0, 0));
@@ -283,6 +287,7 @@ public class ReadPDFToExcel {
 
     /**
      * lấy toàn bộ text của file pdf
+     *
      * @return mảng chứa các trang của file pdf, đầu trang chứa tên vật liệu
      */
     private static String[] getFullToriaiText() throws IOException {
@@ -334,6 +339,7 @@ public class ReadPDFToExcel {
 
     /**
      * lấy thông số đầy đủ của vật liệu, tên vật liệu, mã vật liệu, 3 size của vật liệu và ghi vào biến toàn cục
+     *
      * @param kakuKakou mảng chứa các tính vật liệu của vật liệu đang xét
      */
     private static void getKouSyu(String[] kakuKakou) {
@@ -399,7 +405,7 @@ public class ReadPDFToExcel {
      *
      * @param kakuKakou mảng chứa các tính vật liệu của vật liệu đang xét
      * @return map các đoạn tính vật liệu chứa key cũng là map chỉ có 1 cặp có key là chiều dài bozai, value là số lượng bozai
-     * còn value của kaKouPairs cũng là map chứa các cặp key là mảng 2 phần tử gồm tên và chiều dài sản phẩm, value là số lượng sản phẩm
+     * còn value của kaKouPairs cũng là mảng chứa các cặp key là mảng 2 phần tử gồm tên và chiều dài sản phẩm, value là số lượng sản phẩm
      */
     private static Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> getToriaiData(String[] kakuKakou) throws TimeoutException {
         //reset lại map
@@ -414,7 +420,7 @@ public class ReadPDFToExcel {
             return kaKouPairs;
         }
 
-        // lặp qua các đoạn bozai và thêm chúng vào map chứa toàn bộ thông tin vật liệu
+        // lặp qua các đoạn bozai và thêm chúng vào map chứa toàn bộ thông tin vật liệu, tính từ 1 vì 0 là phần chứa thông tin vật liệu
         for (int i = 1; i < kakuKakou.length; i++) {
             // lấy kirirosu tại lần 1
             if (i == 1) {
@@ -498,12 +504,11 @@ public class ReadPDFToExcel {
             kaKouPairs.put(kouZaiChouPairs, meiSyouPairs);
         }
 
-        // cho các key của map đã lấy được vào list và xắp xếp nó để list sẽ hiển thị trong excel
+        // cho các key của map đã lấy được vào list các chiều dài + số lượng của vật liệu đang tính và xắp xếp nó để list sẽ hiển thị trong excel
         seiHinList.setAll(seiHinMap.keySet());
         seiHinList.sort((o1, o2) -> {
             return o1.compareTo(o2);
         });
-
 
 
 //        // in thông tin vật liệu
@@ -553,6 +558,7 @@ public class ReadPDFToExcel {
      * nếu vượt quá 99 dòng sẽ chia thành 2 file, file 1 là dưới 99 dòng rồi thêm nó vào list file, file 2 là phần còn lại
      * tiếp tục gọi lại hàm(đệ quy) và truyền file 2 vào và thực hiện tương tự đến khi không cần chia thành file 2 nữa tức
      * file 2 có size = 0 thì dừng
+     *
      * @param kaKouPairs map chứa tính vật liệu đại diện cho file đang gọi
      */
     private static void divFile(Map<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> kaKouPairs) throws TimeoutException {
@@ -1034,8 +1040,8 @@ public class ReadPDFToExcel {
     /**
      * ghi tính vật liệu của vật liệu đang xét trong map vào file mới
      *
-     * @param kaKouPairs   map chứa tính vật liệu
-     * @param timePlus     thời gian hoặc chỉ số cộng thêm vào ô time để tránh bị trùng tên  time giữa các file
+     * @param kaKouPairs     map chứa tính vật liệu
+     * @param timePlus       thời gian hoặc chỉ số cộng thêm vào ô time để tránh bị trùng tên  time giữa các file
      * @param excelFileNames list chứa danh sách các file đã tạo
      * @param fileListSize
      * @param k
@@ -1291,9 +1297,10 @@ public class ReadPDFToExcel {
 
     /**
      * trả về đoạn text nằm giữa startDelimiter và endDelimiter
-     * @param text đoạn văn bản chứa thông tin tìm kiếm
+     *
+     * @param text           đoạn văn bản chứa thông tin tìm kiếm
      * @param startDelimiter đoạn text phía trước vùng cần tìm
-     * @param endDelimiter đoạn text phía sau vùng cần tìm
+     * @param endDelimiter   đoạn text phía sau vùng cần tìm
      * @return đoạn text nằm giữa startDelimiter và endDelimiter
      */
     private static String extractValue(String text, String startDelimiter, String endDelimiter) {
@@ -1337,8 +1344,9 @@ public class ReadPDFToExcel {
 
     /**
      * chuyển các thông số của tính vật liệu trong file 3bc sang excel
-     * @param kaKouPairs thông số chiều dài vật liệu và chiều dài + số lượng của các sản phẩm tính cho cây vật liệu đó
-     * @param sheetIndex thứ tự tạo sheet
+     *
+     * @param kaKouPairs     thông số chiều dài vật liệu và chiều dài + số lượng của các sản phẩm tính cho cây vật liệu đó
+     * @param sheetIndex     thứ tự tạo sheet
      * @param excelFileNames tên file excel
      * @throws FileNotFoundException
      */
@@ -1490,8 +1498,6 @@ public class ReadPDFToExcel {
                 // ghi số lượng sản phẩm
                 sheet.getRow(i + 6).getCell(1).setCellValue(seiHinMap.get(length));
             }
-
-
 
 
             // ghi bozai và sản phẩm trong bozai
@@ -1706,8 +1712,9 @@ public class ReadPDFToExcel {
 
     /**
      * chuyển các thông số của tính vật liệu trong file 3bc sang excel
-     * @param kaKouPairs thông số chiều dài vật liệu và chiều dài + số lượng của các sản phẩm tính cho cây vật liệu đó
-     * @param sheetIndex thứ tự tạo sheet
+     *
+     * @param kaKouPairs     thông số chiều dài vật liệu và chiều dài + số lượng của các sản phẩm tính cho cây vật liệu đó
+     * @param sheetIndex     thứ tự tạo sheet
      * @param excelFileNames tên file excel
      * @throws FileNotFoundException
      */
@@ -1726,17 +1733,19 @@ public class ReadPDFToExcel {
                 kouSyu = kouSyu.replace("[", "U");
             }
 
-            // Lấy index sheet gốc cần sao chép
+            // bản cũ copy excel từ file mẫu
+            /*// Lấy index sheet gốc cần sao chép
             int sheetSampleIndex = 0;
             // sao chép sheet gốc sang một sheet mới
             workbook.cloneSheet(sheetSampleIndex);
             // đổi tên sheet mới theo tên vật liệu đang duyệt, sheetIndex là chỉ số của sheet mới
-            workbook.setSheetName(sheetIndex, kouSyu);
-            // lấy ra sheet mới
-            Sheet sheet = workbook.getSheetAt(sheetIndex);
+            workbook.setSheetName(sheetIndex, kouSyu);*/
 
+            // lấy ra sheet đang duyệt cần chỉnh
+            Sheet sheet = workbook.getSheetAt(sheetIndex - 1);
 
-            Date currentDate = new Date();
+            // bản cũ copy excel từ file mẫu
+            /*Date currentDate = new Date();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
             String time = sdf.format(currentDate);
@@ -1758,12 +1767,66 @@ public class ReadPDFToExcel {
             // Ghi chuyuBan vào ô I8
             sheet.getRow(1).getCell(8).setCellValue(chuyuBan);
             // Ghi teiHaiSha vào ô O14
-            sheet.getRow(1).getCell(14).setCellValue(teiHaiSha);
+            sheet.getRow(1).getCell(14).setCellValue(teiHaiSha);*/
 
             // lấy số loại bozai và sản phẩm
             int soBoZai = kaKouPairs.size();
             int soSanPham = seiHinList.size();
 
+            // map chứa chiều dài và số lượng của các sản phẩm trong vật liệu đang tính của excel, chiều dài là key sẽ khong xuâ hiện lần 2
+            // vì nếu có 2 chiều dài sẽ gộp làm 1 và cộng dồn số lượng để khớp với seiHinList của tính vật liệu 3bc, sau đó so sánh chiều dài số lượng
+            // của nó với seiHinList và seiHinMap của 3bc, nếu khớp là tính vật liệu 3bc đúng và không báo lỗi
+            // map này đã được xắp xếp vì chiều dài trong excel vốn đã được tự động động xắp xếp tăng dần
+            Map<Double, Integer> seiHinMapExcel = new LinkedHashMap<>();
+
+
+            // lấy hàng cuối cùng chứa dữ liệu trong cột a, chính là hàng cuối cùng chứa chiều dài số lượng sản phẩm
+            int lastRowSeihin = getLastRowWithDataInColumn(sheet, COT_CHIEU_DAI_SAN_PHAM); // Cột A = index 0
+
+            // lặp qua các hàng chứa chiều dài sản phẩm của excel và thêm vào map
+            for (int i = TRUOC_HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
+                // lấy chiều dài sản phẩm
+                Double seihinZenchou = Math.abs(Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_CHIEU_DAI_SAN_PHAM))));
+                // lấy số lượng sản phẩm
+                int seihinHonsuu = Math.abs((int) Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_SO_LUONG_SAN_PHAM))));
+
+                // nếu sản phẩm đã có trong map thì lấy số lượng trong map rồi xóa sản phẩm đi rồi thêm lại sản phẩm với
+                // số lượng trong map đã lấy + số lượng hiện tại
+                // nếu chưa có trong map thì thêm sản phẩm với số lượng hiện tại
+                if (seiHinMapExcel.get(seihinZenchou) != null) {
+                    int oldNum = seiHinMapExcel.get(seihinZenchou);
+                    seiHinMapExcel.remove(seihinZenchou);
+                    seiHinMapExcel.put(seihinZenchou, seihinHonsuu + oldNum);
+                } else {
+                    seiHinMapExcel.put(seihinZenchou, seihinHonsuu);
+                }
+            }
+
+            int sttSanPham = 0;
+            // duyệt qua mảng chiều dài sản phẩm của excel và check xem có khớp với của 3bc không
+            // nếu chỉ cần 1 cặp không khớp thì báo lỗi và dừng thực hiện
+            for (Map.Entry<Double, Integer> sanPham : seiHinMapExcel.entrySet()) {
+                double chieuDaiExcel = sanPham.getKey();
+                // định dạng chiều dài excel về 1 chữ số phần thập phân và không làm tròn vì chiều dài của 3bc cũng dịnh dạng như vậy
+                BigDecimal bdChieuDai3bc = new BigDecimal(chieuDaiExcel);
+                chieuDaiExcel = bdChieuDai3bc.setScale(1, RoundingMode.DOWN).doubleValue(); // cắt (không làm tròn)
+
+                double chieuDai3bc = seiHinList.get(sttSanPham);
+
+                int soLuongExcel = sanPham.getValue();
+                int soLuong3bc = seiHinMap.get(chieuDai3bc);
+
+                if (chieuDaiExcel != chieuDai3bc || soLuongExcel != soLuong3bc) {
+                    throw new RuntimeException();
+                }
+                sttSanPham++;
+            }
+            System.out.println("Các sản phẩm trên Excel và 3bc khớp nhau");
+
+
+
+            int soSanPhamExcel = lastRowSeihin - TRUOC_HANG_DAU_TIEN_CHUA_SAN_PHAM;
+/*
             // nếu số bozai nhiều hơn 15 bao nhiêu thì thêm số cột bozai với số lượng đó
             // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
             if (soBoZai > 15) {
@@ -1859,8 +1922,6 @@ public class ReadPDFToExcel {
                 // ghi số lượng sản phẩm
                 sheet.getRow(i + 6).getCell(1).setCellValue(seiHinMap.get(length));
             }
-
-
 
 
             // ghi bozai và sản phẩm trong bozai
@@ -1961,7 +2022,7 @@ public class ReadPDFToExcel {
                 workbook.write(fileOut);
 
                 workbook.close();
-            }
+            }*/
 
 
         } catch (IOException e) {
@@ -1976,7 +2037,7 @@ public class ReadPDFToExcel {
 
 //        System.out.println("tong chieu dai bozai " + kouzaiChouGoukei);
 //        System.out.println("tong chieu dai san pham " + seiHinChouGoukei);
-        excelFileNames.add(new ExcelFile("Sheet " + sheetIndex + ": " + kouSyu, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));
+/*        excelFileNames.add(new ExcelFile("Sheet " + sheetIndex + ": " + kouSyu, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));*/
 
     }
 
@@ -2207,7 +2268,6 @@ public class ReadPDFToExcel {
         }
         return updatedFormula.toString();
     }
-
 
 
 }

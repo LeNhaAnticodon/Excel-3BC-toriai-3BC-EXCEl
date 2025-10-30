@@ -32,9 +32,10 @@ public class ReadExcel {
     private static final int COT_NOI_GIAO_HANG = 8;
     private static final int HANG_KHOI_LUONG_RIENG = 6;
     private static final int COT_KHOI_LUONG_RIENG = 1;
-    private static final int COT_CHIEU_DAI_SAN_PHAM = 0;
+    public static final int COT_SO_LUONG_SAN_PHAM = 1;
+    public static final int COT_CHIEU_DAI_SAN_PHAM = 0;
     // lấy hàng đầu tiên chứa chiều dài số lượng sản phẩm
-    private static final int HANG_DAU_TIEN_CHUA_SAN_PHAM = 9;
+    public static final int TRUOC_HANG_DAU_TIEN_CHUA_SAN_PHAM = 9;
     private static final int CAC_THONG_SO_CUA_DON_HANG = 10;
     private static XSSFWorkbook workbook;
 
@@ -171,12 +172,12 @@ public class ReadExcel {
 //                Map<Double, Integer> seihins = new LinkedHashMap<>();
 
                 // duyệt qua các hàng chứa sản phẩm trong sheet đang duyệt và thêm nó vào map sản phẩm
-                for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
+                for (int i = TRUOC_HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
                     Row row = sheet.getRow(i);
                     // lấy chiều dài sản phẩm
-                    Double seihinZenchou = Math.abs(Double.parseDouble(getStringNumberCellValue(row.getCell(0))));
+                    Double seihinZenchou = Math.abs(Double.parseDouble(getStringNumberCellValue(row.getCell(COT_CHIEU_DAI_SAN_PHAM))));
                     // lấy số lượng sản phẩm
-                    Integer seihinHonsuu = Math.abs((int) Double.parseDouble(getStringNumberCellValue(row.getCell(1))));// do có thể kết quả trả về là số thực nên cần chuyển String sang số thực trước rồi mới chuyển sang int
+                    Integer seihinHonsuu = Math.abs((int) Double.parseDouble(getStringNumberCellValue(row.getCell(COT_SO_LUONG_SAN_PHAM))));// do có thể kết quả trả về là số thực nên cần chuyển String sang số thực trước rồi mới chuyển sang int
 
 //                    System.out.println(seihinZenchou + " : " + seihinHonsuu);
                     // thêm các thông số sản phẩm vào map
@@ -482,7 +483,7 @@ public class ReadExcel {
      * @param cell cell truyền vào
      * @return giá trị chuỗi chỉ chứa các chữ số
      */
-    private static String getStringNumberCellValue(Cell cell) {
+    public static String getStringNumberCellValue(Cell cell) {
         if (cell != null) {
             // lấy kiểu của cell rồi gọi hàm lấy giá trị tương ứng theo kiểu đó, chuyển giá trị về String và trả về
             switch (cell.getCellType()) {
