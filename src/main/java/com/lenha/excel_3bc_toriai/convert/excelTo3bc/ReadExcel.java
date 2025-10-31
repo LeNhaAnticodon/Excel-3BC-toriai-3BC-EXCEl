@@ -35,7 +35,7 @@ public class ReadExcel {
     public static final int COT_SO_LUONG_SAN_PHAM = 1;
     public static final int COT_CHIEU_DAI_SAN_PHAM = 0;
     // lấy hàng đầu tiên chứa chiều dài số lượng sản phẩm
-    public static final int TRUOC_HANG_DAU_TIEN_CHUA_SAN_PHAM = 9;
+    public static final int HANG_DAU_TIEN_CHUA_SAN_PHAM = 9;
     private static final int CAC_THONG_SO_CUA_DON_HANG = 10;
     private static XSSFWorkbook workbook;
 
@@ -172,7 +172,7 @@ public class ReadExcel {
 //                Map<Double, Integer> seihins = new LinkedHashMap<>();
 
                 // duyệt qua các hàng chứa sản phẩm trong sheet đang duyệt và thêm nó vào map sản phẩm
-                for (int i = TRUOC_HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
+                for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
                     Row row = sheet.getRow(i);
                     // lấy chiều dài sản phẩm
                     Double seihinZenchou = Math.abs(Double.parseDouble(getStringNumberCellValue(row.getCell(COT_CHIEU_DAI_SAN_PHAM))));

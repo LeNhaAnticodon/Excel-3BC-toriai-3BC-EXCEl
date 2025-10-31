@@ -1,6 +1,5 @@
 package com.lenha.excel_3bc_toriai.convert;
 
-import com.lenha.excel_3bc_toriai.convert.excelTo3bc.ReadExcel;
 import com.lenha.excel_3bc_toriai.model.ExcelFile;
 import com.opencsv.CSVWriter;
 import javafx.collections.FXCollections;
@@ -1784,7 +1783,7 @@ public class ReadPDFToExcel {
             int lastRowSeihin = getLastRowWithDataInColumn(sheet, COT_CHIEU_DAI_SAN_PHAM); // Cột A = index 0
 
             // lặp qua các hàng chứa chiều dài sản phẩm của excel và thêm vào map
-            for (int i = TRUOC_HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
+            for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
                 // lấy chiều dài sản phẩm
                 Double seihinZenchou = Math.abs(Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_CHIEU_DAI_SAN_PHAM))));
                 // lấy số lượng sản phẩm
@@ -1821,78 +1820,126 @@ public class ReadPDFToExcel {
                 }
                 sttSanPham++;
             }
-            System.out.println("Các sản phẩm trên Excel và 3bc khớp nhau");
+            System.out.println("Các sản phẩm của vật liệu " + kouSyu + " trên Excel và 3bc khớp nhau");
 
 
 
-            int soSanPhamExcel = lastRowSeihin - TRUOC_HANG_DAU_TIEN_CHUA_SAN_PHAM;
-/*
-            // nếu số bozai nhiều hơn 15 bao nhiêu thì thêm số cột bozai với số lượng đó
+            // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
             // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
-            if (soBoZai > 15) {
+            if (soBoZai < 6) {
+                InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/sample files2.xlsx");
+                assert sourceFile != null;
+                Workbook excelMau = new XSSFWorkbook(sourceFile);
+                Sheet sheetMau = excelMau.getSheetAt(0);
+                int soSanPhamExcel = lastRowSeihin - HANG_DAU_TIEN_CHUA_SAN_PHAM + 1;
 
-                // thêm j lần các cột mới tại các cột công thức
-                for (int j = 0; j < soBoZai - 15; j++) {
-                    sheet.shiftColumns(4, sheet.getRow(6).getLastCellNum(), 1);
-                    sheet.shiftColumns(4 + 23 + j, sheet.getRow(6).getLastCellNum(), 1);
-                    sheet.shiftColumns(4 + 41 + 2 * j, sheet.getRow(6).getLastCellNum(), 1);
-//                System.out.println("last col: " + sheet.getRow(6).getLastCellNum());
 
-                    // dịch chuyển 3 hàng tiêu đề về vị trí ban đầu sau khi bị dịch chuyển sang phải 1 hàng
-                    for (int i = 0; i < 3; i++) {
-                        Row row = sheet.getRow(i);
-                        row.shiftCellsLeft(5, 10000, 1);
+                // copy ô r7 và r10 của excel mẫu vào excel đang tạo
+                copyRanges(sheetMau, sheet, new int[]{6, 9}, 17, 17, (XSSFWorkbook) workbook);
+                // copy vùng AO7-AZ7 và A10-AZ10 của excel mẫu vào excel đang tạo
+                copyRanges(sheetMau, sheet, new int[]{6, 9}, 39, 52, (XSSFWorkbook) workbook);
+
+                // đến đây đã tạo được các hàng công thức mẫu của hàng sản phẩm đầu tiên, hàng 10, chỉ số hàng 9
+                // chỉ có thể copy từ excel mẫu được hàng đầu tiên vì excel mẫu chỉ có 1 hàng, có 1 hàng không biết sheet cần chỉnh có bao nhiêu sản phẩm
+
+                // tạo cell r10
+                Cell r10 = sheet.getRow(9).getCell(17);
+
+                // duyệt qua các hàng của các sản phẩm thứ 2 trở đi và thêm nốt công thức vào các hàng này
+                // copy công thức từ hàng sản phẩm đầu tiên vào các hàng bên dưới lần lượt theo vòng lặp hàng
+                for (int i = 0; i < soSanPhamExcel - 1; i++) {
+                    if (r10 == null) continue;
+                    // dán công thức theo cột R, chỉ số 17
+                    // tạo cell của hàng sản phẩm đang lặp tại cột 17
+                    Cell dstCell = sheet.getRow(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1).getCell(17);
+                    // gọi hàm copy, dán và update công thức theo hàng để dán công thức từ hàng đầu tiên vào,
+                    // thêm tham số thứ 3 là khoảng cách hàng copy với hàng sản phẩm đầu tiên để biết cách thay đổi công thức cho phù hợp với hàng được dán
+                    copyRowCellWithFormulaUpdate(r10, dstCell, i + 1);
+
+                    // copy các công thức từ cột AO đến cột AZ(cách nhau 12 cột) của hàng sản phẩm đầu tiên vào các hàng đang lặp
+                    for (int j = 0; j < 12; j++) {
+                        // lấy cell của sản phẩm hàng đầu tiên tại cột đang lặp
+                        Cell srcCell = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(j + 40);
+                        // lấy cell của sản phẩm cần dán tại hàng sản phẩm đang lặp và tại cột cần dán đang lặp
+                        dstCell = sheet.getRow(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1).getCell(j + 40);
+                        // nếu cell chưa tồn tại thì tạo nó
+                        if (dstCell == null) dstCell = sheet.getRow(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1).createCell(j + 40);
+                        // gọi hàm copy, dán và update công thức theo hàng để dán công thức từ hàng đầu tiên vào
+                        copyRowCellWithFormulaUpdate(srcCell, dstCell, i + 1);
+                        // gộp ô cột được dán với ô ở cột tiếp theo vì các công thức này nằm trên 2 ô cùng hàng
+                        CellRangeAddress cellRangeAddress = new CellRangeAddress(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1, i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1
+                                , j + 40, j + 40 + 1);
+                        sheet.addMergedRegion(cellRangeAddress);
+                        // tự động tăng j để bỏ qua 1 cột vì ô ở cột tiếp theo đã được gộp với ô ở cột hiện tại
+                        j++;
                     }
 
-                    // sửa lại công thức tất cả các ô có giá trị L về K vì sau khi dịch chuyển 3 hàng tiêu đề về vị trí ban đầu
-                    // công thức bị sai
-                    for (int i = 26 + j; i <= 41 + 2 * j; i++) {
-                        // row index 6 tức là hàng 7 vì ban đầu chỉ có 1 hàng 7 có công thức do chưa thêm các hàng mới
-                        Row row = sheet.getRow(6);
-                        Cell cell = row.getCell(i);
-
-                        if (cell != null && cell.getCellType() == CellType.FORMULA) {
-                            String formula = cell.getCellFormula();
-                            formula = formula.replaceAll("\\$L\\$3", "\\$K\\$3");
-                            cell.setCellFormula(formula);
-                        }
-                    }
-
-                    Cell srcCell;
-                    Cell destCell;
-
-                    // sao chép ô từ cột 3 sang cột 4 từ hàng 3 đến hàng 9 trong 2 cột này
-                    // cần tạo cell ở cột 4 bị phép dịch chuyển cột ở trên thực chất chưa tạo cell mới
-                    for (int i = 3; i <= 9; i++) {
-                        Row row = sheet.getRow(i);
-                        // Sao chép ô từ cột srcColumn sang destColumn
-                        srcCell = row.getCell(3);
-                        destCell = row.createCell(4);
-                        copyCellWithFormulaUpdate(srcCell, destCell, 1);
-                    }
-
-                    // tại hàng 7 copy ô từ cột 26 sang 27
-                    Row row7Formula = sheet.getRow(6);
-                    srcCell = row7Formula.getCell(26 + j);
-                    destCell = row7Formula.createCell(27 + j);
-                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
-
-                    // tại hàng 7 copy ô từ cột 44 sang 45
-                    srcCell = row7Formula.getCell(44 + 2 * j);
-                    destCell = row7Formula.createCell(45 + 2 * j);
-                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
-
-                    // tại hàng 4 copy ô từ cột 44 sang 45
-                    Row row4Formula = sheet.getRow(3);
-                    srcCell = row4Formula.getCell(44 + 2 * j);
-                    destCell = row4Formula.createCell(45 + 2 * j);
-                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
                 }
+
+
+//
+//                // thêm j lần các cột mới tại các cột công thức
+//                for (int j = 0; j < soBoZai - 15; j++) {
+//                    sheet.shiftColumns(4, sheet.getRow(6).getLastCellNum(), 1);
+//                    sheet.shiftColumns(4 + 23 + j, sheet.getRow(6).getLastCellNum(), 1);
+//                    sheet.shiftColumns(4 + 41 + 2 * j, sheet.getRow(6).getLastCellNum(), 1);
+////                System.out.println("last col: " + sheet.getRow(6).getLastCellNum());
+//
+//                    // dịch chuyển 3 hàng tiêu đề về vị trí ban đầu sau khi bị dịch chuyển sang phải 1 hàng
+//                    for (int i = 0; i < 3; i++) {
+//                        Row row = sheet.getRow(i);
+//                        row.shiftCellsLeft(5, 10000, 1);
+//                    }
+//
+//                    // sửa lại công thức tất cả các ô có giá trị L về K vì sau khi dịch chuyển 3 hàng tiêu đề về vị trí ban đầu
+//                    // công thức bị sai
+//                    for (int i = 26 + j; i <= 41 + 2 * j; i++) {
+//                        // row index 6 tức là hàng 7 vì ban đầu chỉ có 1 hàng 7 có công thức do chưa thêm các hàng mới
+//                        Row row = sheet.getRow(6);
+//                        Cell cell = row.getCell(i);
+//
+//                        if (cell != null && cell.getCellType() == CellType.FORMULA) {
+//                            String formula = cell.getCellFormula();
+//                            formula = formula.replaceAll("\\$L\\$3", "\\$K\\$3");
+//                            cell.setCellFormula(formula);
+//                        }
+//                    }
+//
+//                    Cell srcCell;
+//                    Cell destCell;
+//
+//                    // sao chép ô từ cột 3 sang cột 4 từ hàng 3 đến hàng 9 trong 2 cột này
+//                    // cần tạo cell ở cột 4 bị phép dịch chuyển cột ở trên thực chất chưa tạo cell mới
+//                    for (int i = 3; i <= 9; i++) {
+//                        Row row = sheet.getRow(i);
+//                        // Sao chép ô từ cột srcColumn sang destColumn
+//                        srcCell = row.getCell(3);
+//                        destCell = row.createCell(4);
+//                        copyCellWithFormulaUpdate(srcCell, destCell, 1);
+//                    }
+//
+//                    // tại hàng 7 copy ô từ cột 26 sang 27
+//                    Row row7Formula = sheet.getRow(6);
+//                    srcCell = row7Formula.getCell(26 + j);
+//                    destCell = row7Formula.createCell(27 + j);
+//                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
+//
+//                    // tại hàng 7 copy ô từ cột 44 sang 45
+//                    srcCell = row7Formula.getCell(44 + 2 * j);
+//                    destCell = row7Formula.createCell(45 + 2 * j);
+//                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
+//
+//                    // tại hàng 4 copy ô từ cột 44 sang 45
+//                    Row row4Formula = sheet.getRow(3);
+//                    srcCell = row4Formula.getCell(44 + 2 * j);
+//                    destCell = row4Formula.createCell(45 + 2 * j);
+//                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
+//                }
 
             }
 
 
-            // nếu số sản phẩm lớn hơn 1 bao nhiêu lần thì thêm số hàng sản phẩm số lần tương tự
+            /*// nếu số sản phẩm lớn hơn 1 bao nhiêu lần thì thêm số hàng sản phẩm số lần tương tự
             if (soSanPham > 1) {
                 for (int j = 0; j < soSanPham - 1; j++) {
                     // đẩy tất cả các hàng ở dưới hàng index 6 xuống 1 hàng để thừa ra hàng index 7 nhưng nó thực tế vẫn chưa được tạo
@@ -1912,8 +1959,8 @@ public class ReadPDFToExcel {
                         }
                     }
                 }
-            }
-
+            }*/
+/*
             // ghi tất cả sản phẩm vào excel
             for (int i = 0; i < soSanPham; i++) {
                 Double length = seiHinList.get(i);
@@ -2014,7 +2061,7 @@ public class ReadPDFToExcel {
             sheet.addMergedRegion(cellRangeAddress);
 
             // Khóa sheet với mật khẩu
-            sheet.protectSheet("");
+            sheet.protectSheet("");*/
 
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
             ((XSSFWorkbook) workbook).setForceFormulaRecalculation(true);
@@ -2022,7 +2069,7 @@ public class ReadPDFToExcel {
                 workbook.write(fileOut);
 
                 workbook.close();
-            }*/
+            }
 
 
         } catch (IOException e) {
@@ -2039,6 +2086,86 @@ public class ReadPDFToExcel {
 //        System.out.println("tong chieu dai san pham " + seiHinChouGoukei);
 /*        excelFileNames.add(new ExcelFile("Sheet " + sheetIndex + ": " + kouSyu, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));*/
 
+    }
+
+    /**
+     * copy nhiều range giữ nguyên giá trị và giá trị gốc công thức từ sheet của file excel nguồn sang file excel đích
+     * @param srcSheet
+     * @param dstSheet
+     * @param rowsToCopy
+     * @param startCol
+     * @param endCol
+     */
+    public static void copyRanges(Sheet srcSheet, Sheet dstSheet, int[] rowsToCopy, int startCol,int endCol, XSSFWorkbook destWorkbook) {
+//        Sheet srcSheet = sourceWorkbook.getSheetAt(0);
+//        Sheet dstSheet = destWorkbook.getSheetAt(0);
+//        // Các hàng cần copy (zero-based): hàng 7 -> index 6, hàng 10 -> index 9
+//        int[] rowsToCopy = { 6, 9 };
+//        // Phạm vi cột: AN -> 39 (0-based), BA -> 52 (0-based)
+//        int startCol = 39, endCol = 52;
+
+        // Sao chép từng ô trong hai hàng
+        for (int rowIndex : rowsToCopy) {
+            Row srcRow = srcSheet.getRow(rowIndex);
+            if (srcRow == null) continue;
+            Row dstRow = dstSheet.getRow(rowIndex);
+            if (dstRow == null) dstRow = dstSheet.createRow(rowIndex);
+
+            for (int col = startCol; col <= endCol; col++) {
+                Cell srcCell = srcRow.getCell(col);
+                if (srcCell == null) continue;
+                Cell dstCell = dstRow.createCell(col);
+
+                // Sao chép giá trị hoặc công thức
+                switch (srcCell.getCellType()) {
+                    case STRING:
+                        dstCell.setCellValue(srcCell.getStringCellValue());
+                        break;
+                    case NUMERIC:
+                        if (DateUtil.isCellDateFormatted(srcCell)) {
+                            dstCell.setCellValue(srcCell.getDateCellValue());
+                        } else {
+                            dstCell.setCellValue(srcCell.getNumericCellValue());
+                        }
+                        break;
+                    case BOOLEAN:
+                        dstCell.setCellValue(srcCell.getBooleanCellValue());
+                        break;
+                    case FORMULA:
+                        dstCell.setCellFormula(srcCell.getCellFormula());
+                        break;
+                    case BLANK:
+                        dstCell.setCellType(CellType.BLANK);
+                        break;
+                    default:
+                        // Những loại khác (nếu có) có thể thêm xử lý tương tự
+                        dstCell.setCellValue(srcCell.toString());
+                        break;
+                }
+
+                // Sao chép định dạng ô (style)
+                CellStyle newStyle = destWorkbook.createCellStyle();
+                newStyle.cloneStyleFrom(srcCell.getCellStyle());
+                dstCell.setCellStyle(newStyle);
+            }
+        }
+
+        // Sao chép các vùng hợp nhất (merged regions) có liên quan
+        int mergedCount = srcSheet.getNumMergedRegions();
+        for (int i = 0; i < mergedCount; i++) {
+            CellRangeAddress region = srcSheet.getMergedRegion(i);
+            int firstRow = region.getFirstRow();
+            int lastRow = region.getLastRow();
+            int firstCol = region.getFirstColumn();
+            int lastCol = region.getLastColumn();
+            // Kiểm tra xem vùng hợp nhất có nằm hoàn toàn trong AN7:BA7 hoặc AN10:BA10 không
+            if ((firstRow == 6 && lastRow == 6 && firstCol >= startCol && lastCol <= endCol) ||
+                    (firstRow == 9 && lastRow == 9 && firstCol >= startCol && lastCol <= endCol)) {
+                dstSheet.addMergedRegion(
+                        new CellRangeAddress(firstRow, lastRow, firstCol, lastCol)
+                );
+            }
+        }
     }
 
     /**
@@ -2190,7 +2317,13 @@ public class ReadPDFToExcel {
         return column.toString();
     }
 
-
+    /**
+     * copy công thức từ srcCell vào destCell và thay đổi công thức theo hàng
+     * của destCell cho phù hợp dựa vào khoảng cách hàng giữa 2 cell bằng tham số shiftRows
+     * @param srcCell cell gốc
+     * @param destCell cell copy từ cell gốc
+     * @param shiftRows khảng cách hàng giữa cell gốc và cell copy
+     */
     private static void copyRowCellWithFormulaUpdate(Cell srcCell, Cell destCell, int shiftRows) {
         destCell.setCellStyle(srcCell.getCellStyle());
         switch (srcCell.getCellType()) {
