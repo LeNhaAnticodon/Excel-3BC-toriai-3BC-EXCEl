@@ -1838,32 +1838,118 @@ public class ReadPDFToExcel {
                     }
                 }
 
-                InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/sample files2.xlsx");
-                assert sourceFile != null;
-                Workbook excelMau = new XSSFWorkbook(sourceFile);
-                Sheet sheetMau = excelMau.getSheetAt(0);
+
                 int soSanPhamExcel = lastRowSeihin - HANG_DAU_TIEN_CHUA_SAN_PHAM + 1;
 
-                Cell sauHangSanPhamCuoiCotVatLieuDauTien = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel).getCell(4);
-                sauHangSanPhamCuoiCotVatLieuDauTien.setCellFormula("SUM(Z9:AA" + (HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel + 1) + ")");
+                Row sauHangSanPhamCuoi = sheet.getRow(lastRowSeihin + 1);
+                if (sauHangSanPhamCuoi == null) {
+                    sauHangSanPhamCuoi = sheet.createRow(lastRowSeihin + 1);
+                }
 
-                Cell r7 = sheet.getRow(6).getCell(17);
-                Cell ao7 = sheet.getRow(6).getCell(40);
-                Cell r10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(17);
-                Cell z10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(25);
-                Cell aO10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(40);
-                Cell bd10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(55);
-                Cell be10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(56);
+                Cell sauHangSanPhamCuoiVaCotVatLieuDauTien = sauHangSanPhamCuoi.getCell(4);
+                sauHangSanPhamCuoiVaCotVatLieuDauTien.setCellFormula("SUM(Z9:AA" + (HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel + 1) + ")");
+
+                Row row7 = sheet.getRow(6);
+                Row rowHangSanPhamDauTien = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM);
+                if (row7 == null) {
+                    row7 = sheet.createRow(6);
+                }
+                if (rowHangSanPhamDauTien == null) {
+                    rowHangSanPhamDauTien = sheet.createRow(HANG_DAU_TIEN_CHUA_SAN_PHAM);
+                }
+
+                Cell r7 = row7.getCell(17);
+                if (r7 == null) r7 = row7.createCell(17);
+                r7.setCellFormula("B7*SUM(AN7:BA7)/1000");
+
+                Cell ao7 = row7.getCell(40);
+                if (ao7 == null) {
+                    ao7 = row7.createCell(40);
+                }
+                // set align theo chiều ngang là trung tâm
+                ao7.getCellStyle().setAlignment(HorizontalAlignment.CENTER);
+                // gộp ô cột được dán với ô ở cột tiếp theo vì các công thức này nằm trên 2 ô cùng hàng
+                CellRangeAddress cellRangeAddress = new CellRangeAddress(6, 6, 40, 40 + 1);
+                sheet.addMergedRegion(cellRangeAddress);
+                ao7.setCellFormula("E7*E8");
+
+
+                Cell r10 = rowHangSanPhamDauTien.getCell(17);
+                if (r10 == null) {
+                    r10 = rowHangSanPhamDauTien.createCell(17);
+                }
+                r10.setCellFormula("B10-SUM(AN10:BA10)");
+
+                Cell z10 = rowHangSanPhamDauTien.getCell(25);
+                if (z10 == null) {
+                    z10 = rowHangSanPhamDauTien.createCell(25);
+                }
+                z10.getCellStyle().setAlignment(HorizontalAlignment.CENTER);
+                cellRangeAddress = new CellRangeAddress(HANG_DAU_TIEN_CHUA_SAN_PHAM, HANG_DAU_TIEN_CHUA_SAN_PHAM, 25, 25 + 1);
+                sheet.addMergedRegion(cellRangeAddress);
+                z10.setCellFormula("($A10+$B$8)*E10");
+
+                Cell ao10 = rowHangSanPhamDauTien.getCell(40);
+                if (ao10 == null) {
+                    ao10 = rowHangSanPhamDauTien.createCell(40);
+                }
+                ao10.getCellStyle().setAlignment(HorizontalAlignment.CENTER);
+                cellRangeAddress = new CellRangeAddress(HANG_DAU_TIEN_CHUA_SAN_PHAM, HANG_DAU_TIEN_CHUA_SAN_PHAM, 40, 40 + 1);
+                sheet.addMergedRegion(cellRangeAddress);
+                ao10.setCellFormula("E10*E$8");
+
+                Cell bd10 = rowHangSanPhamDauTien.getCell(55);
+                if (bd10 == null) {
+                    bd10 = rowHangSanPhamDauTien.createCell(55);
+                }
+                bd10.getCellStyle().setAlignment(HorizontalAlignment.CENTER);
+                bd10.setCellFormula("Q10");
+
+                Cell be10 = rowHangSanPhamDauTien.getCell(56);
+                if (be10 == null) {
+                    be10 = rowHangSanPhamDauTien.createCell(56);
+                }
+                be10.getCellStyle().setAlignment(HorizontalAlignment.CENTER);
+                be10.setCellFormula("R10");
+
+
+                // sửa lại công thức cho 2 ô cuối cột Q và cột R theo công thức mới
+                Cell oCuoiCotQ = sheet.getRow(lastRowSeihin + 1).getCell(16);
+                if(oCuoiCotQ == null) {
+                    oCuoiCotQ = sauHangSanPhamCuoi.createCell(16);
+                }
+                oCuoiCotQ.setCellFormula("SUM(BD9:BD" + (lastRowSeihin + 2) + ")");
+
+                Cell oCuoiCotR = sheet.getRow(lastRowSeihin + 1).getCell(17);
+                if(oCuoiCotR == null) {
+                    oCuoiCotR = sauHangSanPhamCuoi.createCell(17);
+                }
+                oCuoiCotR.setCellFormula("SUM(BE9:BE" + (lastRowSeihin + 2) + ")");
 
 
 
-                copySrcCellToRange(sheet, sauHangSanPhamCuoiCotVatLieuDauTien, 6, 15, 2, lastRowSeihin + 1, lastRowSeihin + 5, 1, true);
+                copySrcCellToRange(sheet, sauHangSanPhamCuoiVaCotVatLieuDauTien, 6, 15, 2, lastRowSeihin + 1, lastRowSeihin + 1, 1, true);
+                copySrcCellToRange(sheet, ao7, 40, 51, 2, 6, 6, 1, true);
+                copySrcCellToRange(sheet, r10, 17, 17, 1, HANG_DAU_TIEN_CHUA_SAN_PHAM, lastRowSeihin, 1, true);
+                copySrcCellToRange(sheet, z10, 25, 36, 2, HANG_DAU_TIEN_CHUA_SAN_PHAM, lastRowSeihin, 1, true);
+                copySrcCellToRange(sheet, ao10, 40, 51, 2, HANG_DAU_TIEN_CHUA_SAN_PHAM, lastRowSeihin, 1, true);
+                copySrcCellToRange(sheet, bd10, 55, 55, 1, HANG_DAU_TIEN_CHUA_SAN_PHAM, lastRowSeihin, 1, true);
+                copySrcCellToRange(sheet, be10, 56, 56, 1, HANG_DAU_TIEN_CHUA_SAN_PHAM, lastRowSeihin, 1, true);
 
 
 
             // code của bản excel mới nhưng hiện tại không dùng, đã thay bằng cách khác mã không cần sử dụng file excel mẫu
-            // bằng cách tạo công thức tại các ô mẫu cố định đã biết trước rồi dùng hàm copySrcCellToRange dán toàn bộ các công thức ra vùng cần dán dựa theo số lượng sản phẩm đang có
+            // bằng cách tạo công thức tại các ô mẫu cố định đã biết trước rồi dùng hàm copySrcCellToRange,
+            // hàm này có khả năng copy 1 cell và dán vào cả 1 vùng dữ liệu mà không cần quan tâm dán theo cột hay hàng, công thức vẫn thay đổi theo đúng chuẩn
+            // dán toàn bộ các công thức ra vùng cần dán dựa theo số lượng sản phẩm đang có
+
+
 /*
+                InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/sample files2.xlsx");
+                assert sourceFile != null;
+                Workbook excelMau = new XSSFWorkbook(sourceFile);
+                Sheet sheetMau = excelMau.getSheetAt(0);
+
                 // xóa sạch dữ liệu vùng chỉ định đang có dữ liệu cần ghi đè để tránh sau 1 cell trong vùng khi bị ghi đè mà lại gộp cell
                 // sẽ gặp tình trạng báo lỗi nếu nhiều cell cùng có giá trị
                 for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
@@ -2548,8 +2634,8 @@ public class ReadPDFToExcel {
         CellRangeAddress srcMerged = findMergedRegion(sheet, srcRowIndex, srcColIndex);
 
         if (rowMajor) {
-            for (int r = rowBegin; r < rowEnd; r += rowStep) {
-                for (int c = columnBegin; c < columnEnd; c += colStep) {
+            for (int r = rowBegin; r <= rowEnd; r += rowStep) {
+                for (int c = columnBegin; c <= columnEnd; c += colStep) {
                     if (r == srcRowIndex && c == srcColIndex) continue;
 
                     Cell target = getOrCreateCell(sheet, r, c);
@@ -2578,8 +2664,8 @@ public class ReadPDFToExcel {
                 }
             }
         } else {
-            for (int c = columnBegin; c < columnEnd; c += colStep) {
-                for (int r = rowBegin; r < rowEnd; r += rowStep) {
+            for (int c = columnBegin; c <= columnEnd; c += colStep) {
+                for (int r = rowBegin; r <= rowEnd; r += rowStep) {
                     if (r == srcRowIndex && c == srcColIndex) continue;
 
                     Cell target = getOrCreateCell(sheet, r, c);
