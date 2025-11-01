@@ -1830,6 +1830,14 @@ public class ReadPDFToExcel {
             // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
             // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
 //            if (soBoZai < 6) {
+                // xóa sạch dữ liệu vùng chỉ định đang có dữ liệu cần ghi đè để tránh sau 1 cell trong vùng khi bị ghi đè mà lại gộp cell
+                // sẽ gặp tình trạng báo lỗi nếu nhiều cell cùng có giá trị
+                for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
+                    for (int j = 25; j <= 30; j++) {
+                        sheet.getRow(i).getCell(j).setBlank();
+                    }
+                }
+
                 InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/sample files2.xlsx");
                 assert sourceFile != null;
                 Workbook excelMau = new XSSFWorkbook(sourceFile);
@@ -1837,33 +1845,49 @@ public class ReadPDFToExcel {
                 int soSanPhamExcel = lastRowSeihin - HANG_DAU_TIEN_CHUA_SAN_PHAM + 1;
 
                 Cell sauHangSanPhamCuoiCotVatLieuDauTien = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel).getCell(4);
-                sauHangSanPhamCuoiCotVatLieuDauTien.setCellFormula("SUM(Z9:AA" + (HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel) + ")");
+                sauHangSanPhamCuoiCotVatLieuDauTien.setCellFormula("SUM(Z9:AA" + (HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel + 1) + ")");
 
-                String originalFormula = sauHangSanPhamCuoiCotVatLieuDauTien.getCellFormula();
-                for (int i = 0; i < 9; i++) {
-                    Cell sauHangSanPhamCuoiThuI = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel).getCell(i + 6);
-                    String newFormula = shiftFormulaColumns(originalFormula, 2 + i); // +2 cột
-                    sauHangSanPhamCuoiThuI.setCellType(CellType.FORMULA);
-                    sauHangSanPhamCuoiThuI.setCellFormula(newFormula);
-//                    copyCellWithFormulaUpdate(sauHangSanPhamCuoiCotVatLieuDauTien, sauHangSanPhamCuoiThuI, 2);
-                    i++;
+                Cell r7 = sheet.getRow(6).getCell(17);
+                Cell ao7 = sheet.getRow(6).getCell(40);
+                Cell r10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(17);
+                Cell z10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(25);
+                Cell aO10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(40);
+                Cell bd10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(55);
+                Cell be10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(56);
+
+
+
+                copySrcCellToRange(sheet, sauHangSanPhamCuoiCotVatLieuDauTien, 6, 15, 2, lastRowSeihin + 1, lastRowSeihin + 5, 1, true);
+
+
+
+            // code của bản excel mới nhưng hiện tại không dùng, đã thay bằng cách khác mã không cần sử dụng file excel mẫu
+            // bằng cách tạo công thức tại các ô mẫu cố định đã biết trước rồi dùng hàm copySrcCellToRange dán toàn bộ các công thức ra vùng cần dán dựa theo số lượng sản phẩm đang có
+/*
+                // xóa sạch dữ liệu vùng chỉ định đang có dữ liệu cần ghi đè để tránh sau 1 cell trong vùng khi bị ghi đè mà lại gộp cell
+                // sẽ gặp tình trạng báo lỗi nếu nhiều cell cùng có giá trị
+                for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
+                    for (int j = 25; j <= 30; j++) {
+                        sheet.getRow(i).getCell(j).setBlank();
+                    }
                 }
+                // copy các hàng 7 và 10 từ cột 17 đến cột 58 của excel mẫu vào excel đang tạo
+                // đây là các hàng có chứa công thức mẫu
+                saoChepCacHangTrongVungCotTuFileMauVaoFileDich(sheetMau, sheet, new int[]{6, 9}, 17, 58, (XSSFWorkbook) workbook);
 
+                // sửa lại công thức cho 2 ô cuối cột Q và cột R theo công thức mới
+                Cell oCuoiCotQ = sheet.getRow(lastRowSeihin + 1).getCell(16);
+                Cell oCuoiCotR = sheet.getRow(lastRowSeihin + 1).getCell(17);
 
-                // copy ô r7 và r10 của excel mẫu vào excel đang tạo
-                copyRanges(sheetMau, sheet, new int[]{6, 9}, 17, 17, (XSSFWorkbook) workbook);
-                // copy vùng Z10-AK10 của excel mẫu vào excel đang tạo
-                copyRanges(sheetMau, sheet, new int[]{9}, 25, 36, (XSSFWorkbook) workbook);
-                // copy vùng AO7-AZ7 và A10-AZ10 của excel mẫu vào excel đang tạo
-                copyRanges(sheetMau, sheet, new int[]{6, 9}, 39, 52, (XSSFWorkbook) workbook);
-
-
+                oCuoiCotQ.setCellFormula("SUM(BD9:BD" + (lastRowSeihin + 2) + ")");
+                oCuoiCotR.setCellFormula("SUM(BE9:BE" + (lastRowSeihin + 2) + ")");
 
                 // đến đây đã tạo được các hàng công thức mẫu của hàng sản phẩm đầu tiên, hàng 10, chỉ số hàng 9
                 // chỉ có thể copy từ excel mẫu được hàng đầu tiên vì excel mẫu chỉ có 1 hàng, có 1 hàng không biết sheet cần chỉnh có bao nhiêu sản phẩm
 
+            
                 // tạo cell r10
-                Cell r10 = sheet.getRow(9).getCell(17);
+                Cell r10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(17);
 
                 // duyệt qua các hàng của các sản phẩm thứ 2 trở đi và thêm nốt công thức vào các hàng này
                 // copy công thức từ hàng sản phẩm đầu tiên vào các hàng bên dưới lần lượt theo vòng lặp hàng
@@ -1876,12 +1900,13 @@ public class ReadPDFToExcel {
                     // thêm tham số thứ 3 là khoảng cách hàng copy với hàng sản phẩm đầu tiên để biết cách thay đổi công thức cho phù hợp với hàng được dán
                     copyRowCellWithFormulaUpdate(r10, dstCell, i + 1);
 
+                    Cell srcCell = null;
                     // copy các công thức từ cột AO đến cột AZ(cách nhau 12 cột) của hàng sản phẩm đầu tiên(HANG_DAU_TIEN_CHUA_SAN_PHAM) vào các hàng đang lặp
                     // copy các công thức từ cột Z đến cột AK(cách nhau 12 cột) của hàng sản phẩm đầu tiên(HANG_DAU_TIEN_CHUA_SAN_PHAM) vào các hàng đang lặp
                     for (int j = 0; j < 12; j++) {
                         // copy các công thức từ cột AO đến cột AZ(cách nhau 12 cột) của hàng sản phẩm đầu tiên(HANG_DAU_TIEN_CHUA_SAN_PHAM) vào các hàng đang lặp
                         // lấy cell của sản phẩm hàng đầu tiên tại cột đang lặp
-                        Cell srcCell = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(j + 40);// 40 là chỉ số cột AO
+                        srcCell = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(j + 40);// 40 là chỉ số cột AO
                         // lấy cell của sản phẩm cần dán tại hàng sản phẩm đang lặp và tại cột cần dán đang lặp
                         dstCell = sheet.getRow(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1).getCell(j + 40);
                         // nếu cell chưa tồn tại thì tạo nó
@@ -1908,11 +1933,25 @@ public class ReadPDFToExcel {
                         cellRangeAddress = new CellRangeAddress(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1, i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1
                                 , j + 25, j + 25 + 1);
                         sheet.addMergedRegion(cellRangeAddress);
+
                         // tự động tăng j để bỏ qua 1 cột vì ô ở cột tiếp theo đã được gộp với ô ở cột hiện tại
                         j++;
                     }
 
+                    // copy các công thức từ cột BD đến cột BE(cách nhau 2 cột) của hàng sản phẩm đầu tiên(HANG_DAU_TIEN_CHUA_SAN_PHAM) vào các hàng đang lặp
+                    for (int j = 0; j < 2; j++) {
+                        // lấy cell của sản phẩm hàng đầu tiên tại cột đang lặp
+                        srcCell = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(j + 55);// 55 là chỉ số cột BD
+                        // lấy cell của sản phẩm cần dán tại hàng sản phẩm đang lặp và tại cột cần dán đang lặp
+                        dstCell = sheet.getRow(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1).getCell(j + 55);
+                        // nếu cell chưa tồn tại thì tạo nó
+                        if (dstCell == null) dstCell = sheet.getRow(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1).createCell(j + 55);
+                        // gọi hàm copy, dán và update công thức theo hàng để dán công thức từ hàng đầu tiên vào
+                        copyRowCellWithFormulaUpdate(srcCell, dstCell, i + 1);
+                    }
+
                 }
+*/
 
 
 
@@ -2127,14 +2166,34 @@ public class ReadPDFToExcel {
     }
 
     /**
-     * copy nhiều range giữ nguyên giá trị và giá trị gốc công thức từ sheet của file excel nguồn sang file excel đích
+     *
+     * @param sheet
+     * @param srcCell
+     * @param columnBegin
+     * @param columnEnd
+     * @param buocNhay
+     */
+    private static void copySrcCellToRange(Sheet sheet, Cell srcCell, int columnBegin, int columnEnd, int buocNhay) {
+        String originalFormula = srcCell.getCellFormula();
+        int srcRowIndex = srcCell.getRowIndex();
+        int srcColIndex = srcCell.getColumnIndex();
+        for (int i = columnBegin; i < columnEnd; i = i + buocNhay) {
+            Cell sauHangSanPhamCuoiThuI = sheet.getRow(srcRowIndex).getCell(i);
+            String newFormula = shiftFormulaColumns(originalFormula, i - srcColIndex);
+            sauHangSanPhamCuoiThuI.setCellType(CellType.FORMULA);
+            sauHangSanPhamCuoiThuI.setCellFormula(newFormula);
+        }
+    }
+
+    /**
+     * copy nhiều range tại các hàng trong rowsToCopy và nằm trong khảng cột startCol đến cột endCol giữ nguyên giá trị và giá trị gốc công thức từ sheet của file excel nguồn sang file excel đích
      * @param srcSheet
      * @param dstSheet
      * @param rowsToCopy
      * @param startCol
      * @param endCol
      */
-    public static void copyRanges(Sheet srcSheet, Sheet dstSheet, int[] rowsToCopy, int startCol,int endCol, XSSFWorkbook destWorkbook) {
+    public static void saoChepCacHangTrongVungCotTuFileMauVaoFileDich(Sheet srcSheet, Sheet dstSheet, int[] rowsToCopy, int startCol, int endCol, XSSFWorkbook destWorkbook) {
 //        Sheet srcSheet = sourceWorkbook.getSheetAt(0);
 //        Sheet dstSheet = destWorkbook.getSheetAt(0);
 //        // Các hàng cần copy (zero-based): hàng 7 -> index 6, hàng 10 -> index 9
@@ -2173,7 +2232,7 @@ public class ReadPDFToExcel {
                         dstCell.setCellFormula(srcCell.getCellFormula());
                         break;
                     case BLANK:
-                        dstCell.setCellType(CellType.BLANK);
+                        dstCell.setBlank();
                         break;
                     default:
                         // Những loại khác (nếu có) có thể thêm xử lý tương tự
@@ -2186,24 +2245,25 @@ public class ReadPDFToExcel {
                 newStyle.cloneStyleFrom(srcCell.getCellStyle());
                 dstCell.setCellStyle(newStyle);
             }
-        }
 
-        // Sao chép các vùng hợp nhất (merged regions) có liên quan
-        int mergedCount = srcSheet.getNumMergedRegions();
-        for (int i = 0; i < mergedCount; i++) {
-            CellRangeAddress region = srcSheet.getMergedRegion(i);
-            int firstRow = region.getFirstRow();
-            int lastRow = region.getLastRow();
-            int firstCol = region.getFirstColumn();
-            int lastCol = region.getLastColumn();
-            // Kiểm tra xem vùng hợp nhất có nằm hoàn toàn trong AN7:BA7 hoặc AN10:BA10 không
-            if ((firstRow == 6 && lastRow == 6 && firstCol >= startCol && lastCol <= endCol) ||
-                    (firstRow == 9 && lastRow == 9 && firstCol >= startCol && lastCol <= endCol)) {
-                dstSheet.addMergedRegion(
-                        new CellRangeAddress(firstRow, lastRow, firstCol, lastCol)
-                );
+            // Sao chép các vùng hợp nhất (merged regions) có liên quan
+            int mergedCount = srcSheet.getNumMergedRegions();
+            for (int i = 0; i < mergedCount; i++) {
+                CellRangeAddress region = srcSheet.getMergedRegion(i);
+                int firstRow = region.getFirstRow();
+                int lastRow = region.getLastRow();
+                int firstCol = region.getFirstColumn();
+                int lastCol = region.getLastColumn();
+                // Kiểm tra xem vùng hợp nhất có nằm hoàn toàn trong AN7:BA7 hoặc AN10:BA10 không
+                if ((firstRow == rowIndex && lastRow == rowIndex && firstCol >= startCol && lastCol <= endCol)) {
+                    dstSheet.addMergedRegion(
+                            new CellRangeAddress(firstRow, lastRow, firstCol, lastCol)
+                    );
+                }
             }
         }
+
+        
     }
 
     /**
@@ -2457,6 +2517,190 @@ public class ReadPDFToExcel {
         m.appendTail(sb);
         return sb.toString();
     }
+
+    /**
+     * Copy công thức từ srcCell ra một vùng (columns x rows).
+     *
+     * @param sheet        sheet đích (cùng sheet hoặc khác sheet nếu cần).
+     * @param srcCell      ô nguồn chứa công thức (hoặc giá trị).
+     * @param columnBegin  cột bắt đầu (inclusive, zero-based).
+     * @param columnEnd    cột kết thúc (exclusive, zero-based).
+     * @param colStep      bước nhảy cột (ví dụ 1, 2...).
+     * @param rowBegin     hàng bắt đầu (inclusive, zero-based).
+     * @param rowEnd       hàng kết thúc (exclusive, zero-based).
+     * @param rowStep      bước nhảy hàng.
+     * @param rowMajor     nếu true -> lặp hàng ngoài, cột trong (row then col). Nếu false -> cột ngoài, hàng trong.
+     */
+    public static void copySrcCellToRange(Sheet sheet, Cell srcCell,
+                                          int columnBegin, int columnEnd, int colStep,
+                                          int rowBegin, int rowEnd, int rowStep,
+                                          boolean rowMajor) {
+
+        if (sheet == null || srcCell == null) return;
+
+        String originalFormula = (srcCell.getCellType() == CellType.FORMULA)
+                ? srcCell.getCellFormula() : null;
+
+        int srcRowIndex = srcCell.getRowIndex();
+        int srcColIndex = srcCell.getColumnIndex();
+
+        // tìm merged region chứa cell gốc (nếu có)
+        CellRangeAddress srcMerged = findMergedRegion(sheet, srcRowIndex, srcColIndex);
+
+        if (rowMajor) {
+            for (int r = rowBegin; r < rowEnd; r += rowStep) {
+                for (int c = columnBegin; c < columnEnd; c += colStep) {
+                    if (r == srcRowIndex && c == srcColIndex) continue;
+
+                    Cell target = getOrCreateCell(sheet, r, c);
+
+                    if (srcCell.getCellStyle().getAlignment() != null){
+                        target.getCellStyle().setAlignment(srcCell.getCellStyle().getAlignment());
+                    }
+
+                    // copy style
+//                    target.setCellStyle(srcCell.getCellStyle());
+
+                    int colShift = c - srcColIndex;
+                    int rowShift = r - srcRowIndex;
+
+                    if (originalFormula != null) {
+                        String newFormula = shiftFormulaA1(originalFormula, colShift, rowShift);
+                        target.setCellFormula(newFormula);
+                    } else {
+                        copyCellValue(srcCell, target);
+                    }
+
+                    // nếu cell gốc thuộc vùng merged => merge tương ứng
+                    if (srcMerged != null) {
+                        addMergedRegionSafe(sheet, srcMerged, rowShift, colShift);
+                    }
+                }
+            }
+        } else {
+            for (int c = columnBegin; c < columnEnd; c += colStep) {
+                for (int r = rowBegin; r < rowEnd; r += rowStep) {
+                    if (r == srcRowIndex && c == srcColIndex) continue;
+
+                    Cell target = getOrCreateCell(sheet, r, c);
+                    target.setCellStyle(srcCell.getCellStyle());
+
+                    int colShift = c - srcColIndex;
+                    int rowShift = r - srcRowIndex;
+
+                    if (originalFormula != null) {
+                        String newFormula = shiftFormulaA1(originalFormula, colShift, rowShift);
+                        target.setCellFormula(newFormula);
+                    } else {
+                        copyCellValue(srcCell, target);
+                    }
+
+                    if (srcMerged != null) {
+                        addMergedRegionSafe(sheet, srcMerged, rowShift, colShift);
+                    }
+                }
+            }
+        }
+    }
+
+    // ===================== helper ======================
+
+    /** tìm merged region chứa cell (nếu có) */
+    private static CellRangeAddress findMergedRegion(Sheet sheet, int row, int col) {
+        List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
+        for (CellRangeAddress region : mergedRegions) {
+            if (region.isInRange(row, col)) {
+                return region;
+            }
+        }
+        return null;
+    }
+
+    /** thêm vùng merge tương ứng (dịch theo hàng & cột), tránh trùng */
+    private static void addMergedRegionSafe(Sheet sheet, CellRangeAddress srcMerged, int rowShift, int colShift) {
+        int firstRow = srcMerged.getFirstRow() + rowShift;
+        int lastRow = srcMerged.getLastRow() + rowShift;
+        int firstCol = srcMerged.getFirstColumn() + colShift;
+        int lastCol = srcMerged.getLastColumn() + colShift;
+
+        CellRangeAddress newMerged = new CellRangeAddress(firstRow, lastRow, firstCol, lastCol);
+
+        // tránh thêm trùng vùng merge
+        for (CellRangeAddress existing : sheet.getMergedRegions()) {
+            if (existing.formatAsString().equals(newMerged.formatAsString())) {
+                return;
+            }
+        }
+
+        sheet.addMergedRegion(newMerged);
+    }
+
+    /** tạo cell nếu chưa có */
+    private static Cell getOrCreateCell(Sheet sheet, int rowIdx, int colIdx) {
+        Row row = sheet.getRow(rowIdx);
+        if (row == null) row = sheet.createRow(rowIdx);
+        Cell cell = row.getCell(colIdx);
+        if (cell == null) cell = row.createCell(colIdx);
+        return cell;
+    }
+
+    /** copy giá trị cơ bản nếu không có công thức */
+    private static void copyCellValue(Cell src, Cell target) {
+        if (src == null || target == null) return;
+        switch (src.getCellType()) {
+            case STRING:
+                target.setCellValue(src.getStringCellValue());
+                break;
+            case NUMERIC:
+                target.setCellValue(src.getNumericCellValue());
+                break;
+            case BOOLEAN:
+                target.setCellValue(src.getBooleanCellValue());
+                break;
+            case BLANK:
+                target.setBlank();
+                break;
+            default:
+                break;
+        }
+    }
+
+    /** dịch công thức A1-style theo hàng/cột, tôn trọng $ */
+    public static String shiftFormulaA1(String formula, int colShift, int rowShift) {
+        if (formula == null || formula.isEmpty()) return formula;
+        Pattern p = Pattern.compile("((?:'[^']+'|[A-Za-z0-9_]+)!|)(\\$?)([A-Z]+)(\\$?)(\\d+)");
+        Matcher m = p.matcher(formula);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            String sheetPrefix = m.group(1) == null ? "" : m.group(1);
+            String colDollar = m.group(2);
+            String colLetters = m.group(3);
+            String rowDollar = m.group(4);
+            String rowNumberStr = m.group(5);
+
+            // cột
+            String newCol = colLetters;
+            if (!"$".equals(colDollar) && colShift != 0) {
+                int colIndex = CellReference.convertColStringToIndex(colLetters);
+                int newColIndex = Math.max(0, colIndex + colShift);
+                newCol = CellReference.convertNumToColString(newColIndex);
+            }
+
+            // hàng
+            String newRowStr = rowNumberStr;
+            if (!"$".equals(rowDollar) && rowShift != 0) {
+                int rowNum = Integer.parseInt(rowNumberStr);
+                int newRow = Math.max(1, rowNum + rowShift);
+                newRowStr = Integer.toString(newRow);
+            }
+
+            String replacement = sheetPrefix + colDollar + newCol + rowDollar + newRowStr;
+            m.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
 
 
 }
