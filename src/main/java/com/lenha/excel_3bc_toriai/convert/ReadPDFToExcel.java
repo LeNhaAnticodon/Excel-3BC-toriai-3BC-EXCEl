@@ -1838,15 +1838,21 @@ public class ReadPDFToExcel {
                     }
                 }
 
-
                 int soSanPhamExcel = lastRowSeihin - HANG_DAU_TIEN_CHUA_SAN_PHAM + 1;
 
+                // lấy row sau hàng sản phẩm cuối
                 Row sauHangSanPhamCuoi = sheet.getRow(lastRowSeihin + 1);
                 if (sauHangSanPhamCuoi == null) {
                     sauHangSanPhamCuoi = sheet.createRow(lastRowSeihin + 1);
                 }
 
+                // tạo cell sau hàng sản phẩm đầu tiên và ở cột vật liệu đầu tiên
+                // dán công thức mẫu vào cell
+                // các đoạn dưới tương tự
                 Cell sauHangSanPhamCuoiVaCotVatLieuDauTien = sauHangSanPhamCuoi.getCell(4);
+                if (sauHangSanPhamCuoiVaCotVatLieuDauTien == null) {
+                    sauHangSanPhamCuoiVaCotVatLieuDauTien = sauHangSanPhamCuoi.createCell(4);
+                }
                 sauHangSanPhamCuoiVaCotVatLieuDauTien.setCellFormula("SUM(Z9:AA" + (HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel + 1) + ")");
 
                 Row row7 = sheet.getRow(6);
@@ -1859,7 +1865,9 @@ public class ReadPDFToExcel {
                 }
 
                 Cell r7 = row7.getCell(17);
-                if (r7 == null) r7 = row7.createCell(17);
+                if (r7 == null) {
+                    r7 = row7.createCell(17);
+                }
                 r7.setCellFormula("B7*SUM(AN7:BA7)/1000");
 
                 Cell ao7 = row7.getCell(40);
@@ -1927,7 +1935,8 @@ public class ReadPDFToExcel {
                 oCuoiCotR.setCellFormula("SUM(BE9:BE" + (lastRowSeihin + 2) + ")");
 
 
-
+                // từ các cell công thức mẫu gọi hàm dán công thức vào các vùng cần thêm, có vùng sẽ dựa theo số lượng sản phẩm
+                // công thức thay đổi phù hợp theo ô và theo cột
                 copySrcCellToRange(sheet, sauHangSanPhamCuoiVaCotVatLieuDauTien, 6, 15, 2, lastRowSeihin + 1, lastRowSeihin + 1, 1, true);
                 copySrcCellToRange(sheet, ao7, 40, 51, 2, 6, 6, 1, true);
                 copySrcCellToRange(sheet, r10, 17, 17, 1, HANG_DAU_TIEN_CHUA_SAN_PHAM, lastRowSeihin, 1, true);
@@ -2039,20 +2048,40 @@ public class ReadPDFToExcel {
                 }
 */
 
+                unmergeAndFillCellsInRange(sheet, 0, 2, 0, 17);
+                int widthCol18 = sheet.getColumnWidth(18);
+                sheet.setColumnWidth(18, widthCol18);
+                sheet.setColumnWidth(19, widthCol18);
+                sheet.setColumnWidth(20, widthCol18);
+                sheet.setColumnWidth(21, widthCol18);
+                sheet.setColumnWidth(22, widthCol18);
+                sheet.setColumnWidth(23, widthCol18);
+                sheet.setColumnWidth(24, widthCol18);
 
+                // lưu giá trị công thức cũ của ô công thức gốc này mỗi lần lặp để gán lại cho nó khi công thức của nó bị thay đổi khôn đúng
+                String congThucSauHangSanPhamCuoiVaCotVatLieuDauTien = "SUM(Z9:AA" + (HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel + 1) + ")";
+                // thêm j lần các cột mới tại các cột công thức
+                for (int j = 0; j < 2; j++) {
+                    sheet.shiftColumns(42 + 4 * j, sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getLastCellNum(), 2);
+                    sheet.shiftColumns(27 + j, sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getLastCellNum(), 2);
+                    // sau khi dịch chuyển các cột ở dòng code trên thì công thức của sauHangSanPhamCuoiVaCotVatLieuDauTien đã bị thay đổi
+                    // nên cần gán lại công thức cũ của nó cho đúng
+                    sauHangSanPhamCuoiVaCotVatLieuDauTien.setCellFormula(congThucSauHangSanPhamCuoiVaCotVatLieuDauTien);
+                    sheet.shiftColumns(6, sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getLastCellNum(), 2);
+//                System.out.println("last col: " + sheet.getRow(6).getLastCellNum());
 
-//                // thêm j lần các cột mới tại các cột công thức
-//                for (int j = 0; j < 1; j++) {
-//                    sheet.shiftColumns(4, sheet.getRow(6).getLastCellNum(), 1);
-//                    sheet.shiftColumns(4 + 23 + j, sheet.getRow(6).getLastCellNum(), 1);
-//                    sheet.shiftColumns(4 + 41 + 2 * j, sheet.getRow(6).getLastCellNum(), 1);
-////                System.out.println("last col: " + sheet.getRow(6).getLastCellNum());
-//
-//                    // dịch chuyển 3 hàng tiêu đề về vị trí ban đầu sau khi bị dịch chuyển sang phải 1 hàng
-//                    for (int i = 0; i < 3; i++) {
-//                        Row row = sheet.getRow(i);
-//                        row.shiftCellsLeft(5, 10000, 1);
-//                    }
+                    // lấy lại công thức của cell sauHangSanPhamCuoiVaCotVatLieuDauTien trong vòng lặp này để
+                    // khi nó bị thay đổi công thức sai trong vòng lặp sau thì gán lại công thức đúng này cho nó
+                    congThucSauHangSanPhamCuoiVaCotVatLieuDauTien = sauHangSanPhamCuoiVaCotVatLieuDauTien.getCellFormula();
+
+                    // dịch chuyển các cột ở 6 hàng tiêu đề về vị trí ban đầu sau khi bị dịch chuyển sang phải 2 hàng
+                    for (int i = 0; i < 3; i++) {
+                        Row row = sheet.getRow(i);
+                        row.shiftCellsLeft(8, 10000, 2);
+                    }
+                    // dịch chuyển cột ở hàng tên người làm về vị trí ban đầu sau khi bị dịch chuyển sang phải 2 hàng
+                    sheet.getRow(lastRowSeihin + 6).shiftCellsLeft(8, 10000, 2);
+
 //
 //                    // sửa lại công thức tất cả các ô có giá trị L về K vì sau khi dịch chuyển 3 hàng tiêu đề về vị trí ban đầu
 //                    // công thức bị sai
@@ -2099,7 +2128,7 @@ public class ReadPDFToExcel {
 //                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
 //                }
 
-//            }
+            }
 
 
             /*// nếu số sản phẩm lớn hơn 1 bao nhiêu lần thì thêm số hàng sản phẩm số lần tương tự
@@ -2787,6 +2816,134 @@ public class ReadPDFToExcel {
         return sb.toString();
     }
 
+    /**
+     xóa các hợp nhất ô trong vùng chỉ định mà không giữ lại giá trị các ô bên phải và bên dưới
+     * @param sheet
+     * @param firstRow
+     * @param lastRow
+     * @param firstCol
+     * @param lastCol
+     */
+    public static void unmergeRegionsInRange(Sheet sheet,
+                                             int firstRow, int lastRow,
+                                             int firstCol, int lastCol) {
+        // Duyệt ngược để tránh thay đổi index khi remove
+        for (int i = sheet.getNumMergedRegions() - 1; i >= 0; i--) {
+            CellRangeAddress merged = sheet.getMergedRegion(i);
 
+            // Kiểm tra có giao nhau với vùng chỉ định không
+            boolean intersects = !(merged.getFirstRow() > lastRow
+                    || merged.getLastRow() < firstRow
+                    || merged.getFirstColumn() > lastCol
+                    || merged.getLastColumn() < firstCol);
+
+            if (intersects) {
+                sheet.removeMergedRegion(i);
+            }
+        }
+    }
+
+    /**
+     xóa các hợp nhất ô trong vùng chỉ định mà giữ lại giá trị tại tất cả các ô
+     * @param sheet
+     * @param firstRow
+     * @param lastRow
+     * @param firstCol
+     * @param lastCol
+     */
+    public static void unmergeAndFillCellsInRange(Sheet sheet,
+                                                  int firstRow, int lastRow,
+                                                  int firstCol, int lastCol) {
+        for (int i = sheet.getNumMergedRegions() - 1; i >= 0; i--) {
+            CellRangeAddress merged = sheet.getMergedRegion(i);
+
+            boolean intersects = !(merged.getFirstRow() > lastRow
+                    || merged.getLastRow() < firstRow
+                    || merged.getFirstColumn() > lastCol
+                    || merged.getLastColumn() < firstCol);
+
+            if (!intersects) continue;
+
+            int r1 = merged.getFirstRow();
+            int c1 = merged.getFirstColumn();
+
+            Row row = sheet.getRow(r1);
+            Cell topLeft = (row == null) ? null : row.getCell(c1);
+
+            Object value = null;
+            CellType type = null;
+            CellStyle style = null;
+
+            if (topLeft != null) {
+                type = topLeft.getCellType();
+                style = topLeft.getCellStyle();
+
+                switch (type) {
+                    case STRING:
+                        value = topLeft.getStringCellValue();
+                        break;
+                    case NUMERIC:
+                        value = topLeft.getNumericCellValue();
+                        break;
+                    case BOOLEAN:
+                        value = topLeft.getBooleanCellValue();
+                        break;
+                    case FORMULA:
+                        value = topLeft.getCellFormula();
+                        break;
+                    case ERROR:
+                        value = topLeft.getErrorCellValue(); // byte
+                        break;
+                    case BLANK:
+                    default:
+                        value = null;
+                        break;
+                }
+            }
+
+            // Remove merged region trước khi điền từng ô
+            sheet.removeMergedRegion(i);
+
+            for (int r = r1; r <= merged.getLastRow(); r++) {
+                Row rr = sheet.getRow(r);
+                if (rr == null) rr = sheet.createRow(r);
+                for (int c = c1; c <= merged.getLastColumn(); c++) {
+                    Cell cell = rr.getCell(c);
+                    if (cell == null) cell = rr.createCell(c);
+
+                    if (style != null) cell.setCellStyle(style);
+
+                    if (value != null && type != null) {
+                        switch (type) {
+                            case STRING:
+                                cell.setCellValue((String) value);
+                                break;
+                            case NUMERIC:
+                                cell.setCellValue(((Number) value).doubleValue());
+                                break;
+                            case BOOLEAN:
+                                cell.setCellValue((Boolean) value);
+                                break;
+                            case FORMULA:
+                                cell.setCellFormula((String) value);
+                                break;
+                            case ERROR:
+                                if (value instanceof Byte) {
+                                    cell.setCellErrorValue((Byte) value);
+                                } else if (value instanceof Number) {
+                                    cell.setCellErrorValue(((Number) value).byteValue());
+                                }
+                                break;
+                            default:
+                                cell.setBlank();
+                                break;
+                        }
+                    } else {
+                        cell.setBlank();
+                    }
+                }
+            }
+        }
+    }
 
 }
