@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
@@ -21,6 +22,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.lenha.excel_3bc_toriai.convert.excelTo3bc.ReadExcel.*;
 
@@ -1826,18 +1829,35 @@ public class ReadPDFToExcel {
 
             // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
             // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
-            if (soBoZai < 6) {
+//            if (soBoZai < 6) {
                 InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/sample files2.xlsx");
                 assert sourceFile != null;
                 Workbook excelMau = new XSSFWorkbook(sourceFile);
                 Sheet sheetMau = excelMau.getSheetAt(0);
                 int soSanPhamExcel = lastRowSeihin - HANG_DAU_TIEN_CHUA_SAN_PHAM + 1;
 
+                Cell sauHangSanPhamCuoiCotVatLieuDauTien = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel).getCell(4);
+                sauHangSanPhamCuoiCotVatLieuDauTien.setCellFormula("SUM(Z9:AA" + (HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel) + ")");
+
+                String originalFormula = sauHangSanPhamCuoiCotVatLieuDauTien.getCellFormula();
+                for (int i = 0; i < 9; i++) {
+                    Cell sauHangSanPhamCuoiThuI = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel).getCell(i + 6);
+                    String newFormula = shiftFormulaColumns(originalFormula, 2 + i); // +2 cột
+                    sauHangSanPhamCuoiThuI.setCellType(CellType.FORMULA);
+                    sauHangSanPhamCuoiThuI.setCellFormula(newFormula);
+//                    copyCellWithFormulaUpdate(sauHangSanPhamCuoiCotVatLieuDauTien, sauHangSanPhamCuoiThuI, 2);
+                    i++;
+                }
+
 
                 // copy ô r7 và r10 của excel mẫu vào excel đang tạo
                 copyRanges(sheetMau, sheet, new int[]{6, 9}, 17, 17, (XSSFWorkbook) workbook);
+                // copy vùng Z10-AK10 của excel mẫu vào excel đang tạo
+                copyRanges(sheetMau, sheet, new int[]{9}, 25, 36, (XSSFWorkbook) workbook);
                 // copy vùng AO7-AZ7 và A10-AZ10 của excel mẫu vào excel đang tạo
                 copyRanges(sheetMau, sheet, new int[]{6, 9}, 39, 52, (XSSFWorkbook) workbook);
+
+
 
                 // đến đây đã tạo được các hàng công thức mẫu của hàng sản phẩm đầu tiên, hàng 10, chỉ số hàng 9
                 // chỉ có thể copy từ excel mẫu được hàng đầu tiên vì excel mẫu chỉ có 1 hàng, có 1 hàng không biết sheet cần chỉnh có bao nhiêu sản phẩm
@@ -1856,10 +1876,12 @@ public class ReadPDFToExcel {
                     // thêm tham số thứ 3 là khoảng cách hàng copy với hàng sản phẩm đầu tiên để biết cách thay đổi công thức cho phù hợp với hàng được dán
                     copyRowCellWithFormulaUpdate(r10, dstCell, i + 1);
 
-                    // copy các công thức từ cột AO đến cột AZ(cách nhau 12 cột) của hàng sản phẩm đầu tiên vào các hàng đang lặp
+                    // copy các công thức từ cột AO đến cột AZ(cách nhau 12 cột) của hàng sản phẩm đầu tiên(HANG_DAU_TIEN_CHUA_SAN_PHAM) vào các hàng đang lặp
+                    // copy các công thức từ cột Z đến cột AK(cách nhau 12 cột) của hàng sản phẩm đầu tiên(HANG_DAU_TIEN_CHUA_SAN_PHAM) vào các hàng đang lặp
                     for (int j = 0; j < 12; j++) {
+                        // copy các công thức từ cột AO đến cột AZ(cách nhau 12 cột) của hàng sản phẩm đầu tiên(HANG_DAU_TIEN_CHUA_SAN_PHAM) vào các hàng đang lặp
                         // lấy cell của sản phẩm hàng đầu tiên tại cột đang lặp
-                        Cell srcCell = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(j + 40);
+                        Cell srcCell = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(j + 40);// 40 là chỉ số cột AO
                         // lấy cell của sản phẩm cần dán tại hàng sản phẩm đang lặp và tại cột cần dán đang lặp
                         dstCell = sheet.getRow(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1).getCell(j + 40);
                         // nếu cell chưa tồn tại thì tạo nó
@@ -1870,6 +1892,22 @@ public class ReadPDFToExcel {
                         CellRangeAddress cellRangeAddress = new CellRangeAddress(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1, i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1
                                 , j + 40, j + 40 + 1);
                         sheet.addMergedRegion(cellRangeAddress);
+
+
+                        // tương tự như cách copy cột AO đến AZ ở trên
+                        // copy các công thức từ cột Z đến cột AK(cách nhau 12 cột) của hàng sản phẩm đầu tiên(HANG_DAU_TIEN_CHUA_SAN_PHAM) vào các hàng đang lặp
+                        // lấy cell của sản phẩm hàng đầu tiên tại cột đang lặp
+                        srcCell = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(j + 25);// 25 là chỉ số cột Z
+                        // lấy cell của sản phẩm cần dán tại hàng sản phẩm đang lặp và tại cột cần dán đang lặp
+                        dstCell = sheet.getRow(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1).getCell(j + 25);
+                        // nếu cell chưa tồn tại thì tạo nó
+                        if (dstCell == null) dstCell = sheet.getRow(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1).createCell(j + 25);
+                        // gọi hàm copy, dán và update công thức theo hàng để dán công thức từ hàng đầu tiên vào
+                        copyRowCellWithFormulaUpdate(srcCell, dstCell, i + 1);
+                        // gộp ô cột được dán với ô ở cột tiếp theo vì các công thức này nằm trên 2 ô cùng hàng
+                        cellRangeAddress = new CellRangeAddress(i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1, i + HANG_DAU_TIEN_CHUA_SAN_PHAM + 1
+                                , j + 25, j + 25 + 1);
+                        sheet.addMergedRegion(cellRangeAddress);
                         // tự động tăng j để bỏ qua 1 cột vì ô ở cột tiếp theo đã được gộp với ô ở cột hiện tại
                         j++;
                     }
@@ -1877,9 +1915,9 @@ public class ReadPDFToExcel {
                 }
 
 
-//
+
 //                // thêm j lần các cột mới tại các cột công thức
-//                for (int j = 0; j < soBoZai - 15; j++) {
+//                for (int j = 0; j < 1; j++) {
 //                    sheet.shiftColumns(4, sheet.getRow(6).getLastCellNum(), 1);
 //                    sheet.shiftColumns(4 + 23 + j, sheet.getRow(6).getLastCellNum(), 1);
 //                    sheet.shiftColumns(4 + 41 + 2 * j, sheet.getRow(6).getLastCellNum(), 1);
@@ -1936,7 +1974,7 @@ public class ReadPDFToExcel {
 //                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
 //                }
 
-            }
+//            }
 
 
             /*// nếu số sản phẩm lớn hơn 1 bao nhiêu lần thì thêm số hàng sản phẩm số lần tương tự
@@ -2400,6 +2438,24 @@ public class ReadPDFToExcel {
             }
         }
         return updatedFormula.toString();
+    }
+
+    // formula: ví dụ "SUM(Z9:AA12)"
+    public static String shiftFormulaColumns(String formula, int shift) {
+        // Pattern bắt được tham chiếu dạng A1, Z9, AA12, ...
+        Pattern p = Pattern.compile("([A-Z]+)(\\d+)");
+        Matcher m = p.matcher(formula);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            String colStr = m.group(1);           // "Z" hoặc "AA"
+            String rowStr = m.group(2);           // "9" hoặc "12"
+            int colIndex = CellReference.convertColStringToIndex(colStr);
+            int newColIndex = colIndex + shift;   // dịch số cột
+            String newColStr = CellReference.convertNumToColString(newColIndex);
+            m.appendReplacement(sb, newColStr + rowStr);
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 
 
