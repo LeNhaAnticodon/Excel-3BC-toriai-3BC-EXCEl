@@ -24,6 +24,9 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static com.lenha.excel_3bc_toriai.convert.excelTo3bc.ReadExcel.*;
 
@@ -154,7 +157,7 @@ public class ReadPDFToExcel {
         excelCopyPath = excelDirPath + "\\" + fileExcelName + ".xlsx";
         // Tạo đối tượng File đại diện cho file cần xóa
         File file = new File(excelCopyPath);
-        // Kiểm tra nếu file tồn tại và xóa nó
+        // Kiểm tra nếu file tồn tại thì xóa nó
         // vì nếu file đang được mở thì không thể ghi đè nhưng do file là readonly nên có thể xóa dù đang mở
         // xóa xong file thì có thể ghi lại file mới mà không bị lỗi không thể ghi đè
         if (file.exists()) {
@@ -235,9 +238,11 @@ public class ReadPDFToExcel {
 //            workbook.removeSheetAt(0);
 
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
-            ((XSSFWorkbook) workbook).setForceFormulaRecalculation(true);
+            workbook.setForceFormulaRecalculation(true);
             try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
                 workbook.write(fileOut);
+                // xóa file gây lỗi khi excel không tự động tính toán lại công thức
+                writeWithoutCalcChain(workbook, new File(excelCopyPath));
 
                 workbook.close();
             }
@@ -1829,7 +1834,7 @@ public class ReadPDFToExcel {
 
             // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
             // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
-//            if (soBoZai < 6) {
+            if (soBoZai < 6) {
                 // xóa sạch dữ liệu vùng chỉ định đang có dữ liệu cần ghi đè để tránh sau 1 cell trong vùng khi bị ghi đè mà lại gộp cell
                 // sẽ gặp tình trạng báo lỗi nếu nhiều cell cùng có giá trị
                 for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
@@ -1837,6 +1842,14 @@ public class ReadPDFToExcel {
                         sheet.getRow(i).getCell(j).setBlank();
                     }
                 }
+                for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM - 3; i <= HANG_DAU_TIEN_CHUA_SAN_PHAM - 2; i++) {
+                    for (int j = 3; j <= 14; j++) {
+                        sheet.getRow(i).getCell(j).setBlank();
+                    }
+                }
+                Cell b7 = sheet.getRow(7).getCell(1);
+                b7.setBlank();
+                b7.setCellValue(2);
 
                 int soSanPhamExcel = lastRowSeihin - HANG_DAU_TIEN_CHUA_SAN_PHAM + 1;
 
@@ -2047,7 +2060,7 @@ public class ReadPDFToExcel {
 
                 }
 */
-
+                // xóa hợp nhất các ô vùng thông tin để không bị lỗi khi thêm cột, sau khi làm hết việc sẽ fomat lại hợp nhất ô như ban đầu
                 unmergeAndFillCellsInRange(sheet, 0, 2, 0, 17);
                 int widthCol18 = sheet.getColumnWidth(18);
                 sheet.setColumnWidth(18, widthCol18);
@@ -2074,13 +2087,18 @@ public class ReadPDFToExcel {
                     // khi nó bị thay đổi công thức sai trong vòng lặp sau thì gán lại công thức đúng này cho nó
                     congThucSauHangSanPhamCuoiVaCotVatLieuDauTien = sauHangSanPhamCuoiVaCotVatLieuDauTien.getCellFormula();
 
-                    // dịch chuyển các cột ở 6 hàng tiêu đề về vị trí ban đầu sau khi bị dịch chuyển sang phải 2 hàng
-                    for (int i = 0; i < 3; i++) {
-                        Row row = sheet.getRow(i);
-                        row.shiftCellsLeft(8, 10000, 2);
+                    // dịch chuyển các cột ở 3 hàng tiêu đề và hàng tên người làm về vị trí ban đầu sau khi bị dịch chuyển sang phải 2 hàng
+                    for (int i = 0; i < sheet.getLastRowNum(); i++) {
+                        if (i < 3 || i > lastRowSeihin + 5) {
+                            Row row = sheet.getRow(i);
+//                            row.shiftCellsLeft(48 + j * 4, 10000, 2);
+//                            row.shiftCellsLeft(31 + j * 2, 10000, 2);
+
+                            row.shiftCellsLeft(8, 10000, 2);
+
+                        }
+
                     }
-                    // dịch chuyển cột ở hàng tên người làm về vị trí ban đầu sau khi bị dịch chuyển sang phải 2 hàng
-                    sheet.getRow(lastRowSeihin + 6).shiftCellsLeft(8, 10000, 2);
 
 //
 //                    // sửa lại công thức tất cả các ô có giá trị L về K vì sau khi dịch chuyển 3 hàng tiêu đề về vị trí ban đầu
@@ -2097,18 +2115,44 @@ public class ReadPDFToExcel {
 //                        }
 //                    }
 //
-//                    Cell srcCell;
-//                    Cell destCell;
-//
-//                    // sao chép ô từ cột 3 sang cột 4 từ hàng 3 đến hàng 9 trong 2 cột này
-//                    // cần tạo cell ở cột 4 bị phép dịch chuyển cột ở trên thực chất chưa tạo cell mới
-//                    for (int i = 3; i <= 9; i++) {
-//                        Row row = sheet.getRow(i);
-//                        // Sao chép ô từ cột srcColumn sang destColumn
-//                        srcCell = row.getCell(3);
-//                        destCell = row.createCell(4);
-//                        copyCellWithFormulaUpdate(srcCell, destCell, 1);
-//                    }
+                    Cell srcCell;
+                    Cell destCell;
+
+                    // sao chép ô từ cột 5, 6 sang cột 7, 8 từ hàng 4 đến hàng cuối chứa sản phẩm
+                    // cần tạo cell ở cột 7, 8 bị phép dịch chuyển cột ở trên thực chất chưa tạo cell mới
+                    for (int i = 3; i <= lastRowSeihin + 5; i++) {
+                        Row row = sheet.getRow(i);
+                        // Sao chép ô từ cột srcColumn sang destColumn trong các cột tính vật liệu sản phẩm
+                        srcCell = row.getCell(4);
+                        int destCol = 6;
+                        row.createCell(destCol);
+                        row.createCell(destCol + 1);
+                        copySrcCellToRange(sheet, srcCell, destCol, destCol, 1, i, i, 1, true);
+                        srcCell = row.getCell(5);
+                        destCell = row.getCell(7);
+                        destCell.setCellStyle(srcCell.getCellStyle());
+
+                        // Sao chép ô từ cột srcColumn sang destColumn trong các cột công thức tự tạo đầu tiên
+                        // vì thực hiện sau khi đã thêm 2 cột ở sản phẩm làm vùng này tăng lên 2 cột nên ô công thức gốc
+                        // có chỉ số cột không còn là 25 nữa mà là 27, còn ô cần dán không còn 27 nữa mà là 29,
+                        // rồi do tính theo số lần thêm cột ở cột sản phẩm nên thêm j * 2
+                        srcCell = row.getCell(27 + j * 2);
+                        destCol = 29 + j * 2;
+                        row.createCell(destCol);
+                        row.createCell(destCol + 1);
+                        copySrcCellToRange(sheet, srcCell, destCol, destCol, 1, i, i, 1, true);
+
+                        // Sao chép ô từ cột srcColumn sang destColumn trong các cột công thức tự tạo thứ hai vì thực hiện
+                        // sau khi đã thêm 2 cột ở sản phẩm và 2 cột ở công thức tự tạo đầu tiên làm vùng này tăng lên 2 + 2 cột
+                        // nên ô công thức gốc có chỉ số cột không còn là 40 nữa mà là 40 + 2 + 2 = 44, còn ô cần dán
+                        // không còn 42 nữa mà là 42 + 2 + 2 = 46, rồi do tính theo số lần thêm 2 cột ở sản phẩm và 2 cột ở công thức tự tạo đầu tiên nên thêm j * (2 + 2)
+                        srcCell = row.getCell(44 + j * 4);
+                        destCol = 46 + j * 4;
+                        row.createCell(destCol);
+                        row.createCell(destCol + 1);
+                        copySrcCellToRange(sheet, srcCell, destCol, destCol, 1, i, i, 1, true);
+
+                    }
 //
 //                    // tại hàng 7 copy ô từ cột 26 sang 27
 //                    Row row7Formula = sheet.getRow(6);
@@ -2126,7 +2170,7 @@ public class ReadPDFToExcel {
 //                    srcCell = row4Formula.getCell(44 + 2 * j);
 //                    destCell = row4Formula.createCell(45 + 2 * j);
 //                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
-//                }
+                }
 
             }
 
@@ -2256,13 +2300,12 @@ public class ReadPDFToExcel {
             sheet.protectSheet("");*/
 
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
-            ((XSSFWorkbook) workbook).setForceFormulaRecalculation(true);
+            workbook.setForceFormulaRecalculation(true);
             try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
                 workbook.write(fileOut);
 
                 workbook.close();
             }
-
 
         } catch (IOException e) {
             if (e instanceof FileNotFoundException) {
@@ -2278,6 +2321,38 @@ public class ReadPDFToExcel {
 //        System.out.println("tong chieu dai san pham " + seiHinChouGoukei);
 /*        excelFileNames.add(new ExcelFile("Sheet " + sheetIndex + ": " + kouSyu, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));*/
 
+    }
+
+    public static void writeWithoutCalcChain(Workbook wb, File outFile) throws IOException {
+        // 1) write workbook to byte[] in memory
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        wb.write(bos);
+        wb.close();
+        byte[] xlsxBytes = bos.toByteArray();
+
+        // 2) open as zip, copy entries except xl/calcChain.xml
+        try (ZipInputStream zin = new ZipInputStream(new ByteArrayInputStream(xlsxBytes));
+             ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(outFile))) {
+
+            ZipEntry entry;
+            byte[] buffer = new byte[8192];
+            while ((entry = zin.getNextEntry()) != null) {
+                String name = entry.getName();
+                if ("xl/calcChain.xml".equals(name)) {
+                    // skip it
+                    zin.closeEntry();
+                    continue;
+                }
+                // copy entry
+                zout.putNextEntry(new ZipEntry(name));
+                int len;
+                while ((len = zin.read(buffer)) != -1) {
+                    zout.write(buffer, 0, len);
+                }
+                zout.closeEntry();
+                zin.closeEntry();
+            }
+        }
     }
 
     /**
@@ -2669,8 +2744,12 @@ public class ReadPDFToExcel {
 
                     Cell target = getOrCreateCell(sheet, r, c);
 
-                    if (srcCell.getCellStyle().getAlignment() != null){
-                        target.getCellStyle().setAlignment(srcCell.getCellStyle().getAlignment());
+//                    if (srcCell.getCellStyle().getAlignment() != null){
+//                        target.getCellStyle().setAlignment(srcCell.getCellStyle().getAlignment());
+//                    }
+                    // gán kiểu của cell gốc cho cell mới
+                    if (srcCell.getCellStyle() != null){
+                        target.setCellStyle(srcCell.getCellStyle());
                     }
 
                     // copy style
@@ -2698,7 +2777,10 @@ public class ReadPDFToExcel {
                     if (r == srcRowIndex && c == srcColIndex) continue;
 
                     Cell target = getOrCreateCell(sheet, r, c);
-                    target.setCellStyle(srcCell.getCellStyle());
+                    // gán kiểu của cell gốc cho cell mới
+                    if (srcCell.getCellStyle() != null){
+                        target.setCellStyle(srcCell.getCellStyle());
+                    }
 
                     int colShift = c - srcColIndex;
                     int rowShift = r - srcRowIndex;
