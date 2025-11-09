@@ -1831,6 +1831,8 @@ public class ReadPDFToExcel {
             System.out.println("Các sản phẩm của vật liệu " + kouSyu + " trên Excel và 3bc khớp nhau");
 
 
+            int doRongCuCotTongChieuDaiSanPham = sheet.getColumnWidth(16);
+            int doRongCuCotSoSanPhamChuaTinh = sheet.getColumnWidth(17);
 
             // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
             // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
@@ -1843,10 +1845,17 @@ public class ReadPDFToExcel {
                     }
                 }
                 for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM - 3; i <= HANG_DAU_TIEN_CHUA_SAN_PHAM - 2; i++) {
-                    for (int j = 3; j <= 14; j++) {
+                    for (int j = 4; j <= 15; j++) {
                         sheet.getRow(i).getCell(j).setBlank();
                     }
                 }
+
+                for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
+                    for (int j = 4; j <= 15; j++) {
+                        sheet.getRow(i).getCell(j).setBlank();
+                    }
+                }
+
                 Cell b7 = sheet.getRow(7).getCell(1);
                 b7.setBlank();
                 b7.setCellValue(2);
@@ -2062,6 +2071,8 @@ public class ReadPDFToExcel {
 */
                 // xóa hợp nhất các ô vùng thông tin để không bị lỗi khi thêm cột, sau khi làm hết việc sẽ fomat lại hợp nhất ô như ban đầu
                 unmergeAndFillCellsInRange(sheet, 0, 2, 0, 17);
+
+                // cài đặt lại độ rộng các cột cho phù hợp
                 int widthCol18 = sheet.getColumnWidth(18);
                 sheet.setColumnWidth(18, widthCol18);
                 sheet.setColumnWidth(19, widthCol18);
@@ -2174,6 +2185,20 @@ public class ReadPDFToExcel {
 
             }
 
+            // cài đặt lại độ rộng các cột vật liệu mới được thêm vào cho giống với độ rộng của các cột vật liệu cũ
+            int widthCol5 = sheet.getColumnWidth(4);
+            int widthCol6 = sheet.getColumnWidth(5);
+            for (int i = 6; i < 15 + 2 * 2; i += 2) {
+                sheet.setColumnWidth(i, widthCol5);
+                sheet.setColumnWidth(i + 1, widthCol6);
+            }
+
+            // cài đặt lại độ rộng các cột tổng chiều dài sản phẩm và số lượng của sản phẩm chưa tính vật liệu vì sau khi
+            // thêm các cột sản phẩm mới nó bị dịch chuyển sang cột khác
+            sheet.setColumnWidth(15 + 3 * 2, doRongCuCotTongChieuDaiSanPham);
+            sheet.setColumnWidth(15 + 3 * 2 + 1, doRongCuCotSoSanPhamChuaTinh);
+
+
 
             /*// nếu số sản phẩm lớn hơn 1 bao nhiêu lần thì thêm số hàng sản phẩm số lần tương tự
             if (soSanPham > 1) {
@@ -2196,15 +2221,15 @@ public class ReadPDFToExcel {
                     }
                 }
             }*/
-/*
-            // ghi tất cả sản phẩm vào excel
+
+            /*// ghi tất cả sản phẩm vào excel
             for (int i = 0; i < soSanPham; i++) {
                 Double length = seiHinList.get(i);
                 // ghi chiều dài sản phẩm
                 sheet.getRow(i + 6).getCell(0).setCellValue(length);
                 // ghi số lượng sản phẩm
                 sheet.getRow(i + 6).getCell(1).setCellValue(seiHinMap.get(length));
-            }
+            }*/
 
 
             // ghi bozai và sản phẩm trong bozai
@@ -2213,6 +2238,8 @@ public class ReadPDFToExcel {
             // lặp qua các cặp tính vật liệu, mỗi cặp gồm "bozai-số lượng trong map kouZaiChouPairs(nằm trong map nhưng thực tế nó chỉ có 1 cặp)"
             // và "các bộ chiều dài sản phẩm và số lượng trong map meiSyouPairs"
             for (Map.Entry<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> entry : kaKouPairs.entrySet()) {
+                // lấy chỉ số cột vật liệu đang lặp
+                int colBozai = 4 + numBozai;
 
                 Map<StringBuilder, Integer> kouZaiChouPairs = entry.getKey();
                 Map<StringBuilder[], Integer> meiSyouPairs = entry.getValue();
@@ -2220,8 +2247,8 @@ public class ReadPDFToExcel {
                 // Ghi bozai và số lượng của nó
                 for (Map.Entry<StringBuilder, Integer> kouZaiEntry : kouZaiChouPairs.entrySet()) {
 
-                    sheet.getRow(3).getCell(3 + numBozai).setCellValue(String.valueOf(kouZaiEntry.getKey()));
-                    sheet.getRow(4).getCell(3 + numBozai).setCellValue(String.valueOf(kouZaiEntry.getValue()));
+                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 3).getCell(colBozai).setCellValue(String.valueOf(kouZaiEntry.getKey()));
+                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 2).getCell(colBozai).setCellValue(String.valueOf(kouZaiEntry.getValue()));
 
                     kouzaiChouGoukei += Double.parseDouble(String.valueOf(kouZaiEntry.getKey())) * kouZaiEntry.getValue();
                 }
@@ -2229,18 +2256,18 @@ public class ReadPDFToExcel {
                 // lặp qua các chiều dài sản phẩm trong cặp tính vật liệu này và tìm trong hàng có chiều dài sản phẩm
                 // tương ứng trong cột sản phẩm, dóng sang cột bozai đang tạo là tìm được ô cần ghi sô lượng, sau đó ghi cộng dồn số lượng vào ô đó
                 for (Map.Entry<StringBuilder[], Integer> meiSyouEntry : meiSyouPairs.entrySet()) {
-                    // chiều dài sản phẩm
+                    // chiều dài sản phẩm trong map
                     Double length = Double.valueOf(meiSyouEntry.getKey()[1].toString());
-                    // số lượng sản phẩm
+                    // số lượng sản phẩm trong map
                     int num = Integer.parseInt(meiSyouEntry.getValue().toString());
 
-                    // hàng chứa sản phẩm, +6 vì cột chứa sản phẩm bắt đầu chứa các sản phẩm từ hàng thứ 6
-                    int indexSeiHinRow = seiHinList.indexOf(length) + 6;
+                    // hàng chứa sản phẩm, +9 vì cột chứa sản phẩm bắt đầu chứa các sản phẩm từ hàng thứ 9
+                    int indexSeiHinRow = seiHinList.indexOf(length) + HANG_DAU_TIEN_CHUA_SAN_PHAM;
 
-                    // lấy cell chứa số lượng của sản phẩm
-                    Cell cellSoLuong = sheet.getRow(indexSeiHinRow).getCell(3 + numBozai);
+                    // lấy cell chứa số lượng của sản phẩm trong hàng sản phẩm và trong cột bozai đang lặp
+                    Cell cellSoLuong = sheet.getRow(indexSeiHinRow).getCell(colBozai);
 
-                    // lấy số lượng cũ của cell
+                    // lấy số lượng cũ của cell trong hàng sản phẩm và trong cột bozai đang lặp
                     double oldNum = 0d;
                     // nếu cell có type là số thì nó đã có số lượng từ trước thì gán nó cho số lượng cũ
                     if (cellSoLuong.getCellType() == CellType.NUMERIC) {
@@ -2250,26 +2277,26 @@ public class ReadPDFToExcel {
                     // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
                     // không thì ghi cell với số lượng hiện tại
                     if (oldNum > 0d) {
-                        sheet.getRow(indexSeiHinRow).getCell(3 + numBozai).setCellValue(num + oldNum);
+                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(num + oldNum);
                     } else {
-                        sheet.getRow(indexSeiHinRow).getCell(3 + numBozai).setCellValue(num);
+                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(num);
                     }
 
-                    // thống kê phục vụ cho hiển thị thông tin trên phầm mềm
+                    /*// thống kê phục vụ cho hiển thị thông tin trên phầm mềm
                     double totalLength = Double.parseDouble(String.valueOf(meiSyouEntry.getKey()[1])) * Double.parseDouble(meiSyouEntry.getValue().toString());
                     Cell cellSoLuongBozai = sheet.getRow(4).getCell(3 + numBozai);
                     if (cellSoLuongBozai.getCellType() == CellType.STRING) {
                         totalLength *= Double.parseDouble(cellSoLuongBozai.getStringCellValue());
                     }
 
-                    seiHinChouGoukei += totalLength;
+                    seiHinChouGoukei += totalLength;*/
 
                 }
 
-                numBozai++;
+                numBozai += 2;
             }
 
-            // số cột chứa thông tin tính toán tự tạo sẽ ẩn đi khi đã nhập xong tính vật liệu để tránh rối
+            /*// số cột chứa thông tin tính toán tự tạo sẽ ẩn đi khi đã nhập xong tính vật liệu để tránh rối
             int numColHide;
             // nếu số bozai < 15 thì số cột cần ẩn là 15, nếu không thì số cột ẩn là số bozai
             if (soBoZai < 15) {
