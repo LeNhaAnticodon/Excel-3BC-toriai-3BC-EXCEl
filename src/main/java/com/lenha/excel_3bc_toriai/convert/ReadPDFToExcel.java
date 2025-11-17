@@ -1836,7 +1836,9 @@ public class ReadPDFToExcel {
 
             // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
             // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
-            if (soBoZai < 6) {
+//            soBoZai = 18;
+            int soSanPhamCanThem = soBoZai - 6;
+            if (soBoZai > 6) {
                 // xóa sạch dữ liệu vùng chỉ định đang có dữ liệu cần ghi đè để tránh sau 1 cell trong vùng khi bị ghi đè mà lại gộp cell
                 // sẽ gặp tình trạng báo lỗi nếu nhiều cell cùng có giá trị
                 for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
@@ -2088,9 +2090,10 @@ public class ReadPDFToExcel {
                 // lưu giá trị công thức cũ của ô công thức gốc này mỗi lần lặp để gán lại cho nó khi công thức của nó bị thay đổi khôn đúng
                 String congThucSauHangSanPhamCuoiVaCotVatLieuDauTien = "SUM(Z9:AA" + (HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel + 1) + ")";
                 // thêm j lần các cột mới tại các cột công thức
-                for (int j = 0; j < 2; j++) {
+                int soBozaiCanThem = soBoZai - 6;
+                for (int j = 0; j < soBozaiCanThem; j++) {
                     sheet.shiftColumns(42 + 4 * j, sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getLastCellNum(), 2);
-                    sheet.shiftColumns(27 + j, sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getLastCellNum(), 2);
+                    sheet.shiftColumns(27 + 2 * j, sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getLastCellNum(), 2);
                     // sau khi dịch chuyển các cột ở dòng code trên thì công thức của sauHangSanPhamCuoiVaCotVatLieuDauTien đã bị thay đổi
                     // nên cần gán lại công thức cũ của nó cho đúng
                     sauHangSanPhamCuoiVaCotVatLieuDauTien.setCellFormula(congThucSauHangSanPhamCuoiVaCotVatLieuDauTien);
@@ -2194,15 +2197,15 @@ public class ReadPDFToExcel {
             // cài đặt lại độ rộng các cột vật liệu mới được thêm vào cho giống với độ rộng của các cột vật liệu cũ
             int widthCol5 = sheet.getColumnWidth(4);
             int widthCol6 = sheet.getColumnWidth(5);
-            for (int i = 6; i <= 15 + 2 * 2; i += 2) {
+            for (int i = 6; i <= 15 + soSanPhamCanThem * 2; i += 2) {
                 sheet.setColumnWidth(i, widthCol5);
                 sheet.setColumnWidth(i + 1, widthCol6);
             }
 
             // cài đặt lại độ rộng các cột tổng chiều dài sản phẩm và số lượng của sản phẩm chưa tính vật liệu vì sau khi
             // thêm các cột sản phẩm mới nó bị dịch chuyển sang cột khác
-            sheet.setColumnWidth(15 + 2 * 2, doRongCuaCotTongChieuDaiSanPham);
-            sheet.setColumnWidth(15 + 2 * 2 + 1, doRongCuaCotSoSanPhamChuaTinh);
+            sheet.setColumnWidth(16 + soSanPhamCanThem * 2, doRongCuaCotTongChieuDaiSanPham);
+            sheet.setColumnWidth(17 + soSanPhamCanThem * 2, doRongCuaCotSoSanPhamChuaTinh);
 
 
 
@@ -2244,145 +2247,145 @@ public class ReadPDFToExcel {
             // lặp qua các cặp tính vật liệu, mỗi cặp gồm "bozai-số lượng trong map kouZaiChouPairs(nằm trong map nhưng thực tế nó chỉ có 1 cặp)"
             // và "các bộ chiều dài sản phẩm và số lượng trong map meiSyouPairs"
             for (Map.Entry<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> entry : kaKouPairs.entrySet()) {
-                // lấy chỉ số cột vật liệu đang lặp
-                int colBozai = 4 + numBozai;
-
-                Map<StringBuilder, Integer> kouZaiChouPairs = entry.getKey();
-                Map<StringBuilder[], Integer> meiSyouPairs = entry.getValue();
-
-                // chiều dài vật liệu đang xét
-                double chieuDaiBozai;
-                // số lượng của vật liệu đang xét
-                int soLuongCuaBozai = 0;
-
-                // Ghi bozai và số lượng của nó
-                for (Map.Entry<StringBuilder, Integer> kouZaiEntry : kouZaiChouPairs.entrySet()) {
-                    chieuDaiBozai = Double.parseDouble(String.valueOf(kouZaiEntry.getKey()));
-                    soLuongCuaBozai = Integer.parseInt(String.valueOf(kouZaiEntry.getValue()));
-
-                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 3).getCell(colBozai).setCellValue(String.valueOf(kouZaiEntry.getKey()));
-                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 2).getCell(colBozai).setCellValue(String.valueOf(kouZaiEntry.getValue()));
-
-                    kouzaiChouGoukei += Double.parseDouble(String.valueOf(kouZaiEntry.getKey())) * kouZaiEntry.getValue();
-                }
-
-                // lặp qua các chiều dài sản phẩm trong cặp tính vật liệu này và tìm trong hàng có chiều dài sản phẩm
-                // tương ứng trong cột sản phẩm, dóng sang cột bozai đang tạo là tìm được ô cần ghi sô lượng, sau đó ghi cộng dồn số lượng vào ô đó
-                for (Map.Entry<StringBuilder[], Integer> meiSyouEntry : meiSyouPairs.entrySet()) {
-                    // chiều dài sản phẩm trong map
-                    double chieuDaiSanPhamTrongMap = Double.parseDouble(meiSyouEntry.getKey()[1].toString());
-                    // số lượng sản phẩm trong map
-                    int soLuongConLaiCuaSanPhamTrongMap = Integer.parseInt(meiSyouEntry.getValue().toString());
-
-                    // lặp qua các hàng chiều dài sản phẩm và so sánh với chiều dài sản phẩm trong map, nếu khớp nhau thì tính toán tại hàng đó, thêm số lượng
-                    // sản phẩm tương ứng vào ô số lượng tại hàng tìm thấy trên cột bozai đang lặp
-                    for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i < lastRowSeihin; i++) {
-                        // nếu biến nhớ số lượng sản phẩm còn lại trong map bị tính về còn 0 thì đã tính xong và thoát vòng lặp
-                        if (soLuongConLaiCuaSanPhamTrongMap <= 0) {
-                            break;
-                        }
-
-                        // lấy chiều dài sản phẩm trong hàng đang lặp tại cột sản phẩm
-                        double chieuDaisanPham = Math.abs(Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_CHIEU_DAI_SAN_PHAM))));
-                        if (chieuDaisanPham == chieuDaiSanPhamTrongMap) {
-
-                            // lấy số lượng sản phẩm tại cột sản phẩm
-                            int soLuongSanPham = Math.abs((int) Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_SO_LUONG_SAN_PHAM))));
-                            // biến lưu số lượng đã tính của sản phẩm này trước khi tính tiếp ở bước dưới
-                            int soLuongDatinhCuaSanPham = 0;
-                            // lặp qua toàn bộ các cột bozai tại hàng sản phẩm này
-                            // lấy tổng số lượng đã tính vật liệu của sản phẩm này
-                            // bằng cách tại cột đang lặp nhân số lượng của bozai với số lượng của sản phẩm rồi cộng tổng kết quả các lần lặp là ra tổng số lượng sản phẩm đã tính vật liệu
-                            for (int j = 4; j <= 15 + soBoZai - 6 * 2; j++) {
-                                // lấy kết quả dạng chuỗi của số lượng bozai và số lượng sản phẩm tại cột bozai đang lặp
-                                String slBZ = getStringNumberCellValue(sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM- 2).getCell(j));
-                                String slSP = getStringNumberCellValue(sheet.getRow(i).getCell(j));
-
-                                // gán lại giá trị số lượng tương ứng dạng int
-                                // số lượng tại hàng bozai trong cột bozai đang lặp
-                                int soLuongTaiHangBozai = 0;
-                                if (!slBZ.equalsIgnoreCase("")) {
-                                    soLuongTaiHangBozai = Math.abs((int) Double.parseDouble(slBZ));
-                                }
-
-                                // số lượng tại hàng sản phẩm trong cột bozai đang lặp
-                                int soLuongTaiHangSanPham = 0;
-                                if (!slSP.equalsIgnoreCase("")) {
-                                    soLuongTaiHangSanPham = Math.abs((int) Double.parseDouble(slSP));
-                                }
-
-                                // cộng dồn số lượng tính tại cột bozai này vào số lượng đã tính của sản phẩm
-                                soLuongDatinhCuaSanPham += soLuongTaiHangBozai * soLuongTaiHangSanPham;
-                            }
-                            // tính số lượng còn lại của sản phẩm bằng số lượng ban đầu - số lượng đã tính
-                            int soLuongConLaiCuaSanPham = soLuongSanPham - soLuongDatinhCuaSanPham;
-                            // nếu số lượng còn lại không còn thì bỏ qua hàng sản phẩm này chuyển xuống hàng sản phẩm tiếp phía dưới
-                            if (soLuongConLaiCuaSanPham > 0) {
-                                // lấy cell chứa số lượng của sản phẩm trong hàng sản phẩm tại trong cột bozai đang lặp
-                                Cell cellSoLuong = sheet.getRow(i).getCell(colBozai);
-                                // lấy số lượng cũ của cell trong hàng sản phẩm và trong cột bozai đang lặp
-                                double soLuongSanPhamTaiCotBozai = 0d;
-                                // nếu cell có type là số thì nó đã có số lượng từ trước thì gán nó cho số lượng cũ
-                                if (cellSoLuong.getCellType() == CellType.NUMERIC) {
-                                    soLuongSanPhamTaiCotBozai = cellSoLuong.getNumericCellValue();
-                                }
-
-                                int soLuongCanGhi;
-                                if (soLuongConLaiCuaSanPham <= soLuongConLaiCuaSanPhamTrongMap) {
-                                    soLuongCanGhi = soLuongConLaiCuaSanPham;
-                                } else {
-                                    soLuongCanGhi = soLuongConLaiCuaSanPhamTrongMap;
-                                }
-
-                                soLuongCanGhi = soLuongCanGhi / soLuongCuaBozai;
-
-                                soLuongConLaiCuaSanPhamTrongMap -= soLuongCanGhi * soLuongCuaBozai;
-
-                                // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
-                                // không thì ghi cell với số lượng hiện tại
-                                if (soLuongSanPhamTaiCotBozai > 0d) {
-                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCanGhi + soLuongSanPhamTaiCotBozai);
-                                } else {
-                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCanGhi);
-                                }
-
-                            }
-                        }
-
-                    }
-
-                    /*// hàng chứa sản phẩm, +9 vì cột chứa sản phẩm bắt đầu chứa các sản phẩm từ hàng thứ 9
-                    int indexSeiHinRow = seiHinList.indexOf(chieuDaiSanPhamTrongMap) + HANG_DAU_TIEN_CHUA_SAN_PHAM;
-
-                    // lấy cell chứa số lượng của sản phẩm trong hàng sản phẩm và trong cột bozai đang lặp
-                    Cell cellSoLuong = sheet.getRow(indexSeiHinRow).getCell(colBozai);
-                    // lấy số lượng cũ của cell trong hàng sản phẩm và trong cột bozai đang lặp
-                    double oldNum = 0d;
-                    // nếu cell có type là số thì nó đã có số lượng từ trước thì gán nó cho số lượng cũ
-                    if (cellSoLuong.getCellType() == CellType.NUMERIC) {
-                        oldNum = cellSoLuong.getNumericCellValue();
-                    }
-
-                    // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
-                    // không thì ghi cell với số lượng hiện tại
-                    if (oldNum > 0d) {
-                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongConLaiCuaSanPhamTrongMap + oldNum);
-                    } else {
-                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongConLaiCuaSanPhamTrongMap);
-                    }*/
-
-                    /*// thống kê phục vụ cho hiển thị thông tin trên phầm mềm
-                    double totalLength = Double.parseDouble(String.valueOf(meiSyouEntry.getKey()[1])) * Double.parseDouble(meiSyouEntry.getValue().toString());
-                    Cell cellSoLuongBozai = sheet.getRow(4).getCell(3 + numBozai);
-                    if (cellSoLuongBozai.getCellType() == CellType.STRING) {
-                        totalLength *= Double.parseDouble(cellSoLuongBozai.getStringCellValue());
-                    }
-
-                    seiHinChouGoukei += totalLength;*/
-
-                }
-
-                numBozai += 2;
+//                // lấy chỉ số cột vật liệu đang lặp
+//                int colBozai = 4 + numBozai;
+//
+//                Map<StringBuilder, Integer> kouZaiChouPairs = entry.getKey();
+//                Map<StringBuilder[], Integer> meiSyouPairs = entry.getValue();
+//
+//                // chiều dài vật liệu đang xét
+//                double chieuDaiBozai;
+//                // số lượng của vật liệu đang xét
+//                int soLuongCuaBozai = 0;
+//
+//                // Ghi bozai và số lượng của nó
+//                for (Map.Entry<StringBuilder, Integer> kouZaiEntry : kouZaiChouPairs.entrySet()) {
+//                    chieuDaiBozai = Double.parseDouble(String.valueOf(kouZaiEntry.getKey()));
+//                    soLuongCuaBozai = Integer.parseInt(String.valueOf(kouZaiEntry.getValue()));
+//
+//                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 3).getCell(colBozai).setCellValue(String.valueOf(kouZaiEntry.getKey()));
+//                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 2).getCell(colBozai).setCellValue(String.valueOf(kouZaiEntry.getValue()));
+//
+//                    kouzaiChouGoukei += Double.parseDouble(String.valueOf(kouZaiEntry.getKey())) * kouZaiEntry.getValue();
+//                }
+//
+//                // lặp qua các chiều dài sản phẩm trong cặp tính vật liệu này và tìm trong hàng có chiều dài sản phẩm
+//                // tương ứng trong cột sản phẩm, dóng sang cột bozai đang tạo là tìm được ô cần ghi sô lượng, sau đó ghi cộng dồn số lượng vào ô đó
+//                for (Map.Entry<StringBuilder[], Integer> meiSyouEntry : meiSyouPairs.entrySet()) {
+//                    // chiều dài sản phẩm trong map
+//                    double chieuDaiSanPhamTrongMap = Double.parseDouble(meiSyouEntry.getKey()[1].toString());
+//                    // số lượng sản phẩm trong map
+//                    int soLuongConLaiCuaSanPhamTrongMap = Integer.parseInt(meiSyouEntry.getValue().toString());
+//
+//                    // lặp qua các hàng chiều dài sản phẩm và so sánh với chiều dài sản phẩm trong map, nếu khớp nhau thì tính toán tại hàng đó, thêm số lượng
+//                    // sản phẩm tương ứng vào ô số lượng tại hàng tìm thấy trên cột bozai đang lặp
+//                    for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i < lastRowSeihin; i++) {
+//                        // nếu biến nhớ số lượng sản phẩm còn lại trong map bị tính về còn 0 thì đã tính xong và thoát vòng lặp
+//                        if (soLuongConLaiCuaSanPhamTrongMap <= 0) {
+//                            break;
+//                        }
+//
+//                        // lấy chiều dài sản phẩm trong hàng đang lặp tại cột sản phẩm
+//                        double chieuDaisanPham = Math.abs(Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_CHIEU_DAI_SAN_PHAM))));
+//                        if (chieuDaisanPham == chieuDaiSanPhamTrongMap) {
+//
+//                            // lấy số lượng sản phẩm tại cột sản phẩm
+//                            int soLuongSanPham = Math.abs((int) Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_SO_LUONG_SAN_PHAM))));
+//                            // biến lưu số lượng đã tính của sản phẩm này trước khi tính tiếp ở bước dưới
+//                            int soLuongDatinhCuaSanPham = 0;
+//                            // lặp qua toàn bộ các cột bozai tại hàng sản phẩm này
+//                            // lấy tổng số lượng đã tính vật liệu của sản phẩm này
+//                            // bằng cách tại cột đang lặp nhân số lượng của bozai với số lượng của sản phẩm rồi cộng tổng kết quả các lần lặp là ra tổng số lượng sản phẩm đã tính vật liệu
+//                            for (int j = 4; j <= 15 + soBoZai - 6 * 2; j++) {
+//                                // lấy kết quả dạng chuỗi của số lượng bozai và số lượng sản phẩm tại cột bozai đang lặp
+//                                String slBZ = getStringNumberCellValue(sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM- 2).getCell(j));
+//                                String slSP = getStringNumberCellValue(sheet.getRow(i).getCell(j));
+//
+//                                // gán lại giá trị số lượng tương ứng dạng int
+//                                // số lượng tại hàng bozai trong cột bozai đang lặp
+//                                int soLuongTaiHangBozai = 0;
+//                                if (!slBZ.equalsIgnoreCase("")) {
+//                                    soLuongTaiHangBozai = Math.abs((int) Double.parseDouble(slBZ));
+//                                }
+//
+//                                // số lượng tại hàng sản phẩm trong cột bozai đang lặp
+//                                int soLuongTaiHangSanPham = 0;
+//                                if (!slSP.equalsIgnoreCase("")) {
+//                                    soLuongTaiHangSanPham = Math.abs((int) Double.parseDouble(slSP));
+//                                }
+//
+//                                // cộng dồn số lượng tính tại cột bozai này vào số lượng đã tính của sản phẩm
+//                                soLuongDatinhCuaSanPham += soLuongTaiHangBozai * soLuongTaiHangSanPham;
+//                            }
+//                            // tính số lượng còn lại của sản phẩm bằng số lượng ban đầu - số lượng đã tính
+//                            int soLuongConLaiCuaSanPham = soLuongSanPham - soLuongDatinhCuaSanPham;
+//                            // nếu số lượng còn lại không còn thì bỏ qua hàng sản phẩm này chuyển xuống hàng sản phẩm tiếp phía dưới
+//                            if (soLuongConLaiCuaSanPham > 0) {
+//                                // lấy cell chứa số lượng của sản phẩm trong hàng sản phẩm tại trong cột bozai đang lặp
+//                                Cell cellSoLuong = sheet.getRow(i).getCell(colBozai);
+//                                // lấy số lượng cũ của cell trong hàng sản phẩm và trong cột bozai đang lặp
+//                                double soLuongSanPhamTaiCotBozai = 0d;
+//                                // nếu cell có type là số thì nó đã có số lượng từ trước thì gán nó cho số lượng cũ
+//                                if (cellSoLuong.getCellType() == CellType.NUMERIC) {
+//                                    soLuongSanPhamTaiCotBozai = cellSoLuong.getNumericCellValue();
+//                                }
+//
+//                                int soLuongCanGhi;
+//                                if (soLuongConLaiCuaSanPham <= soLuongConLaiCuaSanPhamTrongMap) {
+//                                    soLuongCanGhi = soLuongConLaiCuaSanPham;
+//                                } else {
+//                                    soLuongCanGhi = soLuongConLaiCuaSanPhamTrongMap;
+//                                }
+//
+//                                soLuongCanGhi = soLuongCanGhi / soLuongCuaBozai;
+//
+//                                soLuongConLaiCuaSanPhamTrongMap -= soLuongCanGhi * soLuongCuaBozai;
+//
+//                                // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
+//                                // không thì ghi cell với số lượng hiện tại
+//                                if (soLuongSanPhamTaiCotBozai > 0d) {
+//                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCanGhi + soLuongSanPhamTaiCotBozai);
+//                                } else {
+//                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCanGhi);
+//                                }
+//
+//                            }
+//                        }
+//
+//                    }
+//
+//                    /*// hàng chứa sản phẩm, +9 vì cột chứa sản phẩm bắt đầu chứa các sản phẩm từ hàng thứ 9
+//                    int indexSeiHinRow = seiHinList.indexOf(chieuDaiSanPhamTrongMap) + HANG_DAU_TIEN_CHUA_SAN_PHAM;
+//
+//                    // lấy cell chứa số lượng của sản phẩm trong hàng sản phẩm và trong cột bozai đang lặp
+//                    Cell cellSoLuong = sheet.getRow(indexSeiHinRow).getCell(colBozai);
+//                    // lấy số lượng cũ của cell trong hàng sản phẩm và trong cột bozai đang lặp
+//                    double oldNum = 0d;
+//                    // nếu cell có type là số thì nó đã có số lượng từ trước thì gán nó cho số lượng cũ
+//                    if (cellSoLuong.getCellType() == CellType.NUMERIC) {
+//                        oldNum = cellSoLuong.getNumericCellValue();
+//                    }
+//
+//                    // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
+//                    // không thì ghi cell với số lượng hiện tại
+//                    if (oldNum > 0d) {
+//                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongConLaiCuaSanPhamTrongMap + oldNum);
+//                    } else {
+//                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongConLaiCuaSanPhamTrongMap);
+//                    }*/
+//
+//                    /*// thống kê phục vụ cho hiển thị thông tin trên phầm mềm
+//                    double totalLength = Double.parseDouble(String.valueOf(meiSyouEntry.getKey()[1])) * Double.parseDouble(meiSyouEntry.getValue().toString());
+//                    Cell cellSoLuongBozai = sheet.getRow(4).getCell(3 + numBozai);
+//                    if (cellSoLuongBozai.getCellType() == CellType.STRING) {
+//                        totalLength *= Double.parseDouble(cellSoLuongBozai.getStringCellValue());
+//                    }
+//
+//                    seiHinChouGoukei += totalLength;*/
+//
+//                }
+//
+//                numBozai += 2;
             }
 
             /*// số cột chứa thông tin tính toán tự tạo sẽ ẩn đi khi đã nhập xong tính vật liệu để tránh rối
