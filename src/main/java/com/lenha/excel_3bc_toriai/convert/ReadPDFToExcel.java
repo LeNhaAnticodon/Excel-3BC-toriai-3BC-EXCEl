@@ -2297,7 +2297,7 @@ public class ReadPDFToExcel {
                     sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 3).getCell(colBozai).setCellValue(chieuDaiBoZaiS);
                     sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 2).getCell(colBozai).setCellValue(soLuongCuaBozaiS);
 
-                    kouzaiChouGoukei += Double.parseDouble(String.valueOf(kouZaiEntry.getKey())) * kouZaiEntry.getValue();
+                    kouzaiChouGoukei += Double.parseDouble(chieuDaiBoZaiS) * Integer.parseInt(soLuongCuaBozaiS);
                 }
 
                 // lặp qua các chiều dài sản phẩm trong cặp tính vật liệu này và tìm trong hàng có chiều dài sản phẩm
@@ -2413,14 +2413,15 @@ public class ReadPDFToExcel {
 
                     }
 
-                    /*// thống kê phục vụ cho hiển thị thông tin trên phầm mềm
-                    double totalLength = Double.parseDouble(String.valueOf(meiSyouEntry.getKey()[1])) * Double.parseDouble(meiSyouEntry.getValue().toString());
-                    Cell cellSoLuongBozai = sheet.getRow(4).getCell(3 + numBozai);
-                    if (cellSoLuongBozai.getCellType() == CellType.STRING) {
-                        totalLength *= Double.parseDouble(cellSoLuongBozai.getStringCellValue());
-                    }
 
-                    seiHinChouGoukei += totalLength;*/
+                    // thống kê phục vụ cho hiển thị thông tin trên phầm mềm
+//                    double totalLength = chieuDaiSanPhamTrongMap * soLuongSanPhamTrongMap;
+//                    Cell cellSoLuongBozai = sheet.getRow(4).getCell(3 + numBozai);
+//                    if (cellSoLuongBozai.getCellType() == CellType.STRING) {
+//                        totalLength *= Double.parseDouble(cellSoLuongBozai.getStringCellValue());
+//                    }
+
+                    seiHinChouGoukei += chieuDaiSanPhamTrongMap * soLuongSanPhamTrongMap * soLuongCuaBozai;
 
                 }
 
@@ -2465,7 +2466,7 @@ public class ReadPDFToExcel {
 
 //        System.out.println("tong chieu dai bozai " + kouzaiChouGoukei);
 //        System.out.println("tong chieu dai san pham " + seiHinChouGoukei);
-/*        excelFileNames.add(new ExcelFile("Sheet " + sheetIndex + ": " + kouSyu, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));*/
+        excelFileNames.add(new ExcelFile("Sheet " + sheetIndex + ": " + kouSyu, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));
 
     }
 

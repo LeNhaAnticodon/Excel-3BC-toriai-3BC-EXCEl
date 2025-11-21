@@ -1126,12 +1126,12 @@ public class ConVertExcelAnd3BCController implements Initializable {
     private void copylinkExcelResultFolder() {
 
         // lấy địa chỉ thư mục chứa file excel
-        File chlFileDir = new File(linkExcelDir.getText());
-        // nếu thư mục chứa các file chl là thư mục thì copy địa chỉ thư mục chứa các file chl vào clipboard
+        File excelFileDir = new File(linkExcelCopyResultDir.getText());
+        // nếu thư mục chứa file excel là thư mục thì copy địa chỉ thư mục chứa file excel vào clipboard
         // hiển thị label thông báo đã copy trong 3 giây
-        if (chlFileDir.isDirectory()) {
+        if (excelFileDir.isDirectory()) {
             // gọi hàm copy
-            copyContentToClipBoard(chlFileDir.getAbsolutePath());
+            copyContentToClipBoard(excelFileDir.getAbsolutePath());
 
             // hiển thị label thông báo đã copy trong 3 giây
             copyLinkStatusLabel.setVisible(true);
@@ -1200,17 +1200,17 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
                             // lấy tổng chiều dài bozai, tính theo m lên / 1000
                             double kouzaiChouGoukei = csvFile.getKouzaiChouGoukei() / 1000;
-                            // lấy tổng chiều dài sản phẩm, tính theo m nên / 1000 và do chiều dài bị x100 trước nên cần / 100
-                            double seiHinChouGoukei = (csvFile.getSeiHinChouGoukei() / 100) / 1000;
+                            // lấy tổng chiều dài sản phẩm, tính theo m nên / 1000
+                            double seiHinChouGoukei = (csvFile.getSeiHinChouGoukei()) / 1000;
 
                             // tạo đối tượng fomat số theo định dạng Nhật
                             NumberFormat numberFormat = NumberFormat.getInstance(new Locale("ja", "JA"));
 
-                            // làm tròn các chiều dài về 2 chữ số thập phân
-                            // hàm round trả về long nên cần x100 trước, nó sẽ làm tròn số về long, sau đó chuyển sang double và
-                            // /100 sẽ được số double có 2 số sau phần thập phân
-                            String formattedKouzaiChouGoukei = numberFormat.format((double) Math.round(kouzaiChouGoukei * 100) / 100);
-                            String formattedseiHinChouGoukei = numberFormat.format((double) Math.round(seiHinChouGoukei * 100) / 100);
+                            // làm tròn các chiều dài về 3 chữ số thập phân
+                            // hàm round trả về long nên cần x1000 trước, nó sẽ làm tròn số về long, sau đó chuyển sang double và
+                            // /100 sẽ được số double có 3 số sau phần thập phân
+                            String formattedKouzaiChouGoukei = numberFormat.format((double) Math.round(kouzaiChouGoukei * 1000) / 1000);
+                            String formattedseiHinChouGoukei = numberFormat.format((double) Math.round(seiHinChouGoukei * 1000) / 1000);
 
                             // vùng chứa tổng chiều dài bozai
                             Label labelKouzaiChou = new Label(formattedKouzaiChouGoukei + "  ");
