@@ -2296,7 +2296,7 @@ public class ReadPDFToExcel {
                             // lặp qua toàn bộ các cột bozai tại hàng sản phẩm này
                             // lấy tổng số lượng đã tính vật liệu của sản phẩm này
                             // bằng cách tại cột đang lặp nhân số lượng của bozai với số lượng của sản phẩm rồi cộng tổng kết quả các lần lặp là ra tổng số lượng sản phẩm đã tính vật liệu
-                            for (int j = 4; j <= 15 + soBoZai - 6 * 2; j++) {
+                            for (int j = 4; j <= 15 + soBoZai - 6 * 2; j += 2) {
                                 // lấy kết quả dạng chuỗi của số lượng bozai và số lượng sản phẩm tại cột bozai đang lặp
                                 String slBZ = getStringNumberCellValue(sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM- 2).getCell(j));
                                 String slSP = getStringNumberCellValue(sheet.getRow(i).getCell(j));
@@ -2336,9 +2336,11 @@ public class ReadPDFToExcel {
                                 } else {
                                     soLuongCanGhi = soLuongConLaiCuaSanPhamTrongMap;
                                 }
-
+                                // số lượng cần ghi sẽ phải là nó chia cho số lượng của bozai tại cột đang lặp
+                                // để tính xem hàng sản phẩm này có đúng là hàng cần ghi không vì có thể còn hàng sản phẩm khác có chiều dài tương tự cần ghi
                                 soLuongCanGhi = soLuongCanGhi / soLuongCuaBozai;
 
+                                // tính lại số lượng còn lại của sản phẩm trong map để dùng cho các hàng tiếp theo nếu còn chiều dài giống hàng này
                                 soLuongConLaiCuaSanPhamTrongMap -= soLuongCanGhi * soLuongCuaBozai;
 
                                 // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
