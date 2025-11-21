@@ -18,7 +18,7 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="599.0" prefWidth="599.0" style="-fx-background-color: #F0F4C3;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lenha.excel_3bc_toriai.ConVertExcelAnd3BCController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="599.0" prefWidth="599.0" style="-fx-background-color: #F0F4C3;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lenha.excel_3bc_toriai.ConVertExcelAnd3BCController">
    <top>
       <VBox alignment="TOP_RIGHT" spacing="5.0" BorderPane.alignment="CENTER">
          <children>
@@ -44,7 +44,7 @@
                       <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
                         <items>
                           <MenuItem mnemonicParsing="false" onAction="#convertFilePdfToriaiToExcel" text="THỰC HIỆN CHUYỂN FILE" />
-                              <MenuItem mnemonicParsing="false" onAction="#openExcelDir" text="Mở thư mục chứa các file CHL" />
+                              <MenuItem mnemonicParsing="false" onAction="#openExcelDir" text="Mở thư mục chứa file EXCEL" />
                               <MenuItem mnemonicParsing="false" onAction="#closeApp" text="Đóng" />
                         </items>
                       </Menu>

@@ -59,7 +59,7 @@
             <Font name="System Italic" size="12.9" />
          </font>
       </Label>
-      <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #AFB42B;" text="Skype: live:quangnha92" VBox.vgrow="SOMETIMES">
+      <Label maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #AFB42B;" text="Email(Teams): quangnha92@gmail.com, quangnha9210@gmail.com" VBox.vgrow="SOMETIMES">
          <padding>
             <Insets bottom="5.0" left="15.0" />
          </padding>

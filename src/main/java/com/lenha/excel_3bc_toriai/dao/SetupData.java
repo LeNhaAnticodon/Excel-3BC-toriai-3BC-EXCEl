@@ -66,6 +66,7 @@ public class SetupData {
         languageMap.put("Chọn thư mục lưu file", "Select_the_folder_to_save_the_file");
         languageMap.put("THỰC HIỆN CHUYỂN FILE", "IMPLEMENT_FILE_TRANSFER");
         languageMap.put("Mở thư mục chứa các file CHL", "Open_the_folder_containing_CHL_files");
+        languageMap.put("Mở thư mục chứa file EXCEL", "Open_the_folder_containing_Excel_files");
         languageMap.put("Danh sách file đã chuyển sang CHL.sysc2", "List_of_files_has_been_converted_to_chl_sysc");
         languageMap.put("Trợ giúp", "Help");
         languageMap.put("Chỉnh Sửa", "Edit");
@@ -110,6 +111,7 @@ public class SetupData {
         languageMap.put("ファイルを保存するフォルダーを選択します", "Select_the_folder_to_save_the_file");
         languageMap.put("ファイル転送を実行します", "IMPLEMENT_FILE_TRANSFER");
         languageMap.put("CHLファイルが入っているフォルダーを開きます", "Open_the_folder_containing_CHL_files");
+        languageMap.put("EXCELファイルが入っているフォルダーを開きます", "Open_the_folder_containing_Excel_files");
         languageMap.put("ファイルのリストがCHL.sysc2に変換されました", "List_of_files_has_been_converted_to_chl_sysc");
         languageMap.put("ヘルプ", "Help");
         languageMap.put("編集", "Edit");
@@ -154,6 +156,7 @@ public class SetupData {
         languageMap.put("Select the folder to save the file", "Select_the_folder_to_save_the_file");
         languageMap.put("IMPLEMENT FILE TRANSFER", "IMPLEMENT_FILE_TRANSFER");
         languageMap.put("Open the folder containing CHL files", "Open_the_folder_containing_CHL_files");
+        languageMap.put("Open the folder containing EXCEL file", "Open_the_folder_containing_Excel_files");
         languageMap.put("List of files has been converted to CHL.sysc2", "List_of_files_has_been_converted_to_chl_sysc");
         languageMap.put("Help", "Help");
         languageMap.put("Edit", "Edit");
