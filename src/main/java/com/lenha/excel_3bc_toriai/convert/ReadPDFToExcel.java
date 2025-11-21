@@ -2258,7 +2258,7 @@ public class ReadPDFToExcel {
                 // số lượng của vật liệu đang xét
                 int soLuongCuaBozai = 0;
 
-                // Ghi bozai và số lượng của nó
+                // Ghi bozai và số lượng của nó, thực ra chỉ có 1 cặp bozai và số lượng nhưng vẫn tạo vòng lặp cho đơn giản, không ảnh hưởng gì
                 for (Map.Entry<StringBuilder, Integer> kouZaiEntry : kouZaiChouPairs.entrySet()) {
                     chieuDaiBozai = Double.parseDouble(String.valueOf(kouZaiEntry.getKey()));
                     soLuongCuaBozai = Integer.parseInt(String.valueOf(kouZaiEntry.getValue()));
@@ -2275,15 +2275,15 @@ public class ReadPDFToExcel {
                     // chiều dài sản phẩm trong map
                     double chieuDaiSanPhamTrongMap = Double.parseDouble(meiSyouEntry.getKey()[1].toString());
                     // số lượng sản phẩm trong map
-                    int soLuongConLaiCuaSanPhamTrongMap = Integer.parseInt(meiSyouEntry.getValue().toString());
+                    int soLuongSanPhamTrongMap = Integer.parseInt(meiSyouEntry.getValue().toString());
 
                     // lặp qua các hàng chiều dài sản phẩm và so sánh với chiều dài sản phẩm trong map, nếu khớp nhau thì tính toán tại hàng đó, thêm số lượng
                     // sản phẩm tương ứng vào ô số lượng tại hàng tìm thấy trên cột bozai đang lặp
                     for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i < lastRowSeihin; i++) {
-                        // nếu biến nhớ số lượng sản phẩm còn lại trong map bị tính về còn 0 thì đã tính xong và thoát vòng lặp
-                        if (soLuongConLaiCuaSanPhamTrongMap <= 0) {
-                            break;
-                        }
+//                        // nếu biến nhớ số lượng sản phẩm còn lại trong map bị tính về còn 0 thì đã tính xong và thoát vòng lặp
+//                        if (soLuongSanPhamTrongMap <= 0) {
+//                            break;
+//                        }
 
                         // lấy chiều dài sản phẩm trong hàng đang lặp tại cột sản phẩm
                         double chieuDaisanPham = Math.abs(Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_CHIEU_DAI_SAN_PHAM))));
@@ -2291,7 +2291,9 @@ public class ReadPDFToExcel {
 
                             // lấy số lượng sản phẩm tại cột sản phẩm
                             int soLuongSanPham = Math.abs((int) Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_SO_LUONG_SAN_PHAM))));
-                            // biến lưu số lượng đã tính của sản phẩm này trước khi tính tiếp ở bước dưới
+
+                            // đoạn code này tính toán số lượng còn lại của sản phẩm thế nhưng không cần nữa vì trong excel có 1 cột đã hiển thị giá trị này rồi
+/*                            // biến lưu số lượng đã tính của sản phẩm này trước khi tính tiếp ở bước dưới
                             int soLuongDatinhCuaSanPham = 0;
                             // lặp qua toàn bộ các cột bozai tại hàng sản phẩm này
                             // lấy tổng số lượng đã tính vật liệu của sản phẩm này
@@ -2317,39 +2319,54 @@ public class ReadPDFToExcel {
                                 // cộng dồn số lượng tính tại cột bozai này vào số lượng đã tính của sản phẩm
                                 soLuongDatinhCuaSanPham += soLuongTaiHangBozai * soLuongTaiHangSanPham;
                             }
+
                             // tính số lượng còn lại của sản phẩm bằng số lượng ban đầu - số lượng đã tính
                             int soLuongConLaiCuaSanPham = soLuongSanPham - soLuongDatinhCuaSanPham;
+                            */
+                            // lấy giá trị số lượng còn lại của sản phẩm trong hàng sản phẩm này ở ở cột hiển thị
+                            int soLuongConLaiCuaSanPham = 0;
+                            String slConLaiCuaSP = getStringNumberCellValue(sheet.getRow(i).getCell(15 + 2 + (soBoZai - 6) * 2));
+                            if (!slConLaiCuaSP.equalsIgnoreCase("")){
+                                soLuongConLaiCuaSanPham = (int) Double.parseDouble(slConLaiCuaSP);
+                            }
                             // nếu số lượng còn lại không còn thì bỏ qua hàng sản phẩm này chuyển xuống hàng sản phẩm tiếp phía dưới
                             if (soLuongConLaiCuaSanPham > 0) {
                                 // lấy cell chứa số lượng của sản phẩm trong hàng sản phẩm tại trong cột bozai đang lặp
                                 Cell cellSoLuong = sheet.getRow(i).getCell(colBozai);
                                 // lấy số lượng cũ của cell trong hàng sản phẩm và trong cột bozai đang lặp
-                                double soLuongSanPhamTaiCotBozai = 0d;
+                                int soLuongCuCuaSanPhamTaiCotBozai = 0;
                                 // nếu cell có type là số thì nó đã có số lượng từ trước thì gán nó cho số lượng cũ
                                 if (cellSoLuong.getCellType() == CellType.NUMERIC) {
-                                    soLuongSanPhamTaiCotBozai = cellSoLuong.getNumericCellValue();
+                                    soLuongCuCuaSanPhamTaiCotBozai = (int) cellSoLuong.getNumericCellValue();
                                 }
 
-                                int soLuongCanGhi;
-                                if (soLuongConLaiCuaSanPham <= soLuongConLaiCuaSanPhamTrongMap) {
+                                if (soLuongConLaiCuaSanPham < soLuongSanPhamTrongMap * soLuongCuaBozai) {
+                                    continue;
+                                }
+
+                                /*int soLuongCanGhi;
+                                if (soLuongConLaiCuaSanPham <= soLuongSanPhamTrongMap) {
                                     soLuongCanGhi = soLuongConLaiCuaSanPham;
                                 } else {
-                                    soLuongCanGhi = soLuongConLaiCuaSanPhamTrongMap;
+                                    soLuongCanGhi = soLuongSanPhamTrongMap;
                                 }
                                 // số lượng cần ghi sẽ phải là nó chia cho số lượng của bozai tại cột đang lặp
                                 // để tính xem hàng sản phẩm này có đúng là hàng cần ghi không vì có thể còn hàng sản phẩm khác có chiều dài tương tự cần ghi
                                 soLuongCanGhi = soLuongCanGhi / soLuongCuaBozai;
 
                                 // tính lại số lượng còn lại của sản phẩm trong map để dùng cho các hàng tiếp theo nếu còn chiều dài giống hàng này
-                                soLuongConLaiCuaSanPhamTrongMap -= soLuongCanGhi * soLuongCuaBozai;
+                                soLuongSanPhamTrongMap -= soLuongCanGhi * soLuongCuaBozai;*/
 
                                 // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
                                 // không thì ghi cell với số lượng hiện tại
-                                if (soLuongSanPhamTaiCotBozai > 0d) {
-                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCanGhi + soLuongSanPhamTaiCotBozai);
+                                if (soLuongCuCuaSanPhamTaiCotBozai > 0d) {
+                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap + soLuongCuCuaSanPhamTaiCotBozai);
                                 } else {
-                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCanGhi);
+                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap);
                                 }
+                                break;
+                                // tính lại số lượng còn lại của sản phẩm trong map để dùng cho các hàng tiếp theo nếu còn chiều dài giống hàng này
+//                                soLuongSanPhamTrongMap -= soLuongSanPhamTrongMap * soLuongCuaBozai;
 
                             }
                         }
@@ -2371,9 +2388,9 @@ public class ReadPDFToExcel {
                     // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
                     // không thì ghi cell với số lượng hiện tại
                     if (oldNum > 0d) {
-                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongConLaiCuaSanPhamTrongMap + oldNum);
+                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap + oldNum);
                     } else {
-                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongConLaiCuaSanPhamTrongMap);
+                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap);
                     }*/
 
                     /*// thống kê phục vụ cho hiển thị thông tin trên phầm mềm
