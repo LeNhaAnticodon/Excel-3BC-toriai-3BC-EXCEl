@@ -493,7 +493,7 @@ public class ReadExcel {
                 case NUMERIC, FORMULA:
                     return extractNumberString(String.valueOf(cell.getNumericCellValue()).trim());
                 default:
-                    System.out.println("Ô không chứa dữ liệu hợp lệ.");
+//                    System.out.println("Ô không chứa dữ liệu hợp lệ.");
             }
         }
         return "";

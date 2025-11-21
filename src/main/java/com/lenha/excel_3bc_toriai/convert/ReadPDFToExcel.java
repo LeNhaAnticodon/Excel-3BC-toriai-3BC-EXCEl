@@ -1834,6 +1834,11 @@ public class ReadPDFToExcel {
             int doRongCuaCotTongChieuDaiSanPham = sheet.getColumnWidth(16);
             int doRongCuaCotSoSanPhamChuaTinh = sheet.getColumnWidth(17);
 
+            // xóa và nhập lại kirirosu
+            Cell b7 = sheet.getRow(7).getCell(1);
+            b7.setBlank();
+            b7.setCellValue(2);
+
             // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
             // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
 //            soBoZai = 18;
@@ -1859,11 +1864,6 @@ public class ReadPDFToExcel {
                         sheet.getRow(i).getCell(j).setBlank();
                     }
                 }
-
-                // xóa và nhập lại kirirosu
-                Cell b7 = sheet.getRow(7).getCell(1);
-                b7.setBlank();
-                b7.setCellValue(2);
 
                 int soSanPhamExcel = lastRowSeihin - HANG_DAU_TIEN_CHUA_SAN_PHAM + 1;
 
@@ -2075,7 +2075,7 @@ public class ReadPDFToExcel {
                 }
 */
                 // xóa hợp nhất các ô vùng thông tin để không bị lỗi khi thêm cột, sau khi làm hết việc sẽ fomat lại hợp nhất ô như ban đầu
-                unmergeAndFillCellsInRange(sheet, 0, 2, 0, 17);
+//                unmergeAndFillCellsInRange(sheet, 0, 2, 0, 17);
 
                 // cài đặt lại độ rộng các cột cho phù hợp
                 int widthCol18 = sheet.getColumnWidth(18);
@@ -2192,6 +2192,34 @@ public class ReadPDFToExcel {
 //                    copyCellWithFormulaUpdate(srcCell, destCell, 1);
                 }
 
+                try {
+                    // hợp nhất các ô
+                    // sau khi thêm các cột vật liệu sẽ làm các ô thông tin mất hợp nhất nên cần hợp nhất lại
+                    // chỉ thực hiện trong sheet có số bozai > 6 vì chỉ nó mới thêm cột, còn các sheet khác không thêm nên không mất hợp nhất, nếu tiếp tục thực lệnh sẽ không thể ghi đè và gây ra lỗi
+                    // Xác định vùng cần hợp nhất (từ cột 6 đến cột 8 trên dòng 0)
+//            CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, 2, 4);
+//            sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(0, 0, 8, 10);
+                    sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(0, 0, 14, 16);
+                    sheet.addMergedRegion(cellRangeAddress);
+
+//            cellRangeAddress = new CellRangeAddress(1, 1, 2, 4);
+//            sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(1, 1, 8, 10);
+                    sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(1, 1, 14, 16);
+                    sheet.addMergedRegion(cellRangeAddress);
+
+//            cellRangeAddress = new CellRangeAddress(2, 2, 2, 4);
+//            sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(2, 2, 8, 16);
+                    sheet.addMergedRegion(cellRangeAddress);
+                }catch (Exception e) {
+                    System.out.println("Lỗi hợp nhất ô");
+                }
+
+
             }
 
             // cài đặt lại độ rộng các cột vật liệu mới được thêm vào cho giống với độ rộng của các cột vật liệu cũ
@@ -2231,7 +2259,7 @@ public class ReadPDFToExcel {
                 }
             }*/
 
-            /*// ghi tất cả sản phẩm vào excel
+            /*// ghi tất cả sản phẩm vào excel, cách cũ với các chiều dài sản phẩm là duy nhất do ta tự thực hiện ghi, còn cách mới là dùng chiều dài đã ghi sẵn trên excel nên không thực hiện được
             for (int i = 0; i < soSanPham; i++) {
                 Double length = seiHinList.get(i);
                 // ghi chiều dài sản phẩm
@@ -2254,17 +2282,20 @@ public class ReadPDFToExcel {
                 Map<StringBuilder[], Integer> meiSyouPairs = entry.getValue();
 
                 // chiều dài vật liệu đang xét
-                double chieuDaiBozai;
+//                double chieuDaiBozai;
                 // số lượng của vật liệu đang xét
                 int soLuongCuaBozai = 0;
 
                 // Ghi bozai và số lượng của nó, thực ra chỉ có 1 cặp bozai và số lượng nhưng vẫn tạo vòng lặp cho đơn giản, không ảnh hưởng gì
                 for (Map.Entry<StringBuilder, Integer> kouZaiEntry : kouZaiChouPairs.entrySet()) {
-                    chieuDaiBozai = Double.parseDouble(String.valueOf(kouZaiEntry.getKey()));
-                    soLuongCuaBozai = Integer.parseInt(String.valueOf(kouZaiEntry.getValue()));
+                    String chieuDaiBoZaiS = String.valueOf(kouZaiEntry.getKey());
+                    String soLuongCuaBozaiS = String.valueOf(kouZaiEntry.getValue());
 
-                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 3).getCell(colBozai).setCellValue(String.valueOf(kouZaiEntry.getKey()));
-                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 2).getCell(colBozai).setCellValue(String.valueOf(kouZaiEntry.getValue()));
+//                    chieuDaiBozai = Double.parseDouble(String.valueOf(kouZaiEntry.getKey()));
+                    soLuongCuaBozai = Integer.parseInt(soLuongCuaBozaiS);
+
+                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 3).getCell(colBozai).setCellValue(chieuDaiBoZaiS);
+                    sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 2).getCell(colBozai).setCellValue(soLuongCuaBozaiS);
 
                     kouzaiChouGoukei += Double.parseDouble(String.valueOf(kouZaiEntry.getKey())) * kouZaiEntry.getValue();
                 }
@@ -2279,7 +2310,7 @@ public class ReadPDFToExcel {
 
                     // lặp qua các hàng chiều dài sản phẩm và so sánh với chiều dài sản phẩm trong map, nếu khớp nhau thì tính toán tại hàng đó, thêm số lượng
                     // sản phẩm tương ứng vào ô số lượng tại hàng tìm thấy trên cột bozai đang lặp
-                    for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i < lastRowSeihin; i++) {
+                    for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
 //                        // nếu biến nhớ số lượng sản phẩm còn lại trong map bị tính về còn 0 thì đã tính xong và thoát vòng lặp
 //                        if (soLuongSanPhamTrongMap <= 0) {
 //                            break;
@@ -2287,18 +2318,19 @@ public class ReadPDFToExcel {
 
                         // lấy chiều dài sản phẩm trong hàng đang lặp tại cột sản phẩm
                         double chieuDaisanPham = Math.abs(Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_CHIEU_DAI_SAN_PHAM))));
+                        // nếu chiều dài sản phẩm tại hàng đang lặp khớp với chiều dài sản phẩm trong map thì bắt đầu tính toán
                         if (chieuDaisanPham == chieuDaiSanPhamTrongMap) {
 
                             // lấy số lượng sản phẩm tại cột sản phẩm
                             int soLuongSanPham = Math.abs((int) Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_SO_LUONG_SAN_PHAM))));
 
-                            // đoạn code này tính toán số lượng còn lại của sản phẩm thế nhưng không cần nữa vì trong excel có 1 cột đã hiển thị giá trị này rồi
-/*                            // biến lưu số lượng đã tính của sản phẩm này trước khi tính tiếp ở bước dưới
+                            // đoạn code này tính toán số lượng còn lại của sản phẩm
+                            // biến lưu số lượng đã tính của sản phẩm này trước khi tính tiếp ở bước dưới
                             int soLuongDatinhCuaSanPham = 0;
                             // lặp qua toàn bộ các cột bozai tại hàng sản phẩm này
                             // lấy tổng số lượng đã tính vật liệu của sản phẩm này
                             // bằng cách tại cột đang lặp nhân số lượng của bozai với số lượng của sản phẩm rồi cộng tổng kết quả các lần lặp là ra tổng số lượng sản phẩm đã tính vật liệu
-                            for (int j = 4; j <= 15 + soBoZai - 6 * 2; j += 2) {
+                            for (int j = 4; j <= 15 + (soBoZai - 6) * 2; j += 2) {
                                 // lấy kết quả dạng chuỗi của số lượng bozai và số lượng sản phẩm tại cột bozai đang lặp
                                 String slBZ = getStringNumberCellValue(sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM- 2).getCell(j));
                                 String slSP = getStringNumberCellValue(sheet.getRow(i).getCell(j));
@@ -2322,16 +2354,19 @@ public class ReadPDFToExcel {
 
                             // tính số lượng còn lại của sản phẩm bằng số lượng ban đầu - số lượng đã tính
                             int soLuongConLaiCuaSanPham = soLuongSanPham - soLuongDatinhCuaSanPham;
-                            */
-                            // lấy giá trị số lượng còn lại của sản phẩm trong hàng sản phẩm này ở ở cột hiển thị
-                            int soLuongConLaiCuaSanPham = 0;
-                            String slConLaiCuaSP = getStringNumberCellValue(sheet.getRow(i).getCell(15 + 2 + (soBoZai - 6) * 2));
+
+                            // cách khác lấy giá trị số lượng còn lại của sản phẩm trong hàng sản phẩm này bằng giá trị ở cột hiển thị
+                            // tuy nhiên nó không hoạt động vì công thức không hề cập nhật giá trị khi ghi số lượng vào các ô tính vật liệu làm công thức bị sai và chương trình chạy không đúng nữa
+                       /*     int soLuongConLaiCuaSanPham = 0;
+                            Cell cellSlConLaiCuaSP = sheet.getRow(i).getCell(15 + 2 + (soBoZai - 6) * 2);
+                            String slConLaiCuaSP = getStringNumberCellValue(cellSlConLaiCuaSP);
                             if (!slConLaiCuaSP.equalsIgnoreCase("")){
                                 soLuongConLaiCuaSanPham = (int) Double.parseDouble(slConLaiCuaSP);
-                            }
+                            }*/
+
                             // nếu số lượng còn lại không còn thì bỏ qua hàng sản phẩm này chuyển xuống hàng sản phẩm tiếp phía dưới
                             if (soLuongConLaiCuaSanPham > 0) {
-                                // lấy cell chứa số lượng của sản phẩm trong hàng sản phẩm tại trong cột bozai đang lặp
+                                // lấy cell chứa số lượng cũ của sản phẩm trong hàng sản phẩm tại trong cột bozai đang lặp
                                 Cell cellSoLuong = sheet.getRow(i).getCell(colBozai);
                                 // lấy số lượng cũ của cell trong hàng sản phẩm và trong cột bozai đang lặp
                                 int soLuongCuCuaSanPhamTaiCotBozai = 0;
@@ -2340,10 +2375,13 @@ public class ReadPDFToExcel {
                                     soLuongCuCuaSanPhamTaiCotBozai = (int) cellSoLuong.getNumericCellValue();
                                 }
 
+                                // nếu số lượng còn lại của sản phẩm nhỏ hơn số lượng cần ghi thêm thì tức là hàng này không điều kiện ghi
+                                // nhảy sang vòng lặp tiếp theo để tìm chiều dài giống trong hàng sản phẩm đang lặp này nữa(nếu có) và thực hiện lại
                                 if (soLuongConLaiCuaSanPham < soLuongSanPhamTrongMap * soLuongCuaBozai) {
                                     continue;
                                 }
 
+                                // đoạn code không chắc có chạy không nhưng cũng không cần thiết
                                 /*int soLuongCanGhi;
                                 if (soLuongConLaiCuaSanPham <= soLuongSanPhamTrongMap) {
                                     soLuongCanGhi = soLuongConLaiCuaSanPham;
@@ -2357,6 +2395,9 @@ public class ReadPDFToExcel {
                                 // tính lại số lượng còn lại của sản phẩm trong map để dùng cho các hàng tiếp theo nếu còn chiều dài giống hàng này
                                 soLuongSanPhamTrongMap -= soLuongCanGhi * soLuongCuaBozai;*/
 
+                                // đến đây mà vẫn chưa bị thoát thì mọi điều kiện ph hợp, ghi nối số lượng sản phẩm trong map vào ô của tính vật liệu của sản phẩm trong hàng đang lặp
+                                // sau đó thoát khỏi vòng lặp này để nhảy sang vòng bên ngoài và duyệt tiếp chiều dài sản phẩm khác trong map của bozai đang duyệt của vòng lặp ngoài
+                                // có thể thoát ngay vì mỗi chiều dài trong bozai đang duyệt chắc chắn chỉ ghi đúng 1 lần, nếu ghi được rồi thì không cần phải tính tiếp nữa
                                 // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
                                 // không thì ghi cell với số lượng hiện tại
                                 if (soLuongCuCuaSanPhamTaiCotBozai > 0d) {
@@ -2365,33 +2406,12 @@ public class ReadPDFToExcel {
                                     sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap);
                                 }
                                 break;
-                                // tính lại số lượng còn lại của sản phẩm trong map để dùng cho các hàng tiếp theo nếu còn chiều dài giống hàng này
-//                                soLuongSanPhamTrongMap -= soLuongSanPhamTrongMap * soLuongCuaBozai;
+
 
                             }
                         }
 
                     }
-
-                    /*// hàng chứa sản phẩm, +9 vì cột chứa sản phẩm bắt đầu chứa các sản phẩm từ hàng thứ 9
-                    int indexSeiHinRow = seiHinList.indexOf(chieuDaiSanPhamTrongMap) + HANG_DAU_TIEN_CHUA_SAN_PHAM;
-
-                    // lấy cell chứa số lượng của sản phẩm trong hàng sản phẩm và trong cột bozai đang lặp
-                    Cell cellSoLuong = sheet.getRow(indexSeiHinRow).getCell(colBozai);
-                    // lấy số lượng cũ của cell trong hàng sản phẩm và trong cột bozai đang lặp
-                    double oldNum = 0d;
-                    // nếu cell có type là số thì nó đã có số lượng từ trước thì gán nó cho số lượng cũ
-                    if (cellSoLuong.getCellType() == CellType.NUMERIC) {
-                        oldNum = cellSoLuong.getNumericCellValue();
-                    }
-
-                    // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
-                    // không thì ghi cell với số lượng hiện tại
-                    if (oldNum > 0d) {
-                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap + oldNum);
-                    } else {
-                        sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap);
-                    }*/
 
                     /*// thống kê phục vụ cho hiển thị thông tin trên phầm mềm
                     double totalLength = Double.parseDouble(String.valueOf(meiSyouEntry.getKey()[1])) * Double.parseDouble(meiSyouEntry.getValue().toString());
@@ -2407,34 +2427,22 @@ public class ReadPDFToExcel {
                 numBozai += 2;
             }
 
-            /*// số cột chứa thông tin tính toán tự tạo sẽ ẩn đi khi đã nhập xong tính vật liệu để tránh rối
-            int numColHide;
+            // số cột chứa thông tin tính toán tự tạo sẽ ẩn đi khi đã nhập xong tính vật liệu để tránh rối
+            int soCotBozai;
             // nếu số bozai < 15 thì số cột cần ẩn là 15, nếu không thì số cột ẩn là số bozai
-            if (soBoZai < 15) {
-                numColHide = 15;
+            if (soBoZai < 6) {
+                soCotBozai = 6 * 2;
             } else {
-                numColHide = soBoZai;
+                soCotBozai = soBoZai * 2;
             }
-            // ẩn tất cả các cột từ numColHide + 8
-            for (int i = numColHide + 8; i < sheet.getRow(6).getLastCellNum(); i++) {
+            int lastCol = sheet.getRow(9).getLastCellNum();
+            // ẩn tất cả các cột từ soCotBozai + 8
+            for (int i = soCotBozai + 12; i <= lastCol; i++) {
                 sheet.setColumnHidden(i, true);
             }
 
-            // hợp nhất các ô
-            // Xác định vùng cần hợp nhất (từ cột 6 đến cột 8 trên dòng 0)
-            CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, 6, 8);
-            sheet.addMergedRegion(cellRangeAddress);
 
-            cellRangeAddress = new CellRangeAddress(0, 0, 12, 14);
-            sheet.addMergedRegion(cellRangeAddress);
-
-            cellRangeAddress = new CellRangeAddress(1, 1, 2, 4);
-            sheet.addMergedRegion(cellRangeAddress);
-
-            cellRangeAddress = new CellRangeAddress(1, 1, 8, 10);
-            sheet.addMergedRegion(cellRangeAddress);
-
-            // Khóa sheet với mật khẩu
+            /*// Khóa sheet với mật khẩu
             sheet.protectSheet("");*/
 
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
