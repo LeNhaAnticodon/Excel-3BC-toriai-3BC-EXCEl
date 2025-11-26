@@ -1950,13 +1950,13 @@ public class ReadPDFToExcel {
 
                 // sửa lại công thức cho 2 ô cuối cột Q và cột R theo công thức mới
                 Cell oCuoiCotQ = sheet.getRow(lastRowSeihin + 1).getCell(16);
-                if(oCuoiCotQ == null) {
+                if (oCuoiCotQ == null) {
                     oCuoiCotQ = sauHangSanPhamCuoi.createCell(16);
                 }
                 oCuoiCotQ.setCellFormula("SUM(BD9:BD" + (lastRowSeihin + 2) + ")");
 
                 Cell oCuoiCotR = sheet.getRow(lastRowSeihin + 1).getCell(17);
-                if(oCuoiCotR == null) {
+                if (oCuoiCotR == null) {
                     oCuoiCotR = sauHangSanPhamCuoi.createCell(17);
                 }
                 oCuoiCotR.setCellFormula("SUM(BE9:BE" + (lastRowSeihin + 2) + ")");
@@ -1973,11 +1973,10 @@ public class ReadPDFToExcel {
                 copySrcCellToRange(sheet, be10, 56, 56, 1, HANG_DAU_TIEN_CHUA_SAN_PHAM, lastRowSeihin, 1, true);
 
 
-
-            // code của bản excel mới nhưng hiện tại không dùng, đã thay bằng cách khác mã không cần sử dụng file excel mẫu
-            // bằng cách tạo công thức tại các ô mẫu cố định đã biết trước rồi dùng hàm copySrcCellToRange,
-            // hàm này có khả năng copy 1 cell và dán vào cả 1 vùng dữ liệu mà không cần quan tâm dán theo cột hay hàng, công thức vẫn thay đổi theo đúng chuẩn
-            // dán toàn bộ các công thức ra vùng cần dán dựa theo số lượng sản phẩm đang có
+                // code của bản excel mới nhưng hiện tại không dùng, đã thay bằng cách khác mã không cần sử dụng file excel mẫu
+                // bằng cách tạo công thức tại các ô mẫu cố định đã biết trước rồi dùng hàm copySrcCellToRange,
+                // hàm này có khả năng copy 1 cell và dán vào cả 1 vùng dữ liệu mà không cần quan tâm dán theo cột hay hàng, công thức vẫn thay đổi theo đúng chuẩn
+                // dán toàn bộ các công thức ra vùng cần dán dựa theo số lượng sản phẩm đang có
 
 
 /*
@@ -2075,7 +2074,7 @@ public class ReadPDFToExcel {
                 }
 */
                 // xóa hợp nhất các ô vùng thông tin để không bị lỗi khi thêm cột, sau khi làm hết việc sẽ fomat lại hợp nhất ô như ban đầu
-//                unmergeAndFillCellsInRange(sheet, 0, 2, 0, 17);
+                unmergeAndFillCellsInRange(sheet, 0, 2, 0, 17);
 
                 // cài đặt lại độ rộng các cột cho phù hợp
                 int widthCol18 = sheet.getColumnWidth(18);
@@ -2197,25 +2196,31 @@ public class ReadPDFToExcel {
                     // sau khi thêm các cột vật liệu sẽ làm các ô thông tin mất hợp nhất nên cần hợp nhất lại
                     // chỉ thực hiện trong sheet có số bozai > 6 vì chỉ nó mới thêm cột, còn các sheet khác không thêm nên không mất hợp nhất, nếu tiếp tục thực lệnh sẽ không thể ghi đè và gây ra lỗi
                     // Xác định vùng cần hợp nhất (từ cột 6 đến cột 8 trên dòng 0)
-//            CellRangeAddress cellRangeAddress = new CellRangeAddress(0, 0, 2, 4);
-//            sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(0, 0, 0, 1);
+                    sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(0, 0, 2, 4);
+                    sheet.addMergedRegion(cellRangeAddress);
                     cellRangeAddress = new CellRangeAddress(0, 0, 8, 10);
                     sheet.addMergedRegion(cellRangeAddress);
                     cellRangeAddress = new CellRangeAddress(0, 0, 14, 16);
                     sheet.addMergedRegion(cellRangeAddress);
 
-//            cellRangeAddress = new CellRangeAddress(1, 1, 2, 4);
-//            sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(1, 1, 0, 1);
+                    sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(1, 1, 2, 4);
+                    sheet.addMergedRegion(cellRangeAddress);
                     cellRangeAddress = new CellRangeAddress(1, 1, 8, 10);
                     sheet.addMergedRegion(cellRangeAddress);
                     cellRangeAddress = new CellRangeAddress(1, 1, 14, 16);
                     sheet.addMergedRegion(cellRangeAddress);
 
-//            cellRangeAddress = new CellRangeAddress(2, 2, 2, 4);
-//            sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(2, 2, 0, 1);
+                    sheet.addMergedRegion(cellRangeAddress);
+                    cellRangeAddress = new CellRangeAddress(2, 2, 2, 4);
+                    sheet.addMergedRegion(cellRangeAddress);
                     cellRangeAddress = new CellRangeAddress(2, 2, 8, 16);
                     sheet.addMergedRegion(cellRangeAddress);
-                }catch (Exception e) {
+                } catch (Exception e) {
                     System.out.println("Lỗi hợp nhất ô");
                 }
 
@@ -2234,6 +2239,18 @@ public class ReadPDFToExcel {
             // thêm các cột sản phẩm mới nó bị dịch chuyển sang cột khác
             sheet.setColumnWidth(16 + soSanPhamCanThem * 2, doRongCuaCotTongChieuDaiSanPham);
             sheet.setColumnWidth(17 + soSanPhamCanThem * 2, doRongCuaCotSoSanPhamChuaTinh);
+
+            int witdthCol23 = sheet.getColumnWidth(23);
+            // Bỏ ẩn các cột công thức để khi thêm cột bozai nếu trùng với các cột công thức cũ thì nó không bị ẩn
+            // Bỏ ẩn một dải cột (ví dụ cột E..G -> index 4..6)
+            for (int col = 24; col <= 31; col++) {
+                sheet.setColumnHidden(col, false);
+
+                // Nếu cột trước đó bị set width = 0, thì đặt lại width hợp lý
+                if (sheet.getColumnWidth(col) == 0) {
+                    sheet.setColumnWidth(col, witdthCol23); // 15 ký tự ~ 15*256
+                }
+            }
 
 
 
@@ -2336,7 +2353,7 @@ public class ReadPDFToExcel {
                             // bằng cách tại cột đang lặp nhân số lượng của bozai với số lượng của sản phẩm rồi cộng tổng kết quả các lần lặp là ra tổng số lượng sản phẩm đã tính vật liệu
                             for (int j = 4; j <= 15 + (soBoZai - 6) * 2; j += 2) {
                                 // lấy kết quả dạng chuỗi của số lượng bozai và số lượng sản phẩm tại cột bozai đang lặp
-                                String slBZ = getStringNumberCellValue(sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM- 2).getCell(j));
+                                String slBZ = getStringNumberCellValue(sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 2).getCell(j));
                                 String slSP = getStringNumberCellValue(sheet.getRow(i).getCell(j));
 
                                 // gán lại giá trị số lượng tương ứng dạng int
@@ -2381,11 +2398,11 @@ public class ReadPDFToExcel {
 
                                 int soLuongCoTheGhi = soLuongConLaiCuaSanPham / soLuongCuaBozai;
 
-                                if(soLuongCoTheGhi < 1) {
+                                if (soLuongCoTheGhi < 1) {
                                     continue;
                                 }
 
-                                if (soLuongCoTheGhi > soLuongConLaiCuaSanPhamTrongMap){
+                                if (soLuongCoTheGhi > soLuongConLaiCuaSanPhamTrongMap) {
                                     soLuongCoTheGhi = soLuongConLaiCuaSanPhamTrongMap;
                                 }
 
@@ -2416,7 +2433,7 @@ public class ReadPDFToExcel {
                                 } else {
                                     sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCoTheGhi);
                                 }
-                                if(soLuongConLaiCuaSanPhamTrongMap <= 0) {
+                                if (soLuongConLaiCuaSanPhamTrongMap <= 0) {
                                     break;
                                 }
 
@@ -2516,7 +2533,6 @@ public class ReadPDFToExcel {
     }
 
     /**
-     *
      * @param sheet
      * @param srcCell
      * @param columnBegin
@@ -2537,6 +2553,7 @@ public class ReadPDFToExcel {
 
     /**
      * copy nhiều range tại các hàng trong rowsToCopy và nằm trong khảng cột startCol đến cột endCol giữ nguyên giá trị và giá trị gốc công thức từ sheet của file excel nguồn sang file excel đích
+     *
      * @param srcSheet
      * @param dstSheet
      * @param rowsToCopy
@@ -2613,7 +2630,7 @@ public class ReadPDFToExcel {
             }
         }
 
-        
+
     }
 
     /**
@@ -2768,8 +2785,9 @@ public class ReadPDFToExcel {
     /**
      * copy công thức từ srcCell vào destCell và thay đổi công thức theo hàng
      * của destCell cho phù hợp dựa vào khoảng cách hàng giữa 2 cell bằng tham số shiftRows
-     * @param srcCell cell gốc
-     * @param destCell cell copy từ cell gốc
+     *
+     * @param srcCell   cell gốc
+     * @param destCell  cell copy từ cell gốc
      * @param shiftRows khảng cách hàng giữa cell gốc và cell copy
      */
     private static void copyRowCellWithFormulaUpdate(Cell srcCell, Cell destCell, int shiftRows) {
@@ -2871,15 +2889,15 @@ public class ReadPDFToExcel {
     /**
      * Copy công thức từ srcCell ra một vùng (columns x rows).
      *
-     * @param sheet        sheet đích (cùng sheet hoặc khác sheet nếu cần).
-     * @param srcCell      ô nguồn chứa công thức (hoặc giá trị).
-     * @param columnBegin  cột bắt đầu (inclusive, zero-based).
-     * @param columnEnd    cột kết thúc (exclusive, zero-based).
-     * @param colStep      bước nhảy cột (ví dụ 1, 2...).
-     * @param rowBegin     hàng bắt đầu (inclusive, zero-based).
-     * @param rowEnd       hàng kết thúc (exclusive, zero-based).
-     * @param rowStep      bước nhảy hàng.
-     * @param rowMajor     nếu true -> lặp hàng ngoài, cột trong (row then col). Nếu false -> cột ngoài, hàng trong.
+     * @param sheet       sheet đích (cùng sheet hoặc khác sheet nếu cần).
+     * @param srcCell     ô nguồn chứa công thức (hoặc giá trị).
+     * @param columnBegin cột bắt đầu (inclusive, zero-based).
+     * @param columnEnd   cột kết thúc (exclusive, zero-based).
+     * @param colStep     bước nhảy cột (ví dụ 1, 2...).
+     * @param rowBegin    hàng bắt đầu (inclusive, zero-based).
+     * @param rowEnd      hàng kết thúc (exclusive, zero-based).
+     * @param rowStep     bước nhảy hàng.
+     * @param rowMajor    nếu true -> lặp hàng ngoài, cột trong (row then col). Nếu false -> cột ngoài, hàng trong.
      */
     public static void copySrcCellToRange(Sheet sheet, Cell srcCell,
                                           int columnBegin, int columnEnd, int colStep,
@@ -2908,7 +2926,7 @@ public class ReadPDFToExcel {
 //                        target.getCellStyle().setAlignment(srcCell.getCellStyle().getAlignment());
 //                    }
                     // gán kiểu của cell gốc cho cell mới
-                    if (srcCell.getCellStyle() != null){
+                    if (srcCell.getCellStyle() != null) {
                         target.setCellStyle(srcCell.getCellStyle());
                     }
 
@@ -2938,7 +2956,7 @@ public class ReadPDFToExcel {
 
                     Cell target = getOrCreateCell(sheet, r, c);
                     // gán kiểu của cell gốc cho cell mới
-                    if (srcCell.getCellStyle() != null){
+                    if (srcCell.getCellStyle() != null) {
                         target.setCellStyle(srcCell.getCellStyle());
                     }
 
@@ -2962,7 +2980,9 @@ public class ReadPDFToExcel {
 
     // ===================== helper ======================
 
-    /** tìm merged region chứa cell (nếu có) */
+    /**
+     * tìm merged region chứa cell (nếu có)
+     */
     private static CellRangeAddress findMergedRegion(Sheet sheet, int row, int col) {
         List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
         for (CellRangeAddress region : mergedRegions) {
@@ -2973,7 +2993,9 @@ public class ReadPDFToExcel {
         return null;
     }
 
-    /** thêm vùng merge tương ứng (dịch theo hàng & cột), tránh trùng */
+    /**
+     * thêm vùng merge tương ứng (dịch theo hàng & cột), tránh trùng
+     */
     private static void addMergedRegionSafe(Sheet sheet, CellRangeAddress srcMerged, int rowShift, int colShift) {
         int firstRow = srcMerged.getFirstRow() + rowShift;
         int lastRow = srcMerged.getLastRow() + rowShift;
@@ -2992,7 +3014,9 @@ public class ReadPDFToExcel {
         sheet.addMergedRegion(newMerged);
     }
 
-    /** tạo cell nếu chưa có */
+    /**
+     * tạo cell nếu chưa có
+     */
     private static Cell getOrCreateCell(Sheet sheet, int rowIdx, int colIdx) {
         Row row = sheet.getRow(rowIdx);
         if (row == null) row = sheet.createRow(rowIdx);
@@ -3001,7 +3025,9 @@ public class ReadPDFToExcel {
         return cell;
     }
 
-    /** copy giá trị cơ bản nếu không có công thức */
+    /**
+     * copy giá trị cơ bản nếu không có công thức
+     */
     private static void copyCellValue(Cell src, Cell target) {
         if (src == null || target == null) return;
         switch (src.getCellType()) {
@@ -3022,7 +3048,9 @@ public class ReadPDFToExcel {
         }
     }
 
-    /** dịch công thức A1-style theo hàng/cột, tôn trọng $ */
+    /**
+     * dịch công thức A1-style theo hàng/cột, tôn trọng $
+     */
     public static String shiftFormulaA1(String formula, int colShift, int rowShift) {
         if (formula == null || formula.isEmpty()) return formula;
         Pattern p = Pattern.compile("((?:'[^']+'|[A-Za-z0-9_]+)!|)(\\$?)([A-Z]+)(\\$?)(\\d+)");
@@ -3059,7 +3087,8 @@ public class ReadPDFToExcel {
     }
 
     /**
-     xóa các hợp nhất ô trong vùng chỉ định mà không giữ lại giá trị các ô bên phải và bên dưới
+     * xóa các hợp nhất ô trong vùng chỉ định mà không giữ lại giá trị các ô bên phải và bên dưới
+     *
      * @param sheet
      * @param firstRow
      * @param lastRow
@@ -3086,7 +3115,8 @@ public class ReadPDFToExcel {
     }
 
     /**
-     xóa các hợp nhất ô trong vùng chỉ định mà giữ lại giá trị tại tất cả các ô
+     * xóa các hợp nhất ô trong vùng chỉ định mà giữ lại giá trị tại tất cả các ô
+     *
      * @param sheet
      * @param firstRow
      * @param lastRow
