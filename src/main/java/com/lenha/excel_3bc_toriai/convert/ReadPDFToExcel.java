@@ -154,7 +154,7 @@ public class ReadPDFToExcel {
         // đoạn code copy file này khác với app chl vì nó chỉ tạo 1 file nên chỉ chạy 1 lần ở đoạn đầu này
         // tạo path chứa file excel
         // mà không chạy trong vòng lặp bên dưới như trong hàm writeDataToChl
-        excelCopyPath = excelDirPath + "\\" + fileExcelName + ".xlsx";
+        excelCopyPath = excelDirPath + "\\" + fileExcelName + "-NC" + ".xlsx";
         // Tạo đối tượng File đại diện cho file cần xóa
         File file = new File(excelCopyPath);
         // Kiểm tra nếu file tồn tại thì xóa nó
@@ -1837,7 +1837,7 @@ public class ReadPDFToExcel {
             // xóa và nhập lại kirirosu
             Cell b7 = sheet.getRow(7).getCell(1);
             b7.setBlank();
-            b7.setCellValue(2);
+            b7.setCellValue(kirirosu);
 
             // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
             // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
@@ -2310,7 +2310,11 @@ public class ReadPDFToExcel {
 
                     // lặp qua các hàng chiều dài sản phẩm và so sánh với chiều dài sản phẩm trong map, nếu khớp nhau thì tính toán tại hàng đó, thêm số lượng
                     // sản phẩm tương ứng vào ô số lượng tại hàng tìm thấy trên cột bozai đang lặp
+
+                    int soLuongConLaiCuaSanPhamTrongMap = soLuongSanPhamTrongMap;
                     for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
+
+
 //                        // nếu biến nhớ số lượng sản phẩm còn lại trong map bị tính về còn 0 thì đã tính xong và thoát vòng lặp
 //                        if (soLuongSanPhamTrongMap <= 0) {
 //                            break;
@@ -2375,25 +2379,32 @@ public class ReadPDFToExcel {
                                     soLuongCuCuaSanPhamTaiCotBozai = (int) cellSoLuong.getNumericCellValue();
                                 }
 
-                                // nếu số lượng còn lại của sản phẩm nhỏ hơn số lượng cần ghi thêm thì tức là hàng này không điều kiện ghi
-                                // nhảy sang vòng lặp tiếp theo để tìm chiều dài giống trong hàng sản phẩm đang lặp này nữa(nếu có) và thực hiện lại
-                                if (soLuongConLaiCuaSanPham < soLuongSanPhamTrongMap * soLuongCuaBozai) {
+                                int soLuongCoTheGhi = soLuongConLaiCuaSanPham / soLuongCuaBozai;
+
+                                if(soLuongCoTheGhi < 1) {
                                     continue;
                                 }
 
+                                if (soLuongCoTheGhi > soLuongConLaiCuaSanPhamTrongMap){
+                                    soLuongCoTheGhi = soLuongConLaiCuaSanPhamTrongMap;
+                                }
+
+                                soLuongConLaiCuaSanPhamTrongMap -= soLuongCoTheGhi;
+
+
                                 // đoạn code không chắc có chạy không nhưng cũng không cần thiết
-                                /*int soLuongCanGhi;
+                                /*int soLuongConLaiCuaSanPhamTrongMap;
                                 if (soLuongConLaiCuaSanPham <= soLuongSanPhamTrongMap) {
-                                    soLuongCanGhi = soLuongConLaiCuaSanPham;
+                                    soLuongConLaiCuaSanPhamTrongMap = soLuongConLaiCuaSanPham;
                                 } else {
-                                    soLuongCanGhi = soLuongSanPhamTrongMap;
+                                    soLuongConLaiCuaSanPhamTrongMap = soLuongSanPhamTrongMap;
                                 }
                                 // số lượng cần ghi sẽ phải là nó chia cho số lượng của bozai tại cột đang lặp
                                 // để tính xem hàng sản phẩm này có đúng là hàng cần ghi không vì có thể còn hàng sản phẩm khác có chiều dài tương tự cần ghi
-                                soLuongCanGhi = soLuongCanGhi / soLuongCuaBozai;
+                                soLuongConLaiCuaSanPhamTrongMap = soLuongConLaiCuaSanPhamTrongMap / soLuongCuaBozai;
 
                                 // tính lại số lượng còn lại của sản phẩm trong map để dùng cho các hàng tiếp theo nếu còn chiều dài giống hàng này
-                                soLuongSanPhamTrongMap -= soLuongCanGhi * soLuongCuaBozai;*/
+                                soLuongSanPhamTrongMap -= soLuongConLaiCuaSanPhamTrongMap * soLuongCuaBozai;*/
 
                                 // đến đây mà vẫn chưa bị thoát thì mọi điều kiện ph hợp, ghi nối số lượng sản phẩm trong map vào ô của tính vật liệu của sản phẩm trong hàng đang lặp
                                 // sau đó thoát khỏi vòng lặp này để nhảy sang vòng bên ngoài và duyệt tiếp chiều dài sản phẩm khác trong map của bozai đang duyệt của vòng lặp ngoài
@@ -2401,11 +2412,13 @@ public class ReadPDFToExcel {
                                 // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
                                 // không thì ghi cell với số lượng hiện tại
                                 if (soLuongCuCuaSanPhamTaiCotBozai > 0d) {
-                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap + soLuongCuCuaSanPhamTaiCotBozai);
+                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCoTheGhi + soLuongCuCuaSanPhamTaiCotBozai);
                                 } else {
-                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap);
+                                    sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCoTheGhi);
                                 }
-                                break;
+                                if(soLuongConLaiCuaSanPhamTrongMap <= 0) {
+                                    break;
+                                }
 
 
                             }
@@ -2430,7 +2443,7 @@ public class ReadPDFToExcel {
 
             // số cột chứa thông tin tính toán tự tạo sẽ ẩn đi khi đã nhập xong tính vật liệu để tránh rối
             int soCotBozai;
-            // nếu số bozai < 15 thì số cột cần ẩn là 15, nếu không thì số cột ẩn là số bozai
+            // nếu số bozai < 6 thì số cột cần ẩn là từ cột 6 * 2 + 12 đến hết, nếu không thì số cột ẩn là từ cột số bozai * 2 + 12 đến hết
             if (soBoZai < 6) {
                 soCotBozai = 6 * 2;
             } else {
