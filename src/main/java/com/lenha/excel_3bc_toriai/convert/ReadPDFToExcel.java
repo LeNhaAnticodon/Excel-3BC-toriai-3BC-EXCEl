@@ -2334,6 +2334,7 @@ public class ReadPDFToExcel {
 
                     // cách để ghi số lượng các sản phẩm khác nhau nhưng chiều dài giống nhau không ghi số lượng dồn vào chỉ 1 sản phẩm khi tính
                     // nhưng cách này chưa hoạt động
+                    // có thể debug để xem lại, có thể tính tới cách khác là tạo tên sản phẩm bằng số thứ tự trong 3bc rồi dùng tên đó để so sánh giống thì nhập số lượng(chưa thử)
 //                    Map<Double, Integer> hangDaGHiLanTruoc = new HashMap<>();
 
                     for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
