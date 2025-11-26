@@ -2325,20 +2325,31 @@ public class ReadPDFToExcel {
                     // số lượng sản phẩm trong map
                     int soLuongSanPhamTrongMap = Integer.parseInt(meiSyouEntry.getValue().toString());
 
+
                     // lặp qua các hàng chiều dài sản phẩm và so sánh với chiều dài sản phẩm trong map, nếu khớp nhau thì tính toán tại hàng đó, thêm số lượng
                     // sản phẩm tương ứng vào ô số lượng tại hàng tìm thấy trên cột bozai đang lặp
 
+                    // biến nhớ số lượng còn lại của sản phẩm trong map khi lặp qua các hàng sản phẩm để nhập số lượng của sản phẩm trong map này
                     int soLuongConLaiCuaSanPhamTrongMap = soLuongSanPhamTrongMap;
+
+                    // cách để ghi số lượng các sản phẩm khác nhau nhưng chiều dài giống nhau không ghi số lượng dồn vào chỉ 1 sản phẩm khi tính
+                    // nhưng cách này chưa hoạt động
+//                    Map<Double, Integer> hangDaGHiLanTruoc = new HashMap<>();
+
                     for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
 
 
-//                        // nếu biến nhớ số lượng sản phẩm còn lại trong map bị tính về còn 0 thì đã tính xong và thoát vòng lặp
-//                        if (soLuongSanPhamTrongMap <= 0) {
-//                            break;
-//                        }
-
                         // lấy chiều dài sản phẩm trong hàng đang lặp tại cột sản phẩm
                         double chieuDaisanPham = Math.abs(Double.parseDouble(getStringNumberCellValue(sheet.getRow(i).getCell(COT_CHIEU_DAI_SAN_PHAM))));
+
+                        // cách để ghi số lượng các sản phẩm khác nhau nhưng chiều dài giống nhau không ghi số lượng dồn vào chỉ 1 sản phẩm khi tính
+                        // nhưng cách này chưa hoạt động
+                        /*Integer chiSoHangDaGHiLanTruoc;
+                        chiSoHangDaGHiLanTruoc = hangDaGHiLanTruoc.get(chieuDaisanPham);
+                        if (chiSoHangDaGHiLanTruoc != null && i == chiSoHangDaGHiLanTruoc) {
+                            continue;
+                        }*/
+
                         // nếu chiều dài sản phẩm tại hàng đang lặp khớp với chiều dài sản phẩm trong map thì bắt đầu tính toán
                         if (chieuDaisanPham == chieuDaiSanPhamTrongMap) {
 
@@ -2396,16 +2407,22 @@ public class ReadPDFToExcel {
                                     soLuongCuCuaSanPhamTaiCotBozai = (int) cellSoLuong.getNumericCellValue();
                                 }
 
+                                // tính số lượng sản phẩm có thể ghi bằng số lượng còn lại của sản phẩm / số lượng của bozai tại cột bozai đang lặp
                                 int soLuongCoTheGhi = soLuongConLaiCuaSanPham / soLuongCuaBozai;
 
+                                // nếu số lượng < 1 tức không thể ghi nữa thì chuyển xuống hàng sản phẩm tiếp theo
                                 if (soLuongCoTheGhi < 1) {
                                     continue;
                                 }
 
+                                //  nếu số lượng có thể ghi lớn hơn số lượng còn lại của sản phẩm trong map thì
+                                // số lượng có thể ghi gán lại nhỏ hơn = số lượng còn lại của sản phẩm trong map
                                 if (soLuongCoTheGhi > soLuongConLaiCuaSanPhamTrongMap) {
                                     soLuongCoTheGhi = soLuongConLaiCuaSanPhamTrongMap;
                                 }
 
+                                // sau khi tính xong số lượng có thể ghi thì trừ số lượng còn lại của sản phẩm trong map cho số lượng có thể ghi
+                                // vì chắc chắn nó sẽ ghi thêm vào số lượng nên cần trừ đi
                                 soLuongConLaiCuaSanPhamTrongMap -= soLuongCoTheGhi;
 
 
@@ -2425,7 +2442,6 @@ public class ReadPDFToExcel {
 
                                 // đến đây mà vẫn chưa bị thoát thì mọi điều kiện ph hợp, ghi nối số lượng sản phẩm trong map vào ô của tính vật liệu của sản phẩm trong hàng đang lặp
                                 // sau đó thoát khỏi vòng lặp này để nhảy sang vòng bên ngoài và duyệt tiếp chiều dài sản phẩm khác trong map của bozai đang duyệt của vòng lặp ngoài
-                                // có thể thoát ngay vì mỗi chiều dài trong bozai đang duyệt chắc chắn chỉ ghi đúng 1 lần, nếu ghi được rồi thì không cần phải tính tiếp nữa
                                 // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
                                 // không thì ghi cell với số lượng hiện tại
                                 if (soLuongCuCuaSanPhamTaiCotBozai > 0d) {
@@ -2433,6 +2449,12 @@ public class ReadPDFToExcel {
                                 } else {
                                     sheet.getRow(i).getCell(4 + numBozai).setCellValue(soLuongCoTheGhi);
                                 }
+
+                                // cách để ghi số lượng các sản phẩm khác nhau nhưng chiều dài giống nhau không ghi số lượng dồn vào chỉ 1 sản phẩm khi tính
+                                // nhưng cách này chưa hoạt động
+//                                hangDaGHiLanTruoc.put(chieuDaisanPham, i);
+
+                                // nếu số lượng còn lại của sản phẩm trong map bị trừ về 0 thì đã nhập xong sản phẩm này nên thoát
                                 if (soLuongConLaiCuaSanPhamTrongMap <= 0) {
                                     break;
                                 }

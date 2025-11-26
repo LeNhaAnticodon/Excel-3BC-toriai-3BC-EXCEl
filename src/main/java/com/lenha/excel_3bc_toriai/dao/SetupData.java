@@ -103,6 +103,7 @@ public class SetupData {
         languageMap.put("Hãy chỉnh sửa lại dữ liệu vật liệu đang chuyển để tiếp tục!", "Please_edit_the_transferring_material_data_to_continue");
 
         languageMap.put("Tên file CHL", "CHL_file_name");
+        languageMap.put("Tên file EXCEL", "EXCEL_file_name");
         languageMap.put("Sản phẩm(m)", "Product");
         languageMap.put("Vật liệu(m)", "Base_material");
 
@@ -148,6 +149,7 @@ public class SetupData {
         languageMap.put("続行するには、転送中の鋼種データを編集してください。", "Please_edit_the_transferring_material_data_to_continue");
 
         languageMap.put("CHLファイル名", "CHL_file_name");
+        languageMap.put("EXCELファイル名", "EXCEL_file_name");
         languageMap.put("総製品(m)", "Product");
         languageMap.put("総鋼材(m)", "Base_material");
 
@@ -193,6 +195,7 @@ public class SetupData {
         languageMap.put("Please edit the transferring material data to continue!", "Please_edit_the_transferring_material_data_to_continue");
 
         languageMap.put("CHL file name", "CHL_file_name");
+        languageMap.put("EXCEL file name", "EXCEL_file_name");
         languageMap.put("Product(m)", "Product");
         languageMap.put("Material(m)", "Base_material");
 
