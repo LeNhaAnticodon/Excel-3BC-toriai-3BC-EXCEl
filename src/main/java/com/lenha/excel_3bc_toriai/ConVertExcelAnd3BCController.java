@@ -50,6 +50,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeoutException;
 
+import static com.lenha.excel_3bc_toriai.convert.ReadPDFToExcel.copyFile;
+
 public class ConVertExcelAnd3BCController implements Initializable {
 
     @FXML
@@ -849,24 +851,63 @@ public class ConVertExcelAnd3BCController implements Initializable {
                     return;
                 }
 
+                // nếu là lỗi file pdf với file excel có nội dung tính vật liệu không khớp nhau thì yêu cầu chọn lại
+                if (e instanceof SecurityException) {
+                    // Kiểm tra nếu file tồn tại thì xóa nó
+                    // vì do file đã được tạo, mà giờ có lỗi ghi file nên file này không cần nữa
+                    if (copyFile.exists()) {
+                        if (copyFile.delete()) {
+                            System.out.println("File đã được xóa thành công.");
+                        } else {
+                            System.out.println("Xóa file thất bại.");
+                        }
+                    }
+                    confirmAlert.setHeaderText("File PDF đang chọn có nội dung không khớp với file EXCEL tính vật liệu đang chọn!");
+                    confirmAlert.setContentText(ERROR_CONVERT_CONTENT);
+                    System.out.println("File PDF đang chọn có nội dung không khớp với file EXCEL tính vật liệu đang chọn");
+                    updateLangAlert(confirmAlert);
 
-                // nếu là lỗi ghi file thì thông báo
-                Optional<ButtonType> result = confirmAlert.showAndWait();
+                    // chuyển lại alert về dạng confirm
+                    // nếu là lỗi ghi file thì thông báo
+                    Optional<ButtonType> result = confirmAlert.showAndWait();
 
-                // chuyển lại alert về dạng confirm
-                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+                    // chuyển lại alert về dạng confirm
+                    confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
 
-                // nếu chọn ok thì gọi lại hàm chọn file pdf để chọn file khác
-                // nếu chọn cancel thì thoát
-                if (result.isPresent() && result.get() == ButtonType.OK) {
-                    File fileSelected2 = get3bcToriaiFile();
+                    // nếu chọn ok thì gọi lại hàm chọn file EXCEL để chọn file khác
+                    // nếu chọn cancel thì thoát
+                    if (result.isPresent() && result.get() == ButtonType.OK) {
+                        File fileSelected2 = get3bcToriaiFile();
 
-                    // nếu không chọn file thì thoát
-                    if (fileSelected2 == null) {
+                        // nếu không chọn file thì thoát
+                        if (fileSelected2 == null) {
+                            return;
+                        }
+                    } else {
                         return;
                     }
+
                 } else {
-                    return;
+
+                    // nếu là lỗi ghi file thì thông báo
+                    Optional<ButtonType> result = confirmAlert.showAndWait();
+
+                    // chuyển lại alert về dạng confirm
+                    confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+
+                    // nếu chọn ok thì gọi lại hàm chọn file pdf để chọn file khác
+                    // nếu chọn cancel thì thoát
+                    if (result.isPresent() && result.get() == ButtonType.OK) {
+                        File fileSelected2 = get3bcToriaiFile();
+
+                        // nếu không chọn file thì thoát
+                        if (fileSelected2 == null) {
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+
                 }
             }
         }
