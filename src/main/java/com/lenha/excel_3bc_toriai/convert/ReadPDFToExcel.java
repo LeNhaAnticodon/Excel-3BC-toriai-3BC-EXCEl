@@ -2144,11 +2144,17 @@ public class ReadPDFToExcel {
                     Row row = sheet.getRow(i);
                     // Sao chép ô từ cột srcColumn sang destColumn trong các cột tính vật liệu sản phẩm
                     srcCell = row.getCell(4);
+                    if (srcCell == null){
+                        srcCell = row.createCell(4);
+                    }
                     int destCol = 6;
                     row.createCell(destCol);
                     row.createCell(destCol + 1);
                     copySrcCellToRange(sheet, srcCell, destCol, destCol, 1, i, i, 1, true);
                     srcCell = row.getCell(5);
+                    if (srcCell == null){
+                        srcCell = row.createCell(5);
+                    }
                     destCell = row.getCell(7);
                     destCell.setCellStyle(srcCell.getCellStyle());
 
@@ -2157,6 +2163,9 @@ public class ReadPDFToExcel {
                     // có chỉ số cột không còn là 25 nữa mà là 27, còn ô cần dán không còn 27 nữa mà là 29,
                     // rồi do tính theo số lần thêm cột ở cột sản phẩm nên thêm j * 2
                     srcCell = row.getCell(27 + j * 2);
+                    if (srcCell == null){
+                        srcCell = row.createCell(27 + j * 2);
+                    }
                     destCol = 29 + j * 2;
                     row.createCell(destCol);
                     row.createCell(destCol + 1);
@@ -2167,6 +2176,9 @@ public class ReadPDFToExcel {
                     // nên ô công thức gốc có chỉ số cột không còn là 40 nữa mà là 40 + 2 + 2 = 44, còn ô cần dán
                     // không còn 42 nữa mà là 42 + 2 + 2 = 46, rồi do tính theo số lần thêm 2 cột ở sản phẩm và 2 cột ở công thức tự tạo đầu tiên nên thêm j * (2 + 2)
                     srcCell = row.getCell(44 + j * 4);
+                    if (srcCell == null){
+                        srcCell = row.createCell(44 + j * 4);
+                    }
                     destCol = 46 + j * 4;
                     row.createCell(destCol);
                     row.createCell(destCol + 1);
