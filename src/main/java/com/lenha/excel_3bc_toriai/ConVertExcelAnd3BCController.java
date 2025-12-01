@@ -822,7 +822,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 if (e instanceof FileNotFoundException) {
                     confirmAlert.getButtonTypes().clear();
                     confirmAlert.getButtonTypes().add(ButtonType.OK);
-                    confirmAlert.setHeaderText("Tên file EXCEL đang tạo: (\"" + ReadPDFToExcel.fileExcelName + ".xlsx" + "\") trùng tên với 1 file EXCEL khác đang được mở nên không thể ghi đè");
+                    confirmAlert.setHeaderText("Tên file EXCEL đang tạo: (\"" + ReadPDFToExcel.fileExcelName + "-NC" + ".xlsx" + "\") trùng tên với 1 file EXCEL khác đang được mở nên không thể ghi đè");
                     confirmAlert.setContentText("Hãy đóng file EXCEL đang mở để tiếp tục!");
                     System.out.println("File đang được mở bởi người dùng khác");
                     updateLangAlert(confirmAlert);

@@ -9,7 +9,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -173,20 +173,8 @@ public class ReadPDFToExcel {
 
         copyFile = new File(excelCopyPath);
 
-        /*// Đọc file mẫu từ resources rồi copy file ra địa chỉ của copyFilePath
-        try (InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/sample files.xlsx")) {
-            if (sourceFile == null) {
-                throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
-            }
-            Files.copy(sourceFile, copyFilePath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new FileNotFoundException();
-        }*/
-
-
-        // Đọc file excel gốc rồi tạo file copy ra địa chỉ theo link copyFilePath
-        try (InputStream sourceFile = new FileInputStream(fileExcelRootPath)) {
+        // Đọc file mẫu từ resources rồi copy file ra địa chỉ của copyFilePath
+        try (InputStream sourceFile = ReadPDFToExcel.class.getResourceAsStream("/com/lenha/excel_3bc_toriai/sampleFiles/sample files3.xlsx")) {
             if (sourceFile == null) {
                 throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
             }
@@ -196,6 +184,22 @@ public class ReadPDFToExcel {
             throw new FileNotFoundException();
         }
 
+
+        // cách cũ clone file từ file gốc nên nó copy cả lỗi của file gốc nên không nên dùng
+/*        // Đọc file excel gốc rồi tạo file copy ra địa chỉ theo link copyFilePath
+        try (InputStream sourceFile = new FileInputStream(fileExcelRootPath)) {
+            if (sourceFile == null) {
+                throw new IOException("File mẫu không tồn tại trong JAR ứng dụng");
+            }
+            Files.copy(sourceFile, copyFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new FileNotFoundException();
+        }*/
+
+        // copy file bằng hàm mới không phải clone file như cách trên để tránh copy cả lỗi của file gốc
+//        createNewFileAndCopyValue(new File(fileExcelRootPath), copyFile);
+        copyDataToCopyFile(new File(fileExcelRootPath), copyFile);
 
         // thêm tên file vào list các sheet của file để hiển thị tên file
         excelFileNames.add(new ExcelFile("EXCEL: " + fileExcelName + ".xlsx", "", 0, 0));
@@ -235,6 +239,12 @@ public class ReadPDFToExcel {
                 // ghi thông tin vào file định dạng .xlsx là file của excel
 //            writeDataToChl(kaKouPairs, i, excelFileNames);
                 writeDataToExcelToriai2(kaKouPairs, i, excelFileNames, workbook);
+
+                /*workbook.setForceFormulaRecalculation(true);
+                try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
+                    workbook.write(fileOut);
+
+                }*/
             }
 
             // ẩn sheet mẫu
@@ -292,6 +302,326 @@ public class ReadPDFToExcel {
             }
         }*/
 
+    }
+
+    /**
+     * chatGPT AI
+     * tạo file excel mới và copy y nguyên value từ file excel gốc sang file mới
+     * mục đích để sửa lỗi của file gốc, do file gốc tính vật liệu có trường bị lỗi gì đó chưa tìm được nguyên nhân
+     * khiến code nhập tính vật liệu không chạy được
+     * hàm copyFile của class File nó chỉ clone từ file gốc sang file copy nên file copy vẫn bị lỗi nên không dùng được và phải dùng method này
+     * @param srcFile file gốc
+     * @param dstFile file copy
+     */
+    private static void createNewFileAndCopyValue(File srcFile, File dstFile) throws IOException {
+        try (FileInputStream fis = new FileInputStream(srcFile);
+             XSSFWorkbook srcWb = new XSSFWorkbook(fis);
+             XSSFWorkbook dstWb = new XSSFWorkbook()) {
+
+            Map<Integer, XSSFCellStyle> styleMap = new HashMap<>(); // cache cloned styles
+
+            for (int i = 0; i < srcWb.getNumberOfSheets(); i++) {
+                XSSFSheet srcSheet = srcWb.getSheetAt(i);
+                XSSFSheet dstSheet = dstWb.createSheet(srcSheet.getSheetName());
+
+                // copy column widths: compute max column index conservatively
+                int maxCol = 0;
+                for (int r = srcSheet.getFirstRowNum(); r <= srcSheet.getLastRowNum(); r++) {
+                    Row rr = srcSheet.getRow(r);
+                    if (rr != null && rr.getLastCellNum() > maxCol) {
+                        maxCol = rr.getLastCellNum();
+                    }
+                }
+                for (int c = 0; c <= maxCol; c++) {
+                    try {
+                        dstSheet.setColumnWidth(c, srcSheet.getColumnWidth(c));
+                    } catch (Exception e) {
+                        // ignore columns that don't exist in source
+                    }
+                }
+
+                // copy merged regions
+                for (int m = 0; m < srcSheet.getNumMergedRegions(); m++) {
+                    CellRangeAddress cra = srcSheet.getMergedRegion(m);
+                    dstSheet.addMergedRegion(new CellRangeAddress(cra.getFirstRow(), cra.getLastRow(), cra.getFirstColumn(), cra.getLastColumn()));
+                }
+
+                // copy rows and cells
+                for (int r = srcSheet.getFirstRowNum(); r <= srcSheet.getLastRowNum(); r++) {
+                    XSSFRow srcRow = srcSheet.getRow(r);
+                    if (srcRow == null) continue;
+                    XSSFRow dstRow = dstSheet.createRow(r);
+                    dstRow.setHeight(srcRow.getHeight());
+
+                    short firstCell = srcRow.getFirstCellNum();
+                    short lastCell = srcRow.getLastCellNum();
+                    if (firstCell < 0 || lastCell < 0) continue;
+
+                    for (int c = firstCell; c < lastCell; c++) {
+                        XSSFCell srcCell = srcRow.getCell(c);
+                        if (srcCell == null) continue;
+                        XSSFCell dstCell = dstRow.createCell(c);
+
+                        // clone style (cache by hashcode)
+                        XSSFCellStyle srcStyle = srcCell.getCellStyle();
+                        if (srcStyle != null) {
+                            int key = srcStyle.hashCode();
+                            XSSFCellStyle newStyle = styleMap.get(key);
+                            if (newStyle == null) {
+                                newStyle = dstWb.createCellStyle();
+                                newStyle.cloneStyleFrom(srcStyle);
+                                styleMap.put(key, newStyle);
+                            }
+                            dstCell.setCellStyle(newStyle);
+                        }
+
+                        // copy comment (shallow)
+                        if (srcCell.getCellComment() != null) {
+                            dstCell.setCellComment(srcCell.getCellComment());
+                        }
+
+                        // copy value / formula / type
+                        switch (srcCell.getCellType()) {
+                            case STRING:
+                                dstCell.setCellValue(srcCell.getRichStringCellValue());
+                                break;
+                            case NUMERIC:
+                                if (DateUtil.isCellDateFormatted(srcCell)) {
+                                    dstCell.setCellValue(srcCell.getDateCellValue());
+                                } else {
+                                    dstCell.setCellValue(srcCell.getNumericCellValue());
+                                }
+                                break;
+                            case BOOLEAN:
+                                dstCell.setCellValue(srcCell.getBooleanCellValue());
+                                break;
+                            case FORMULA:
+                                try {
+                                    dstCell.setCellFormula(srcCell.getCellFormula());
+                                } catch (Exception e) {
+                                    // If copying formula fails, fallback to cached value (if any)
+                                    if (srcCell.getCachedFormulaResultType() == CellType.NUMERIC) {
+                                        dstCell.setCellValue(srcCell.getNumericCellValue());
+                                    } else if (srcCell.getCachedFormulaResultType() == CellType.STRING) {
+                                        dstCell.setCellValue(srcCell.getStringCellValue());
+                                    }
+                                }
+                                break;
+                            case BLANK:
+                                dstCell.setBlank();
+                                break;
+                            case ERROR:
+                                dstCell.setCellErrorValue(srcCell.getErrorCellValue());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+            try (FileOutputStream fos = new FileOutputStream(dstFile)) {
+                dstWb.write(fos);
+            }
+        }
+    }
+
+    public static void copyDataToCopyFile(File srcFile, File destFile) throws IOException {
+        try (FileInputStream srcFis = new FileInputStream(srcFile);
+             XSSFWorkbook srcWb = new XSSFWorkbook(srcFis)) {
+
+            XSSFWorkbook destWb;
+            boolean destExisted = destFile.exists();
+
+            if (destExisted) {
+                try (FileInputStream destFis = new FileInputStream(destFile)) {
+                    destWb = new XSSFWorkbook(destFis);
+                }
+                // Ensure only sheet index 0 exists: remove others
+                int total = destWb.getNumberOfSheets();
+                for (int i = total - 1; i >= 1; i--) { // remove all except 0
+                    destWb.removeSheetAt(i);
+                }
+                // Ensure at least one sheet exists
+                if (destWb.getNumberOfSheets() == 0) {
+                    destWb.createSheet("Sheet1");
+                }
+            } else {
+                destWb = new XSSFWorkbook();
+                destWb.createSheet("Sheet1");
+            }
+
+            int srcSheetCount = srcWb.getNumberOfSheets();
+
+            // Create additional sheets in dest by cloning sheet index 0 until counts match
+            while (destWb.getNumberOfSheets() < srcSheetCount) {
+                destWb.cloneSheet(0); // clone internal sheet 0
+            }
+
+            // Now for each sheet index: copy content from src sheet i to dest sheet i
+            for (int i = 0; i < srcSheetCount; i++) {
+                XSSFSheet srcSheet = srcWb.getSheetAt(i);
+                XSSFSheet destSheet = destWb.getSheetAt(i);
+
+                // Optionally rename destination sheet to match source name (ensure unique)
+                String desiredName = srcSheet.getSheetName();
+                try {
+                    destWb.setSheetName(i, uniqueSheetName(destWb, desiredName, i));
+                } catch (IllegalArgumentException ex) {
+                    // ignore if name invalid or duplicate; we will leave default name
+                }
+
+                // Clear destination sheet content (rows and merged regions) but keep column widths if you prefer.
+                clearSheetContent(destSheet);
+
+                // Copy sheet content from src to dest (values, formulas, styles, merged regions, column widths)
+                copySheetContent(srcSheet, destSheet, destWb);
+            }
+
+            // Write back to destFile (overwrite or create)
+            try (FileOutputStream fos = new FileOutputStream(destFile)) {
+                destWb.write(fos);
+            }
+
+            destWb.close();
+        }
+    }
+
+    // Ensure sheet name is unique; if conflicts, append suffix
+    private static String uniqueSheetName(XSSFWorkbook wb, String base, int indexToIgnore) {
+        String name = base;
+        int suffix = 1;
+        while (true) {
+            int idx = wb.getSheetIndex(name);
+            if (idx == -1 || idx == indexToIgnore) return name;
+            name = base + "_" + suffix++;
+            if (suffix > 1000) return base + "_" + System.currentTimeMillis();
+        }
+    }
+
+    // Remove rows and merged regions/content from destination sheet
+    private static void clearSheetContent(XSSFSheet sheet) {
+        // remove rows
+        int first = sheet.getFirstRowNum();
+        int last = sheet.getLastRowNum();
+        for (int r = last; r >= first; r--) {
+            XSSFRow row = sheet.getRow(r);
+            if (row != null) sheet.removeRow(row);
+        }
+        // remove merged regions
+        for (int i = sheet.getNumMergedRegions() - 1; i >= 0; i--) {
+            sheet.removeMergedRegion(i);
+        }
+    }
+
+    // Copy sheet content (core logic)
+    private static void copySheetContent(XSSFSheet srcSheet, XSSFSheet destSheet, XSSFWorkbook destWb) {
+        Map<Integer, CellStyle> styleMap = new HashMap<>();
+
+        // copy column widths: determine max column index present in source
+        int maxCol = 0;
+        for (int r = srcSheet.getFirstRowNum(); r <= srcSheet.getLastRowNum(); r++) {
+            Row rr = srcSheet.getRow(r);
+            if (rr != null && rr.getLastCellNum() > maxCol) {
+                maxCol = rr.getLastCellNum();
+            }
+        }
+        for (int c = 0; c <= maxCol; c++) {
+            try {
+                destSheet.setColumnWidth(c, srcSheet.getColumnWidth(c));
+                // also copy hidden state
+                destSheet.setColumnHidden(c, srcSheet.isColumnHidden(c));
+            } catch (Exception e) {
+                // ignore columns that may not exist
+            }
+        }
+
+        // copy merged regions
+        for (int i = 0; i < srcSheet.getNumMergedRegions(); i++) {
+            CellRangeAddress cra = srcSheet.getMergedRegion(i);
+            destSheet.addMergedRegion(new CellRangeAddress(cra.getFirstRow(), cra.getLastRow(), cra.getFirstColumn(), cra.getLastColumn()));
+        }
+
+        // copy rows & cells
+        for (int r = srcSheet.getFirstRowNum(); r <= srcSheet.getLastRowNum(); r++) {
+            XSSFRow srcRow = srcSheet.getRow(r);
+            if (srcRow == null) continue;
+            XSSFRow destRow = destSheet.createRow(r);
+            destRow.setHeight(srcRow.getHeight());
+
+            short firstCell = srcRow.getFirstCellNum();
+            short lastCell = srcRow.getLastCellNum();
+            if (firstCell < 0 || lastCell < 0) continue;
+
+            for (int c = firstCell; c < lastCell; c++) {
+                XSSFCell srcCell = srcRow.getCell(c);
+                if (srcCell == null) continue;
+                XSSFCell destCell = destRow.createCell(c);
+
+                // copy style (clone into dest workbook)
+                XSSFCellStyle srcStyle = srcCell.getCellStyle();
+                if (srcStyle != null) {
+                    int key = srcStyle.hashCode();
+                    XSSFCellStyle newStyle = (XSSFCellStyle) styleMap.get(key);
+                    if (newStyle == null) {
+                        newStyle = destWb.createCellStyle();
+                        try {
+                            newStyle.cloneStyleFrom(srcStyle);
+                        } catch (Exception e) {
+                            // fallback: skip clone if incompatible
+                        }
+                        styleMap.put(key, newStyle);
+                    }
+                    destCell.setCellStyle(newStyle);
+                }
+
+                // copy comment (shallow)
+                if (srcCell.getCellComment() != null) {
+                    destCell.setCellComment(srcCell.getCellComment());
+                }
+
+                // copy value / type / formula
+                switch (srcCell.getCellType()) {
+                    case STRING:
+                        destCell.setCellValue(srcCell.getRichStringCellValue());
+                        break;
+                    case NUMERIC:
+                        if (DateUtil.isCellDateFormatted(srcCell)) {
+                            destCell.setCellValue(srcCell.getDateCellValue());
+                        } else {
+                            destCell.setCellValue(srcCell.getNumericCellValue());
+                        }
+                        break;
+                    case BLANK:
+                        destCell.setBlank();
+                        break;
+                    case BOOLEAN:
+                        destCell.setCellValue(srcCell.getBooleanCellValue());
+                        break;
+                    case FORMULA:
+                        try {
+                            destCell.setCellFormula(srcCell.getCellFormula());
+                        } catch (Exception e) {
+                            // nếu không đặt được formula (ví dụ invalid), fallback to cached result if any
+                            try {
+                                if (srcCell.getCachedFormulaResultType() == CellType.NUMERIC) {
+                                    destCell.setCellValue(srcCell.getNumericCellValue());
+                                } else if (srcCell.getCachedFormulaResultType() == CellType.STRING) {
+                                    destCell.setCellValue(srcCell.getStringCellValue());
+                                }
+                            } catch (Exception ex) {
+                                destCell.setBlank();
+                            }
+                        }
+                        break;
+                    case ERROR:
+                        destCell.setCellErrorValue(srcCell.getErrorCellValue());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     /**
@@ -1840,11 +2170,31 @@ public class ReadPDFToExcel {
         b7.setBlank();
         b7.setCellValue(kirirosu);
 
+
+        // xóa ở các ô bozai và số lượng của nó, xóa vùng nhập tính vật liệu
+        for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM - 3; i <= lastRowSeihin; i++) {
+            for (int j = 4; j <= 15; j++) {
+                Row row = sheet.getRow(i);
+                if (row == null) {
+                    row = sheet.createRow(i);
+                }
+                Cell cell = row.getCell(j);
+                if (cell == null) {
+                    cell = row.createCell(j);
+                }
+
+                cell.setBlank();
+            }
+        }
+
+
         // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
         // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
 //            soBoZai = 18;
-        int soSanPhamCanThem = soBoZai - 6;
+
+        int soSanPhamCanThem = Math.max(soBoZai - 6, 0);
         if (soBoZai > 6) {
+
             // xóa sạch dữ liệu vùng chỉ định đang có dữ liệu cần ghi đè để tránh sau 1 cell trong vùng khi bị ghi đè mà lại gộp cell
             // sẽ gặp tình trạng báo lỗi nếu nhiều cell cùng có giá trị
             for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
@@ -1852,19 +2202,7 @@ public class ReadPDFToExcel {
                     sheet.getRow(i).getCell(j).setBlank();
                 }
             }
-            // xóa ở các ô bozai và số lượng của nó
-            for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM - 3; i <= HANG_DAU_TIEN_CHUA_SAN_PHAM - 2; i++) {
-                for (int j = 4; j <= 15; j++) {
-                    sheet.getRow(i).getCell(j).setBlank();
-                }
-            }
 
-            // xóa vùng nhập tính vật liệu
-            for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
-                for (int j = 4; j <= 15; j++) {
-                    sheet.getRow(i).getCell(j).setBlank();
-                }
-            }
 
             int soSanPhamExcel = lastRowSeihin - HANG_DAU_TIEN_CHUA_SAN_PHAM + 1;
 
@@ -2007,7 +2345,7 @@ public class ReadPDFToExcel {
                 // đến đây đã tạo được các hàng công thức mẫu của hàng sản phẩm đầu tiên, hàng 10, chỉ số hàng 9
                 // chỉ có thể copy từ excel mẫu được hàng đầu tiên vì excel mẫu chỉ có 1 hàng, có 1 hàng không biết sheet cần chỉnh có bao nhiêu sản phẩm
 
-            
+
                 // tạo cell r10
                 Cell r10 = sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM).getCell(17);
 
@@ -2109,8 +2447,8 @@ public class ReadPDFToExcel {
                 for (int i = 0; i < sheet.getLastRowNum(); i++) {
                     if (i < 3 || i > lastRowSeihin + 5) {
                         Row row = sheet.getRow(i);
-//                            row.shiftCellsLeft(48 + j * 4, 10000, 2);
-//                            row.shiftCellsLeft(31 + j * 2, 10000, 2);
+                        row.shiftCellsLeft(48 + j * 4, 10000, 2);
+                        row.shiftCellsLeft(31 + j * 2, 10000, 2);
 
                         row.shiftCellsLeft(8, 10000, 2);
 
@@ -2144,15 +2482,16 @@ public class ReadPDFToExcel {
                     Row row = sheet.getRow(i);
                     // Sao chép ô từ cột srcColumn sang destColumn trong các cột tính vật liệu sản phẩm
                     srcCell = row.getCell(4);
-                    if (srcCell == null){
+                    if (srcCell == null) {
                         srcCell = row.createCell(4);
                     }
                     int destCol = 6;
                     row.createCell(destCol);
                     row.createCell(destCol + 1);
+
                     copySrcCellToRange(sheet, srcCell, destCol, destCol, 1, i, i, 1, true);
                     srcCell = row.getCell(5);
-                    if (srcCell == null){
+                    if (srcCell == null) {
                         srcCell = row.createCell(5);
                     }
                     destCell = row.getCell(7);
@@ -2163,7 +2502,7 @@ public class ReadPDFToExcel {
                     // có chỉ số cột không còn là 25 nữa mà là 27, còn ô cần dán không còn 27 nữa mà là 29,
                     // rồi do tính theo số lần thêm cột ở cột sản phẩm nên thêm j * 2
                     srcCell = row.getCell(27 + j * 2);
-                    if (srcCell == null){
+                    if (srcCell == null) {
                         srcCell = row.createCell(27 + j * 2);
                     }
                     destCol = 29 + j * 2;
@@ -2176,7 +2515,7 @@ public class ReadPDFToExcel {
                     // nên ô công thức gốc có chỉ số cột không còn là 40 nữa mà là 40 + 2 + 2 = 44, còn ô cần dán
                     // không còn 42 nữa mà là 42 + 2 + 2 = 46, rồi do tính theo số lần thêm 2 cột ở sản phẩm và 2 cột ở công thức tự tạo đầu tiên nên thêm j * (2 + 2)
                     srcCell = row.getCell(44 + j * 4);
-                    if (srcCell == null){
+                    if (srcCell == null) {
                         srcCell = row.createCell(44 + j * 4);
                     }
                     destCol = 46 + j * 4;
@@ -2185,7 +2524,7 @@ public class ReadPDFToExcel {
                     copySrcCellToRange(sheet, srcCell, destCol, destCol, 1, i, i, 1, true);
 
                 }
-//
+
 //                    // tại hàng 7 copy ô từ cột 26 sang 27
 //                    Row row7Formula = sheet.getRow(6);
 //                    srcCell = row7Formula.getCell(26 + j);
@@ -2240,6 +2579,8 @@ public class ReadPDFToExcel {
 
         }
 
+
+
         // cài đặt lại độ rộng các cột vật liệu mới được thêm vào cho giống với độ rộng của các cột vật liệu cũ
         int widthCol5 = sheet.getColumnWidth(4);
         int widthCol6 = sheet.getColumnWidth(5);
@@ -2266,6 +2607,7 @@ public class ReadPDFToExcel {
         }
 
 
+        // xóa giá trị tất cả các hàng sản phẩm trong excel
         for (int i = HANG_DAU_TIEN_CHUA_SAN_PHAM; i <= lastRowSeihin; i++) {
             sheet.getRow(i).getCell(0).setBlank();
             sheet.getRow(i).getCell(1).setBlank();
@@ -2337,8 +2679,8 @@ public class ReadPDFToExcel {
 //                    chieuDaiBozai = Double.parseDouble(String.valueOf(kouZaiEntry.getKey()));
                 soLuongCuaBozai = Integer.parseInt(soLuongCuaBozaiS);
 
-                sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 3).getCell(colBozai).setCellValue(chieuDaiBoZaiS);
-                sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 2).getCell(colBozai).setCellValue(soLuongCuaBozaiS);
+                sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 3).getCell(colBozai, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).setCellValue(chieuDaiBoZaiS);
+                sheet.getRow(HANG_DAU_TIEN_CHUA_SAN_PHAM - 2).getCell(colBozai, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).setCellValue(soLuongCuaBozaiS);
 
                 kouzaiChouGoukei += Double.parseDouble(chieuDaiBoZaiS) * Integer.parseInt(soLuongCuaBozaiS);
             }
@@ -2545,7 +2887,6 @@ public class ReadPDFToExcel {
         for (int i = soCotBozai + 12; i <= lastCol; i++) {
             sheet.setColumnHidden(i, true);
         }
-
 
             /*// Khóa sheet với mật khẩu
             sheet.protectSheet("");*/
