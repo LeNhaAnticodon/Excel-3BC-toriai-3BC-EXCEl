@@ -108,6 +108,21 @@ public class SetupData {
         languageMap.put("Vật liệu(m)", "Base_material");
 
 
+        languageMap.put("Có tồn tại vật liệu không nằm trong danh sách hoặc có vật liệu trùng nhau", "Ther_are1");
+        languageMap.put("Đã thay thế tất cả vật liệu sang bộ vật liệu dự phòng!", "All_materials2");
+        languageMap.put("Thông báo kết quả kiểm tra file", "File_check3");
+        languageMap.put("File excel này không phải tính vật liệu", "This_Excel5");
+        languageMap.put("Bạn có muốn chọn lại file excel khác không?", "Do_you8");
+        languageMap.put("File EXCEL được tạo", "Excel_file10");
+        languageMap.put("File PDF đang chọn có nội dung không khớp với file EXCEL tính vật liệu đang chọn!", "The_selected11");
+        languageMap.put("Chọn file EXCEL cần chuyển", "Select_the12");
+        languageMap.put("Chọn thư mục chứa file 3BC", "Select_the15");
+        languageMap.put("Mở thư mục chứa file 3BC", "Open_the18");
+        languageMap.put("CHUYEN FILE EXCEL SANG 3BC", "Convert_Excel19");
+        languageMap.put("Chọn file tính vật liệu của 3BC", "Select_the20");
+        languageMap.put("Chọn thư mục chứa file EXCEL sẽ tạo", "Select_the21");
+
+
         languageMap.put("転送するファイルを選択します", "Select_the_file_to_transfer");
         languageMap.put("ファイルを保存するフォルダーを選択します", "Select_the_folder_to_save_the_file");
         languageMap.put("ファイル転送を実行します", "IMPLEMENT_FILE_TRANSFER");
@@ -152,6 +167,20 @@ public class SetupData {
         languageMap.put("EXCELファイル名", "EXCEL_file_name");
         languageMap.put("総製品(m)", "Product");
         languageMap.put("総鋼材(m)", "Base_material");
+
+        languageMap.put("リストにない材料、または重複した材料があります。", "Ther_are1");
+        languageMap.put("すべての材料がバックアップ材料に置き換えられました！", "All_materials2");
+        languageMap.put("ファイルチェック結果通知", "File_check3");
+        languageMap.put("このExcelファイルは材料計算用ではありません。", "This_Excel5");
+        languageMap.put("別のExcelファイルを選択しますか？", "Do_you8");
+        languageMap.put("Excelファイルが作成されました", "Excel_file10");
+        languageMap.put("選択したPDFファイルは、選択した材料計算用Excelファイルと一致しません！", "The_selected11");
+        languageMap.put("変換するExcelファイルを選択します", "Select_the12");
+        languageMap.put("3BCファイルを含むフォルダを選択します", "Select_the15");
+        languageMap.put("3BCファイルを含むフォルダを開けます", "Open_the18");
+        languageMap.put("Excelファイルを3BCに変換します", "Convert_Excel19");
+        languageMap.put("3BC材料計算ファイルを選択します", "Select_the20");
+        languageMap.put("作成するExcelファイルを含むフォルダを選択します", "Select_the21");
 
 
         languageMap.put("Select the file to transfer", "Select_the_file_to_transfer");
@@ -198,6 +227,20 @@ public class SetupData {
         languageMap.put("EXCEL file name", "EXCEL_file_name");
         languageMap.put("Product(m)", "Product");
         languageMap.put("Material(m)", "Base_material");
+
+        languageMap.put("There are materials not listed or duplicate materials.", "Ther_are1");
+        languageMap.put("All materials have been replaced with backup materials!", "All_materials2");
+        languageMap.put("File check result notification", "File_check3");
+        languageMap.put("This Excel file is not for material calculation.", "This_Excel5");
+        languageMap.put("Do you want to select a different Excel file?", "Do_you8");
+        languageMap.put("Excel file created", "Excel_file10");
+        languageMap.put("The selected PDF file does not match the selected material calculation Excel file!", "The_selected11");
+        languageMap.put("Select the Excel file to convert", "Select_the12");
+        languageMap.put("Select the folder containing the 3BC file", "Select_the15");
+        languageMap.put("Open the folder containing the 3BC file", "Open_the18");
+        languageMap.put("Convert Excel file to 3BC", "Convert_Excel19");
+        languageMap.put("Select the 3BC material calculation file", "Select_the20");
+        languageMap.put("Select the folder containing the Excel file to be created", "Select_the21");
 
 
         // lấy ra list các size vật liệu dự phòng đùng trong trường hợp các vật liệu trong excel không khớp với các vật liệu cài sẵn

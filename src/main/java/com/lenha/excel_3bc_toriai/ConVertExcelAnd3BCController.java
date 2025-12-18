@@ -106,6 +106,12 @@ public class ConVertExcelAnd3BCController implements Initializable {
     public TextField linkExcelCopyResultDir;
     @FXML
     public Button setLinkExcelResultDirBtn;
+    @FXML
+    public Button open3bcFileDirBtn;
+    @FXML
+    public Button convertFileBtn1;
+    @FXML
+    public Button openExcelDirBtn;
 
     // map các ngôn ngữ
     private Map<String, String> languageMap;
@@ -198,7 +204,7 @@ public class ConVertExcelAnd3BCController implements Initializable {
         controls = SetupData.getInstance().getControls();
         // thêm các control của controller này vào map
         controls.addAll(setExcelFileBtn, setSave3bcFileDirBtn, set3bcToriaiFileBtn, setLinkExcelResultDirBtn, convertFileBtn, openDirCsvBtn, listCsvFileTitle, menuBar, copyLinkStatusLabel, copyLinkBtn,
-                fileName, product, baseMaterial);
+                fileName, product, baseMaterial, open3bcFileDirBtn, convertExcelTo3BCFileBtn, convertFileBtn1, openExcelDirBtn);
 
         // Lấy bundle của file ngôn ngữ
         bundle = ResourceBundle.getBundle("languagesMap");
