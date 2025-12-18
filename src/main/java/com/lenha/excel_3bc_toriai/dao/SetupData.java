@@ -121,6 +121,8 @@ public class SetupData {
         languageMap.put("CHUYEN FILE EXCEL SANG 3BC", "Convert_Excel19");
         languageMap.put("Chọn file tính vật liệu của 3BC", "Select_the20");
         languageMap.put("Chọn thư mục chứa file EXCEL sẽ tạo", "Select_the21");
+        languageMap.put("Đã chuyển xong file EXCEL sang file 3BC", "Excel_file22");
+        languageMap.put("Bạn có muốn mở thư mục chứa file 3BC và\ntự động copy địa chỉ không?", "Do_you23");
 
 
         languageMap.put("転送するファイルを選択します", "Select_the_file_to_transfer");
@@ -181,6 +183,8 @@ public class SetupData {
         languageMap.put("Excelファイルを3BCに変換します", "Convert_Excel19");
         languageMap.put("3BC材料計算ファイルを選択します", "Select_the20");
         languageMap.put("作成するExcelファイルを含むフォルダを選択します", "Select_the21");
+        languageMap.put("Excelファイルを3BCファイルに正常に変換しました", "Excel_file22");
+        languageMap.put("3BCファイルを含むフォルダを開いて\nアドレスを自動的にコピーしますか？", "Do_you23");
 
 
         languageMap.put("Select the file to transfer", "Select_the_file_to_transfer");
@@ -241,6 +245,8 @@ public class SetupData {
         languageMap.put("Convert Excel file to 3BC", "Convert_Excel19");
         languageMap.put("Select the 3BC material calculation file", "Select_the20");
         languageMap.put("Select the folder containing the Excel file to be created", "Select_the21");
+        languageMap.put("Excel file converted to 3BC file successfully", "Excel_file22");
+        languageMap.put("Do you want to open the folder containing the 3BC file and automatically copy the address?", "Do_you23");
 
 
         // lấy ra list các size vật liệu dự phòng đùng trong trường hợp các vật liệu trong excel không khớp với các vật liệu cài sẵn
