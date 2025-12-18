@@ -37,12 +37,16 @@
                       </Menu>
                       <Menu fx:id="menuEdit" mnemonicParsing="false" text="Edit">
                         <items>
-                          <MenuItem mnemonicParsing="false" onAction="#getExcelFile" text="Chọn file cần chuyển" />
-                              <MenuItem mnemonicParsing="false" onAction="#setSave3bcFileDir" text="Chọn thư mục lưu file" />
+                          <MenuItem mnemonicParsing="false" onAction="#getExcelFile" text="Chọn file EXCEL cần chuyển" />
+                              <MenuItem mnemonicParsing="false" onAction="#setSave3bcFileDir" text="Chọn thư mục chứa file 3BC" />
+                              <MenuItem mnemonicParsing="false" onAction="#get3bcToriaiFile" text="Chọn file tính vật liệu của 3BC" />
+                              <MenuItem mnemonicParsing="false" onAction="#setSaveExcelFileDir" text="Chọn thư mục chứa file EXCEL sẽ tạo" />
                         </items>
                       </Menu>
                       <Menu fx:id="menuFile" mnemonicParsing="false" text="File">
                         <items>
+                              <MenuItem mnemonicParsing="false" onAction="#convertExcelTo3bcFile" text="CHUYEN FILE EXCEL SANG 3BC" />
+                              <MenuItem mnemonicParsing="false" onAction="#open3bcFileDir" text="Mở thư mục chứa file 3BC" />
                           <MenuItem mnemonicParsing="false" onAction="#convertFilePdfToriaiToExcel" text="THỰC HIỆN CHUYỂN FILE" />
                               <MenuItem mnemonicParsing="false" onAction="#openExcelDir" text="Mở thư mục chứa file EXCEL" />
                               <MenuItem mnemonicParsing="false" onAction="#closeApp" text="Đóng" />
