@@ -259,22 +259,37 @@ public class ReadPDFToExcel {
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
             workbook.setForceFormulaRecalculation(true);
 
+            // tạo khoảng cách các trang in là 43 dòng
             int numRowPage = 43;
+            // số trang đã tạo
             int pageCount = 1;
+            // lấy sheet cần dán giá trị các sheet khác vào
             Sheet sheet0 = workbook.getSheetAt(0);
+            // lấy số sheet tối đa có trong file excel
             int maxSheet = workbook.getNumberOfSheets();
+            // lặp qua các sheet cần copy, copy giá trị, công thức rồi dán vào sheet 0
             for (int i = 1; i < maxSheet; i++) {
                 Sheet sheeti = workbook.getSheetAt(i);
+                // lấy hàng cuối cùng chứa dữ liệu của sheet copy
                 int lastRowi = sheeti.getLastRowNum();
+                // lấy hàng cuối cùng chứa dữ liệu của sheet 0
                 int lastRow0 = sheet0.getLastRowNum();
+                // nếu sheet copy không có hàng nào có dữ liệu thì thoát lặp
                 if (lastRowi == 0) {
                     break;
                 }
+                // nếu số hàng sản phẩm trong sheet gốc mà lớn hơn số hàng đang nhớ theo biến số trang
+                // thì tăng biến nhớ số trang lên 1 để số số hàng theo biến nhớ phải lớn hơn số hàng chứ dữ liệu thực tế
+                // tăng biến nhớ đến khi nào lớn hơn thực tế
                 while (lastRow0 > numRowPage * pageCount) {
                     pageCount++;
                 }
 
-                if (lastRow0 + lastRowi > numRowPage * pageCount) {
+                // nếu số hàng sheet gốc + sheet copy lớn hơn số dòng theo biến nhớ trang thì
+                // cho hàng dán giá trị sheet copy bắt đầu ở trang mới
+                // còn không thì vẫn dán ở hàng cuối chứa dữ liệu của sheet gốc như bình thường
+                // lưu ý vị trí hàng + 2 để có khoảng cách cho dễ nhìn
+                if (lastRow0 + lastRowi + 2> numRowPage * pageCount) {
                     RowRangeCopier.copyRowRange((XSSFWorkbook) workbook, i, 0, lastRowi, 0, numRowPage * pageCount + 2);
                     pageCount++;
                     continue;
@@ -289,17 +304,21 @@ public class ReadPDFToExcel {
                 sheet0.setColumnHidden(i, true);
             }
 
+            // lấy biến in
             PrintSetup printSetup = sheet0.getPrintSetup();
 
             // Khổ dọc, giấy A4
             printSetup.setLandscape(false);
             printSetup.setPaperSize(PrintSetup.A4_PAPERSIZE);
 
-            // bật fit to page
+            // bật fit to page, tự đọng co dãn theo giá trị
             sheet0.setFitToPage(true);
 
+            // tạo khoảng in là mỗi 43 hàng
             int rowsPerPage = 42;
+            // lấy hàng cuối chứa dữ liệu
             int lastRow = sheet0.getLastRowNum();
+            // tạo các khoảng in mooix 43 hàng
             for (int r = rowsPerPage; r <= lastRow; r += rowsPerPage) {
                 sheet0.setRowBreak(r);
             }
