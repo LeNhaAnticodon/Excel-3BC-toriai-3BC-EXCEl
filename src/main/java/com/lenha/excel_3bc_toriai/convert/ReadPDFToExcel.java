@@ -86,6 +86,9 @@ public class ReadPDFToExcel {
     private static String bikou = "";
     private static String chuyuBan = "";
     private static String teiHaiSha = "";
+
+    private static int soBozaiMax = 0;
+    private static int maxLastColNum = 0;
     private static final Map<Double, Integer> seiHinMap = new LinkedHashMap<>();
     // list chứa danh sách các sản phẩm không trùng lặp
     private static ObservableList<Double> seiHinList = FXCollections.observableArrayList();
@@ -255,6 +258,9 @@ public class ReadPDFToExcel {
 
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
             workbook.setForceFormulaRecalculation(true);
+
+            int numRowPage = 43;
+            int pageCount = 1;
             Sheet sheet0 = workbook.getSheetAt(0);
             int maxSheet = workbook.getNumberOfSheets();
             for (int i = 1; i < maxSheet; i++) {
@@ -264,9 +270,38 @@ public class ReadPDFToExcel {
                 if (lastRowi == 0) {
                     break;
                 }
+                while (lastRow0 > numRowPage * pageCount) {
+                    pageCount++;
+                }
+
+                if (lastRow0 + lastRowi > numRowPage * pageCount) {
+                    RowRangeCopier.copyRowRange((XSSFWorkbook) workbook, i, 0, lastRowi, 0, numRowPage * pageCount + 2);
+                    pageCount++;
+                    continue;
+                }
 
                 RowRangeCopier.copyRowRange((XSSFWorkbook) workbook, i, 0, lastRowi, 0, lastRow0 + 2);
 
+            }
+
+            // sau khi đã gộp các sheet thì ẩn các cột không cần hiển thị theo sheet có nhiều bozai nhất
+            for (int i = soBozaiMax * 2 + 6; i <= maxLastColNum; i++) {
+                sheet0.setColumnHidden(i, true);
+            }
+
+            PrintSetup printSetup = sheet0.getPrintSetup();
+
+            // Khổ dọc, giấy A4
+            printSetup.setLandscape(false);
+            printSetup.setPaperSize(PrintSetup.A4_PAPERSIZE);
+
+            // bật fit to page
+            sheet0.setFitToPage(true);
+
+            int rowsPerPage = 42;
+            int lastRow = sheet0.getLastRowNum();
+            for (int r = rowsPerPage; r <= lastRow; r += rowsPerPage) {
+                sheet0.setRowBreak(r);
             }
 
             try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
@@ -2129,6 +2164,8 @@ public class ReadPDFToExcel {
 
         // lấy số loại bozai và sản phẩm
         int soBoZai = kaKouPairs.size();
+        // tìm sheet có số lượng bozai lớn nhất
+        soBozaiMax = Math.max(soBozaiMax, soBoZai);
         int soSanPham = seiHinList.size();
 
         // map chứa chiều dài và số lượng của các sản phẩm trong vật liệu đang tính của excel, chiều dài là key sẽ khong xuâ hiện lần 2
@@ -2910,6 +2947,7 @@ public class ReadPDFToExcel {
             soCotBozai = soBoZai * 2;
         }
         int lastCol = sheet.getRow(9).getLastCellNum();
+        maxLastColNum = Math.max(maxLastColNum, lastCol);
         // ẩn tất cả các cột từ soCotBozai + 8, tạm thời không dùng vì sau khi xắt các sheet khác vào sheet 0 thì nó sẽ làm ẩn các cột của sheet 0
         // nếu sheet 0 có nhiều cột vật liệu hơn các sheet khác
 /*        for (int i = soCotBozai + 12; i <= lastCol; i++) {

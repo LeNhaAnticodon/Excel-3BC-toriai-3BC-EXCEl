@@ -11,6 +11,13 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 public class RowRangeCopier {
 
     /**
+     * hàm để copy giá trị, công thức các ô trong sheet cho trước vào một sheet khác là sheet đích cũng cho trước,
+     * vị trí hàng dán vào trong sheet đích sẽ được cho trước trong tham số. yêu cầu giá trị của sheet copy không được thay đổi,
+     * các công thức được copy trong sheet copy cũng thay đổi tương ứng sao cho giá trị các
+     * ô sau khi dán vào sheet đích không thay đổi so với sheet copy. các tham số sẽ bao gồm index sheet đích,
+     * hàng bắt đầu dán giá trị trong sheet đích, index sheet copy. nó giống như lệnh cắt các hàng xác định trong s
+     * heet copy sang các hàng mới trong sheet đích bằng lệnh cắt hàng và dán hàng vào sheet mới trong excel.
+     *
      * Copy rows [srcStartRow..srcEndRow] (1-based inclusive) from sheet srcSheetIndex
      * into sheet destSheetIndex starting at destStartRow (1-based).
      *
@@ -248,7 +255,7 @@ public class RowRangeCopier {
         }
     }
 
-    private static String adjustSingleCellRef(String cellRef, int delta) {
+/*    private static String adjustSingleCellRef(String cellRef, int delta) {
         Pattern p = Pattern.compile("^(\\$?)([A-Za-z]{1,3})(\\$?)(\\d+)$");
         Matcher m = p.matcher(cellRef);
         if (!m.find()) return cellRef;
@@ -260,6 +267,26 @@ public class RowRangeCopier {
         if ("$".equals(rowDollar)) return cellRef; // absolute row -> unchanged
         int newRow = rowNum + delta;
         if (newRow < 1) newRow = 1;
+        return colDollar + colLetters + rowDollar + Integer.toString(newRow);
+    }*/
+
+    // Thay thế hàm adjustSingleCellRef cũ bằng hàm này, cho tham chiếu có $ (absolute row) cũng sẽ thay đổi như bình thường, mà
+    // không bị khóa kiểu giữ nguyên giá trị
+    private static String adjustSingleCellRef(String cellRef, int delta) {
+        Pattern p = Pattern.compile("^(\\$?)([A-Za-z]{1,3})(\\$?)(\\d+)$");
+        Matcher m = p.matcher(cellRef);
+        if (!m.find()) return cellRef;
+        String colDollar = m.group(1);      // "$" or ""
+        String colLetters = m.group(2);     // e.g. A, AB
+        String rowDollar = m.group(3);      // "$" or ""
+        String rowNumStr = m.group(4);      // e.g. 123
+        int rowNum = Integer.parseInt(rowNumStr);
+
+        // *** Thay đổi chính: Bất kể rowDollar == "$" hay không, ta vẫn dịch row ***
+        int newRow = rowNum + delta;
+        if (newRow < 1) newRow = 1;
+
+        // Giữ nguyên dấu $ nếu có (ví dụ $A$1 -> $A$5)
         return colDollar + colLetters + rowDollar + Integer.toString(newRow);
     }
 
