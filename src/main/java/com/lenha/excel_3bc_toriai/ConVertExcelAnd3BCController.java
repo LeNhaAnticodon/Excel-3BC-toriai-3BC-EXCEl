@@ -147,8 +147,10 @@ public class ConVertExcelAnd3BCController implements Initializable {
     private static final String CONFIRM_3BC_FILE_DIR_CONTENT = "Hãy chọn thư mục chứa để tiếp tục!";
 
     private static final String CONFIRM_CONVERT_COMPLETE_TITLE = "Thông tin hoạt động chuyển file";
+    private static final String CONFIRM_KIRIROSU_20 = "Cảnh báo Kirirosu";
     private static final String CONFIRM_CHECK_EXCEL_FILE = "Thông báo kết quả kiểm tra file";
     private static final String CONFIRM_CONVERT_COMPLETE_HEADER = "Đã chuyển xong file PDF sang file EXCEL";
+    private static final String CONFIRM_KIRIROSU_20_HEADER = "Có tồn tại kirirosu khác 2.0";
     // NEW
     private static final String CONFIRM_CONVERT_EXCEL_TO_3BC_COMPLETE_HEADER = "Đã chuyển xong file EXCEL sang file 3BC";
     private static final String CONFIRM_CHECK_EXCEL_FILE_HEADER = "File excel này không phải tính vật liệu";
@@ -791,6 +793,21 @@ public class ConVertExcelAnd3BCController implements Initializable {
             // gọi hàm chuyển file từ class static convertPDFToExcel
             try {
                 ReadPDFToExcel.convertPDFToExcel(excelRootFile.getAbsolutePath(), pdfFile.getAbsolutePath(), excelCopyFileDir.getAbsolutePath(), SetupData.getInstance().getExcelFile());
+
+                if (!ReadPDFToExcel.kirirosu20) {
+                    ReadPDFToExcel.kirirosu20 = true;
+                    confirmAlert.setAlertType(Alert.AlertType.WARNING);
+                    // hiển thị alert có tồn tại kirirosu kha 2.0
+                    confirmAlert.setTitle(CONFIRM_KIRIROSU_20);
+                    confirmAlert.setHeaderText(CONFIRM_KIRIROSU_20_HEADER);
+                    confirmAlert.setContentText("");
+
+                    updateLangAlert(confirmAlert);
+                    confirmAlert.showAndWait();
+                }
+
+                confirmAlert.setAlertType(Alert.AlertType.CONFIRMATION);
+
                 // hiển thị alert chuyển file thành công
                 confirmAlert.setTitle(CONFIRM_CONVERT_COMPLETE_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_CONVERT_COMPLETE_HEADER);

@@ -1,5 +1,6 @@
 package com.lenha.excel_3bc_toriai.convert;
 
+import com.lenha.excel_3bc_toriai.convert.copyRowSheetToSheet.RowRangeCopier;
 import com.lenha.excel_3bc_toriai.model.ExcelFile;
 import com.opencsv.CSVWriter;
 import javafx.collections.FXCollections;
@@ -48,6 +49,8 @@ public class ReadPDFToExcel {
     private static String koSyuNumMark = "3";
     // 切りロス
     private static String kirirosu = "";
+
+    public static boolean kirirosu20 = true;
 
     // tên file chl sẽ tạo được ghi trong phần 工事名, chưa bao gồm loại vật liệu
     private static String fileChlName = "";
@@ -252,6 +255,20 @@ public class ReadPDFToExcel {
 
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
             workbook.setForceFormulaRecalculation(true);
+            Sheet sheet0 = workbook.getSheetAt(0);
+            int maxSheet = workbook.getNumberOfSheets();
+            for (int i = 1; i < maxSheet; i++) {
+                Sheet sheeti = workbook.getSheetAt(i);
+                int lastRowi = sheeti.getLastRowNum();
+                int lastRow0 = sheet0.getLastRowNum();
+                if (lastRowi == 0) {
+                    break;
+                }
+
+                RowRangeCopier.copyRowRange((XSSFWorkbook) workbook, i, 0, lastRowi, 0, lastRow0 + 2);
+
+            }
+
             try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
                 workbook.write(fileOut);
                 // xóa file gây lỗi khi excel không tự động tính toán lại công thức
@@ -310,6 +327,7 @@ public class ReadPDFToExcel {
      * mục đích để sửa lỗi của file gốc, do file gốc tính vật liệu có trường bị lỗi gì đó chưa tìm được nguyên nhân
      * khiến code nhập tính vật liệu không chạy được
      * hàm copyFile của class File nó chỉ clone từ file gốc sang file copy nên file copy vẫn bị lỗi nên không dùng được và phải dùng method này
+     *
      * @param srcFile file gốc
      * @param dstFile file copy
      */
@@ -764,6 +782,9 @@ public class ReadPDFToExcel {
             // lấy kirirosu tại lần 1
             if (i == 1) {
                 kirirosu = extractValue(kakuKakou[i], "切りﾛｽ設定:", "mm");
+                if (!kirirosu.equalsIgnoreCase("2.0")) {
+                    kirirosu20 = false;
+                }
             }
 
             // lấy đoạn bozai đang lặp
@@ -2187,6 +2208,21 @@ public class ReadPDFToExcel {
             }
         }
 
+        // cài đặt lại độ rộng các cột cho phù hợp
+        int wiCol4 = sheet.getColumnWidth(4);
+        int wiCol5 = sheet.getColumnWidth(5);
+        int widthCol4Sum5Div2 = (wiCol4 + wiCol5) / 2;
+        for (int i = 18; i < 33; i++) {
+            sheet.setColumnWidth(i, widthCol4Sum5Div2);
+
+        }
+//        sheet.setColumnWidth(18, widthCol4Sum5Div2);
+//        sheet.setColumnWidth(19, widthCol4Sum5Div2);
+//        sheet.setColumnWidth(20, widthCol4Sum5Div2);
+//        sheet.setColumnWidth(21, widthCol4Sum5Div2);
+//        sheet.setColumnWidth(22, widthCol4Sum5Div2);
+//        sheet.setColumnWidth(23, widthCol4Sum5Div2);
+//        sheet.setColumnWidth(24, widthCol4Sum5Div2);
 
         // nếu số bozai nhiều hơn 6 bao nhiêu thì thêm số cột bozai với số lượng đó
         // copy và paste giá trị cho cột mới cho giống giá trị với các cột còn lại
@@ -2415,15 +2451,7 @@ public class ReadPDFToExcel {
             // xóa hợp nhất các ô vùng thông tin để không bị lỗi khi thêm cột, sau khi làm hết việc sẽ fomat lại hợp nhất ô như ban đầu
             unmergeAndFillCellsInRange(sheet, 0, 2, 0, 17);
 
-            // cài đặt lại độ rộng các cột cho phù hợp
-            int widthCol18 = sheet.getColumnWidth(18);
-            sheet.setColumnWidth(18, widthCol18);
-            sheet.setColumnWidth(19, widthCol18);
-            sheet.setColumnWidth(20, widthCol18);
-            sheet.setColumnWidth(21, widthCol18);
-            sheet.setColumnWidth(22, widthCol18);
-            sheet.setColumnWidth(23, widthCol18);
-            sheet.setColumnWidth(24, widthCol18);
+
 
             // lưu giá trị công thức cũ của ô công thức gốc này mỗi lần lặp để gán lại cho nó khi công thức của nó bị thay đổi khôn đúng
             String congThucSauHangSanPhamCuoiVaCotVatLieuDauTien = "SUM(Z9:AA" + (HANG_DAU_TIEN_CHUA_SAN_PHAM + soSanPhamExcel + 1) + ")";
@@ -2578,7 +2606,6 @@ public class ReadPDFToExcel {
 
 
         }
-
 
 
         // cài đặt lại độ rộng các cột vật liệu mới được thêm vào cho giống với độ rộng của các cột vật liệu cũ
@@ -2883,10 +2910,14 @@ public class ReadPDFToExcel {
             soCotBozai = soBoZai * 2;
         }
         int lastCol = sheet.getRow(9).getLastCellNum();
-        // ẩn tất cả các cột từ soCotBozai + 8
-        for (int i = soCotBozai + 12; i <= lastCol; i++) {
+        // ẩn tất cả các cột từ soCotBozai + 8, tạm thời không dùng vì sau khi xắt các sheet khác vào sheet 0 thì nó sẽ làm ẩn các cột của sheet 0
+        // nếu sheet 0 có nhiều cột vật liệu hơn các sheet khác
+/*        for (int i = soCotBozai + 12; i <= lastCol; i++) {
             sheet.setColumnHidden(i, true);
-        }
+        }*/
+
+        makeTextWhite(sheet, soCotBozai + 12, lastCol, -1, -1);
+
 
             /*// Khóa sheet với mật khẩu
             sheet.protectSheet("");*/
@@ -2896,6 +2927,49 @@ public class ReadPDFToExcel {
 //        System.out.println("tong chieu dai san pham " + seiHinChouGoukei);
         excelFileNames.add(new ExcelFile("Sheet " + sheetIndex + ": " + kouSyu, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));
 
+    }
+
+    /**
+     * Đặt màu chữ thành trắng trong phạm vi cột/hàng cho trước.
+     * @param sheet     Sheet cần sửa (Apache POI Sheet)
+     * @param startCol  index cột bắt đầu (zero-based)
+     * @param endCol    index cột kết thúc (zero-based)
+     * @param startRow  index hàng bắt đầu (zero-based). Nếu = -1 => 0
+     * @param endRow    index hàng kết thúc (zero-based). Nếu = -1 => sheet.getLastRowNum()
+     */
+     private static void makeTextWhite(Sheet sheet, int startCol, int endCol, int startRow, int endRow) {
+        if (sheet == null) return;
+
+        // chuẩn hóa cột (hoán vị nếu nhập ngược)
+        if (startCol > endCol) {
+            int t = startCol; startCol = endCol; endCol = t;
+        }
+
+        // xử lý row = -1
+        if (startRow == -1) startRow = 0;
+        if (endRow == -1) endRow = sheet.getLastRowNum();
+
+        // nếu không hợp lệ thì thoát
+        if (startRow > endRow || startCol < 0 || endCol < 0) return;
+
+        Workbook wb = sheet.getWorkbook();
+
+        // tạo 1 CellStyle + Font màu trắng dùng chung cho toàn vùng (tái sử dụng để tránh tạo quá nhiều style)
+        CellStyle whiteStyle = wb.createCellStyle();
+        Font whiteFont = wb.createFont();
+        whiteFont.setColor(IndexedColors.WHITE.getIndex());
+        whiteStyle.setFont(whiteFont);
+
+        // duyệt hàng và cột — chỉ áp style cho ô đã tồn tại
+        for (int r = startRow; r <= endRow; r++) {
+            Row row = sheet.getRow(r);
+            if (row == null) continue;
+            for (int c = startCol; c <= endCol; c++) {
+                Cell cell = row.getCell(c);
+                if (cell == null) continue;
+                cell.setCellStyle(whiteStyle);
+            }
+        }
     }
 
     public static void writeWithoutCalcChain(Workbook wb, File outFile) throws IOException {

@@ -124,6 +124,10 @@ public class SetupData {
         languageMap.put("Đã chuyển xong file EXCEL sang file 3BC", "Excel_file22");
         languageMap.put("Bạn có muốn mở thư mục chứa file 3BC và\ntự động copy địa chỉ không?", "Do_you23");
 
+        languageMap.put("Nội dung file EXCEL không phải là tính toán vật liệu hoặc file không được phép truy cập", "The_content_of_the_Excel_file25");
+        languageMap.put("Cảnh báo Kirirosu", "Kirirosu_Warning");
+        languageMap.put("Có tồn tại kirirosu khác 2.0", "Another_Kirirosu_2.0_exists");
+
 
         languageMap.put("転送するファイルを選択します", "Select_the_file_to_transfer");
         languageMap.put("ファイルを保存するフォルダーを選択します", "Select_the_folder_to_save_the_file");
@@ -185,6 +189,10 @@ public class SetupData {
         languageMap.put("作成するExcelファイルを含むフォルダを選択します", "Select_the21");
         languageMap.put("Excelファイルを3BCファイルに正常に変換しました", "Excel_file22");
         languageMap.put("3BCファイルを含むフォルダを開いて\nアドレスを自動的にコピーしますか？", "Do_you23");
+        languageMap.put("Excel ファイルの内容が重要な計算ではないか、ファイルにアクセスできません。", "The_content_of_the_Excel_file25");
+        languageMap.put("切ロス警告", "Kirirosu_Warning");
+        languageMap.put("切ロスのバージョンが 2.0 以外で存在します。", "Another_Kirirosu_2.0_exists");
+
 
 
         languageMap.put("Select the file to transfer", "Select_the_file_to_transfer");
@@ -247,6 +255,10 @@ public class SetupData {
         languageMap.put("Select the folder containing the Excel file to be created", "Select_the21");
         languageMap.put("Excel file converted to 3BC file successfully", "Excel_file22");
         languageMap.put("Do you want to open the folder containing the 3BC file and automatically copy the address?", "Do_you23");
+        languageMap.put("The content of the Excel file is not material calculations or the file is not accessible.", "The_content_of_the_Excel_file25");
+        languageMap.put("Kirirosu Warning", "Kirirosu_Warning");
+        languageMap.put("Another Kirirosu 2.0 exists.", "Another_Kirirosu_2.0_exists");
+
 
 
         // lấy ra list các size vật liệu dự phòng đùng trong trường hợp các vật liệu trong excel không khớp với các vật liệu cài sẵn
