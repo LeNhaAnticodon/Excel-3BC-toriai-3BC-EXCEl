@@ -318,9 +318,15 @@ public class ReadPDFToExcel {
             int rowsPerPage = 42;
             // lấy hàng cuối chứa dữ liệu
             int lastRow = sheet0.getLastRowNum();
-            // tạo các khoảng in mooix 43 hàng
+            // tạo các khoảng in mỗi 43 hàng
             for (int r = rowsPerPage; r <= lastRow; r += rowsPerPage) {
                 sheet0.setRowBreak(r);
+            }
+
+            // ẩn hoặc xóa các sheet đã được gộp vào sheet đầu tiên
+            for (int i = 1; i < maxSheet; i++) {
+                workbook.setSheetHidden(i, true);
+//                workbook.removeSheetAt(1);
             }
 
             try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
