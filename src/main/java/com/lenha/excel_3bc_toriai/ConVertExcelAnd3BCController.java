@@ -112,6 +112,14 @@ public class ConVertExcelAnd3BCController implements Initializable {
     public Button convertFileBtn1;
     @FXML
     public Button openExcelDirBtn;
+    @FXML
+    public RadioButton setExcel1;
+    @FXML
+    public RadioButton setExcel2;
+    @FXML
+    public RadioButton setExcel3;
+    @FXML
+    public ToggleGroup excelOutput;
 
     // map các ngôn ngữ
     private Map<String, String> languageMap;
@@ -215,6 +223,13 @@ public class ConVertExcelAnd3BCController implements Initializable {
         setLangVietNamBtn.setUserData("vi");
         setLangEnglishBtn.setUserData("en");
         setLangNihongoBtn.setUserData("ja");
+
+        // set UserData cho 3 radio button file excel đầu ra
+        setExcel1.setUserData("EX1");
+        setExcel2.setUserData("EX2");
+        setExcel3.setUserData("EX3");
+        // cho radio click vào nút file excel 1
+        excelOutput.selectToggle(setExcel1);
 
         // lấy ngôn ngữ đã lưu trong file setup
         String lang = SetupData.getInstance().getSetup().getLang();
@@ -792,7 +807,18 @@ public class ConVertExcelAnd3BCController implements Initializable {
 
             // gọi hàm chuyển file từ class static convertPDFToExcel
             try {
-                ReadPDFToExcel.convertPDFToExcel(excelRootFile.getAbsolutePath(), pdfFile.getAbsolutePath(), excelCopyFileDir.getAbsolutePath(), SetupData.getInstance().getExcelFile());
+                String exCellType = excelOutput.getSelectedToggle().getUserData().toString();
+
+//                if (exCellType.equals("EX1")) {
+//                } else if (exCellType.equals("EX2")) {
+//                    System.out.println("tạo excel 2");
+//                } else if (exCellType.equals("EX3")) {
+//                    System.out.println("tạo excel 3");
+//                } else {
+//                    return;
+//                }
+                ReadPDFToExcel.convertPDFToExcel(excelRootFile.getAbsolutePath(), pdfFile.getAbsolutePath(), excelCopyFileDir.getAbsolutePath(), SetupData.getInstance().getExcelFile(), exCellType);
+
 
                 if (!ReadPDFToExcel.kirirosu20) {
                     ReadPDFToExcel.kirirosu20 = true;

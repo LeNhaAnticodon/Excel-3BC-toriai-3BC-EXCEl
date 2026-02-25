@@ -18,7 +18,7 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="599.0" prefWidth="599.0" style="-fx-background-color: #F0F4C3;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lenha.excel_3bc_toriai.ConVertExcelAnd3BCController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="599.0" prefWidth="599.0" style="-fx-background-color: #F0F4C3;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lenha.excel_3bc_toriai.ConVertExcelAnd3BCController">
    <top>
       <VBox alignment="TOP_RIGHT" spacing="5.0" BorderPane.alignment="CENTER">
          <children>
@@ -232,13 +232,9 @@
                         </DropShadow>
                      </effect>
                   </Button>
-               </children>
-            </VBox>
-            <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="SOMETIMES">
-               <children>
-                  <VBox alignment="BOTTOM_LEFT" spacing="5.0" HBox.hgrow="SOMETIMES">
+                  <HBox alignment="TOP_RIGHT">
                      <children>
-                        <Label fx:id="copyLinkStatusLabel" maxHeight="1.7976931348623157E308" prefWidth="100.0" text="Đã copy link" textFill="#04a138" visible="false" wrapText="true" VBox.vgrow="SOMETIMES">
+                        <Label fx:id="copyLinkStatusLabel" maxHeight="1.7976931348623157E308" prefWidth="100.0" text="Đã copy link" textFill="#04a138" visible="false" wrapText="true">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
@@ -246,16 +242,50 @@
                         <Button fx:id="copyLinkBtn" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#copyLinkExcelResultDir" prefWidth="72.0" style="-fx-background-radius: 12;" text="Copy link thư mục" textAlignment="CENTER" textFill="#4b4d03" wrapText="true">
                            <font>
                               <Font name="System Italic" size="12.0" />
-                           </font></Button>
+                           </font>
+                        </Button>
                      </children>
-                  </VBox>
+                  </HBox>
+               </children>
+            </VBox>
+            <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="SOMETIMES">
+               <children>
                   <VBox alignment="BOTTOM_RIGHT" maxHeight="-Infinity" spacing="8.0" HBox.hgrow="NEVER">
                      <children>
                         <HBox alignment="TOP_RIGHT" spacing="10.0">
                            <children>
-                              <Label text="日本語" />
+                              <Label text="EXCEL 1" />
             
-                               <RadioButton fx:id="setLangNihongoBtn" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#setLangNihongo" textAlignment="CENTER">
+                               <RadioButton fx:id="setExcel1" contentDisplay="RIGHT" mnemonicParsing="false" textAlignment="CENTER">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="excelOutput" />
+                                 </toggleGroup>
+                              </RadioButton>
+                           </children>
+                        </HBox>
+                        <HBox alignment="TOP_RIGHT" layoutX="10.0" layoutY="10.0" spacing="10.0">
+                           <children>
+                              <Label text="EXCEL 2" />
+                              <RadioButton fx:id="setExcel2" contentDisplay="RIGHT" mnemonicParsing="false" textAlignment="CENTER" toggleGroup="$excelOutput" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="TOP_RIGHT" layoutX="10.0" layoutY="35.0" spacing="10.0">
+                           <children>
+                              <Label text="EXCEL 3" />
+                              <RadioButton fx:id="setExcel3" contentDisplay="RIGHT" mnemonicParsing="false" textAlignment="CENTER" toggleGroup="$excelOutput" />
+                           </children>
+                        </HBox>
+                     </children>
+                     <HBox.margin>
+                        <Insets right="15.0" />
+                     </HBox.margin>
+                  </VBox>
+                  <VBox alignment="BOTTOM_RIGHT" maxHeight="-Infinity" spacing="8.0">
+                     <children>
+                        <HBox alignment="TOP_RIGHT" spacing="10.0">
+                           <children>
+                              <Label text="日本語" />
+                              <RadioButton fx:id="setLangNihongoBtn" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#setLangNihongo" textAlignment="CENTER">
                                  <toggleGroup>
                                     <ToggleGroup fx:id="languages" />
                                  </toggleGroup>
