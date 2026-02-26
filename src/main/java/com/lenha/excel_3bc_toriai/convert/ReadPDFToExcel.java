@@ -276,74 +276,9 @@ public class ReadPDFToExcel {
             // Yêu cầu Excel tính toán lại tất cả các công thức khi tệp được mở
             workbook.setForceFormulaRecalculation(true);
 
-            // tạo khoảng cách các trang in là 43 dòng
-            int numRowPage = 43;
-            // số trang đã tạo
-            int pageCount = 1;
-            // lấy sheet cần dán giá trị các sheet khác vào
-            Sheet sheet0 = workbook.getSheetAt(0);
-            // lấy số sheet tối đa có trong file excel
-            int maxSheet = workbook.getNumberOfSheets();
-            // lặp qua các sheet cần copy, copy giá trị, công thức rồi dán vào sheet 0
-            for (int i = 1; i < maxSheet; i++) {
-                Sheet sheeti = workbook.getSheetAt(i);
-                // lấy hàng cuối cùng chứa dữ liệu của sheet copy
-                int lastRowi = sheeti.getLastRowNum();
-                // lấy hàng cuối cùng chứa dữ liệu của sheet 0
-                int lastRow0 = sheet0.getLastRowNum();
-                // nếu sheet copy không có hàng nào có dữ liệu thì thoát lặp
-                if (lastRowi == 0) {
-                    break;
-                }
-                // nếu số hàng sản phẩm trong sheet gốc mà lớn hơn số hàng đang nhớ theo biến số trang
-                // thì tăng biến nhớ số trang lên 1 để số số hàng theo biến nhớ phải lớn hơn số hàng chứ dữ liệu thực tế
-                // tăng biến nhớ đến khi nào lớn hơn thực tế
-                while (lastRow0 > numRowPage * pageCount) {
-                    pageCount++;
-                }
-
-                // nếu số hàng sheet gốc + sheet copy lớn hơn số dòng theo biến nhớ trang thì
-                // cho hàng dán giá trị sheet copy bắt đầu ở trang mới
-                // còn không thì vẫn dán ở hàng cuối chứa dữ liệu của sheet gốc như bình thường
-                // lưu ý vị trí hàng + 2 để có khoảng cách cho dễ nhìn
-                if (lastRow0 + lastRowi + 2 > numRowPage * pageCount) {
-                    RowRangeCopier.copyRowRange((XSSFWorkbook) workbook, i, 0, lastRowi, 0, numRowPage * pageCount + 2);
-                    pageCount++;
-                    continue;
-                }
-
-                RowRangeCopier.copyRowRange((XSSFWorkbook) workbook, i, 0, lastRowi, 0, lastRow0 + 2);
-
-            }
-
-            // sau khi đã gộp các sheet thì ẩn các cột không cần hiển thị theo sheet có nhiều bozai nhất
-            for (int i = soBozaiMax * 2 + 6; i <= maxLastColNum; i++) {
-                sheet0.setColumnHidden(i, true);
-            }
-
-            // lấy biến in
-            PrintSetup printSetup = sheet0.getPrintSetup();
-
-            // Khổ dọc, giấy A4
-            printSetup.setLandscape(false);
-            printSetup.setPaperSize(PrintSetup.A4_PAPERSIZE);
-
-            // bật fit to page, tự động co dãn theo số ô chứa giá trị
-            sheet0.setFitToPage(true);
-
-            // tạo khoảng in là mỗi 43 hàng
-            int rowsPerPage = 42;
-            // lấy hàng cuối chứa dữ liệu
-            int lastRow = sheet0.getLastRowNum();
-            // tạo các khoảng in mỗi 43 hàng
-            for (int r = rowsPerPage; r <= lastRow; r += rowsPerPage) {
-                sheet0.setRowBreak(r);
-            }
-
-            // ẩn hoặc xóa các sheet đã được gộp vào sheet đầu tiên
-            for (int i = 1; i < maxSheet; i++) {
-                workbook.setSheetHidden(i, true);
-//                workbook.removeSheetAt(1);
+            // gộp sheet và cài đặt in nếu xuất dạng excel 1
+            if (exCellType.equals("EX1")) {
+                gopSheetVaCaiDatIn(workbook);
             }
 
             try (FileOutputStream fileOut = new FileOutputStream(excelCopyPath)) {
@@ -396,6 +331,83 @@ public class ReadPDFToExcel {
             }
         }*/
 
+    }
+
+    /**
+     * gộp dữ liệu các sheet về sheet đầu tiên rồi ẩn các sheet đó
+     * sau đó cài đặt trang in
+     * @param workbook
+     */
+    private static void gopSheetVaCaiDatIn(Workbook workbook) {
+        // tạo khoảng cách các trang in là 43 dòng
+        int numRowPage = 43;
+        // số trang đã tạo
+        int pageCount = 1;
+        // lấy sheet cần dán giá trị các sheet khác vào
+        Sheet sheet0 = workbook.getSheetAt(0);
+        // lấy số sheet tối đa có trong file excel
+        int maxSheet = workbook.getNumberOfSheets();
+        // lặp qua các sheet cần copy, copy giá trị, công thức rồi dán vào sheet 0
+        for (int i = 1; i < maxSheet; i++) {
+            Sheet sheeti = workbook.getSheetAt(i);
+            // lấy hàng cuối cùng chứa dữ liệu của sheet copy
+            int lastRowi = sheeti.getLastRowNum();
+            // lấy hàng cuối cùng chứa dữ liệu của sheet 0
+            int lastRow0 = sheet0.getLastRowNum();
+            // nếu sheet copy không có hàng nào có dữ liệu thì thoát lặp
+            if (lastRowi == 0) {
+                break;
+            }
+            // nếu số hàng sản phẩm trong sheet gốc mà lớn hơn số hàng đang nhớ theo biến số trang
+            // thì tăng biến nhớ số trang lên 1 để số số hàng theo biến nhớ phải lớn hơn số hàng chứ dữ liệu thực tế
+            // tăng biến nhớ đến khi nào lớn hơn thực tế
+            while (lastRow0 > numRowPage * pageCount) {
+                pageCount++;
+            }
+
+            // nếu số hàng sheet gốc + sheet copy lớn hơn số dòng theo biến nhớ trang thì
+            // cho hàng dán giá trị sheet copy bắt đầu ở trang mới
+            // còn không thì vẫn dán ở hàng cuối chứa dữ liệu của sheet gốc như bình thường
+            // lưu ý vị trí hàng + 2 để có khoảng cách cho dễ nhìn
+            if (lastRow0 + lastRowi + 2 > numRowPage * pageCount) {
+                RowRangeCopier.copyRowRange((XSSFWorkbook) workbook, i, 0, lastRowi, 0, numRowPage * pageCount + 2);
+                pageCount++;
+                continue;
+            }
+
+            RowRangeCopier.copyRowRange((XSSFWorkbook) workbook, i, 0, lastRowi, 0, lastRow0 + 2);
+
+        }
+
+        // sau khi đã gộp các sheet thì ẩn các cột không cần hiển thị theo sheet có nhiều bozai nhất
+        for (int i = soBozaiMax * 2 + 6; i <= maxLastColNum; i++) {
+            sheet0.setColumnHidden(i, true);
+        }
+
+        // lấy biến in
+        PrintSetup printSetup = sheet0.getPrintSetup();
+
+        // Khổ dọc, giấy A4
+        printSetup.setLandscape(false);
+        printSetup.setPaperSize(PrintSetup.A4_PAPERSIZE);
+
+        // bật fit to page, tự động co dãn theo số ô chứa giá trị
+        sheet0.setFitToPage(true);
+
+        // tạo khoảng in là mỗi 43 hàng
+        int rowsPerPage = 42;
+        // lấy hàng cuối chứa dữ liệu
+        int lastRow = sheet0.getLastRowNum();
+        // tạo các khoảng in mỗi 43 hàng
+        for (int r = rowsPerPage; r <= lastRow; r += rowsPerPage) {
+            sheet0.setRowBreak(r);
+        }
+
+        // ẩn hoặc xóa các sheet đã được gộp vào sheet đầu tiên
+        for (int i = 1; i < maxSheet; i++) {
+            workbook.setSheetHidden(i, true);
+//                workbook.removeSheetAt(1);
+        }
     }
 
     /**
@@ -3035,47 +3047,51 @@ public class ReadPDFToExcel {
         // lấy ra sheet 1 để nhập nối vật liệu đang duyệt vào vật liệu trước đó
         Sheet sheet = workbook.getSheetAt(0);
 
-        // bản cũ copy excel từ file mẫu trong sample file
-        // 1) Format ngày hiện tại (có zero-padding -> 10/22)
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM/dd");
-        String nowFormatted = LocalDate.now().format(fmt);
+        if (sheetIndex == 1) {
+            // 1) Format ngày hiện tại (có zero-padding -> 10/22)
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM/dd");
+            String nowFormatted = LocalDate.now().format(fmt);
 
-        // Ghi thời gian hiện tại vào ô b1
-        sheet.getRow(0).getCell(1).setCellValue(nowFormatted);
+            // Ghi thời gian hiện tại vào ô b1
+            sheet.getRow(0).getCell(1).setCellValue(nowFormatted);
 
-        // Ghi tên khách hàng vào ô c1
-        sheet.getRow(0).getCell(2).setCellValue(kyakuSakiMei);
+            // Ghi tên khách hàng vào ô c1
+            sheet.getRow(0).getCell(2).setCellValue(kyakuSakiMei);
 
-        // Ghi bikou vào ô e1
-        sheet.getRow(0).getCell(4).setCellValue(bikou);
+            // Ghi bikou vào ô e1
+            sheet.getRow(0).getCell(4).setCellValue(bikou);
 
-        // Ghi shortNouKi vào ô ab1
-        sheet.getRow(0).getCell(27).setCellValue(shortNouKi2);
+            // Ghi shortNouKi vào ô ab1
+            sheet.getRow(0).getCell(27).setCellValue(shortNouKi2);
 
-        // Ghi mã đơn vào ô m1
-        sheet.getRow(0).getCell(12).setCellValue(fileExcelName);
+            // Ghi mã đơn vào ô m1
+            sheet.getRow(0).getCell(12).setCellValue(fileExcelName);
 
-        // Ghi tên người làm vào ô w1
-        // do đây là dạng excel khác với dạng 1 nên không ghi sẵn tên người làm, cần phải lấy tên người làm từ file
-        // excel ban khi lấy từ aladin về, biến của nó là fileExcelRootPath rồi lấy ra tên người làm ở vị trí đã biết trong sheet 1 của file
-        Workbook workbookRoot;
-        try (FileInputStream fileExcel = new FileInputStream(fileExcelRootPath)) {
-            workbookRoot = new XSSFWorkbook(fileExcel);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            // Ghi tên người làm vào ô w1
+            // do đây là dạng excel khác với dạng 1 nên không ghi sẵn tên người làm, cần phải lấy tên người làm từ file
+            // excel ban khi lấy từ aladin về, biến của nó là fileExcelRootPath rồi lấy ra tên người làm ở vị trí đã biết trong sheet 1 của file
+            Workbook workbookRoot;
+            try (FileInputStream fileExcel = new FileInputStream(fileExcelRootPath)) {
+                workbookRoot = new XSSFWorkbook(fileExcel);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            // lấy sheet đầu tiên
+            Sheet sheetWorkbookRoot = workbookRoot.getSheetAt(0);
+            // lấy giá trị tên người làm trong ô đã biết rồi ghi vào sheet đầu ra
+            String tenNguoiLam = sheetWorkbookRoot.getRow(getLastRowWithDataInColumn(sheetWorkbookRoot, 4)).getCell(4).getStringCellValue();
+            sheet.getRow(0).getCell(22).setCellValue(tenNguoiLam);
+
+            // Ghi kirirosu vào ô 03
+            sheet.getRow(2).getCell(14).setCellValue(kirirosu);
+
         }
-        Sheet sheetWorkbookRoot = workbookRoot.getSheetAt(0);
-        String tenNguoiLam = sheetWorkbookRoot.getRow(sheetWorkbookRoot.getLastRowNum()).getCell(4).getStringCellValue();
-        sheet.getRow(0).getCell(22).setCellValue(tenNguoiLam);
+
+
+
 
         // Ghi saizu vào ô AB27, chưa dùng
         sheet.getRow(3).getCell(2).setCellValue(kouSyu);
-
-        // Ghi kirirosu vào ô 03
-        sheet.getRow(2).getCell(14).setCellValue(kirirosu);
-
-
-
 //
 //        // lấy số loại bozai và sản phẩm
 //        int soBoZai = kaKouPairs.size();
