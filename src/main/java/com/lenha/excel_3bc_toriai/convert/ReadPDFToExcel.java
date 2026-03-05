@@ -90,7 +90,9 @@ public class ReadPDFToExcel {
     private static String chuyuBan = "";
     private static String teiHaiSha = "";
 
-    private static int soBozaiMax = 0;
+    // thuộc tính số bozai lớn nhất trong các sheet, nhưng nhỏ nhất phải là 6 vì lúc nào cũng có 6 cột bozai cho trước
+    // cho dù có ít bozai hơn 6 thì vẫn phải để là 6 cột
+    private static int soBozaiMax = 6;
     private static int maxLastColNum = 0;
     private static final Map<Double, Integer> seiHinMap = new LinkedHashMap<>();
     // list chứa danh sách các sản phẩm không trùng lặp
@@ -339,6 +341,7 @@ public class ReadPDFToExcel {
     /**
      * gộp dữ liệu các sheet về sheet đầu tiên rồi ẩn các sheet đó
      * sau đó cài đặt trang in
+     *
      * @param workbook
      */
     private static void gopSheetVaCaiDatIn(Workbook workbook) {
@@ -3092,13 +3095,19 @@ public class ReadPDFToExcel {
 
         rowWritingIndex = 4;
         Row beforeRowWriting = sheet.getRow(rowWritingIndex - 1);
+        int beforeRowHeight = beforeRowWriting.getHeight();
         Row rowWriting = sheet.getRow(rowWritingIndex);
         if (rowWriting == null) {
             rowWriting = sheet.createRow(rowWritingIndex);
         }
+        // trước khi copy dòng cần tính toán xem có bao nhiêu sản phẩm trong bozai đang nhập để tính xem cần cop bao nhiêu dòng
+        // rồi còn gộp ô theo chiều dọc nếu phải cop dòng nhiều hơn 1 lần
+        // sau đó update chỉ số dòng đang viết rowWritingIndex
+
+        // copy cả chiều cao dòng của dòng bên trên
+        rowWriting.setHeight((short) beforeRowHeight);
         for (int i = 0; i < 30; i++) {
             copyRowCellWithFormulaUpdate(beforeRowWriting.getCell(i), rowWriting.getCell(i), 1);
-            ...copy cả chiều cao dòng nữa
 
         }
         // Xác định vùng cần hợp nhất (từ cột 0 đến cột 1 trên dòng rowWritingIndex)
@@ -3184,6 +3193,15 @@ public class ReadPDFToExcel {
 
     }
 
+    /**
+     * TẠO VÙNG GHÉP Ô, CÓ THỂ GHI ĐÈ CẢ GHÉP Ô ĐANG TỒN TẠI TRONG CÁC CELL CẦN GHÉP
+     *
+     * @param sheet
+     * @param firstRow
+     * @param lastRow
+     * @param firstCol
+     * @param lastCol
+     */
     public static void mergeForce(Sheet sheet, int firstRow, int lastRow, int firstCol, int lastCol) {
         CellRangeAddress newRegion = new CellRangeAddress(firstRow, lastRow, firstCol, lastCol);
 
