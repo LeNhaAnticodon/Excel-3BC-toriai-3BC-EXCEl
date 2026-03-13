@@ -3093,38 +3093,100 @@ public class ReadPDFToExcel {
 
         }
 
-        rowWritingIndex = 4;
-        Row beforeRowWriting = sheet.getRow(rowWritingIndex - 1);
-        int beforeRowHeight = beforeRowWriting.getHeight();
         Row rowWriting = sheet.getRow(rowWritingIndex);
-        if (rowWriting == null) {
-            rowWriting = sheet.createRow(rowWritingIndex);
+        // Ghi saizu vào ô cột C
+        rowWriting.getCell(2).setCellValue(kouSyu);
+
+        // lặp qua các cặp tính vật liệu, mỗi cặp gồm "bozai-số lượng trong map kouZaiChouPairs(nằm trong map nhưng thực tế nó chỉ có 1 cặp)"
+        // và "các bộ chiều dài sản phẩm và số lượng trong map meiSyouPairs"
+        for (Map.Entry<Map<StringBuilder, Integer>, Map<StringBuilder[], Integer>> entry : kaKouPairs.entrySet()) {
+
+            Map<StringBuilder, Integer> kouZaiChouPairs = entry.getKey();
+            Map<StringBuilder[], Integer> meiSyouPairs = entry.getValue();
+
+            // số lượng của vật liệu đang xét
+            int soLuongCuaBozai = 0;
+            double chieuDaiCuaBozai = 0d;
+            // Ghi bozai và số lượng của nó, thực ra chỉ có 1 cặp bozai và số lượng nhưng vẫn tạo vòng lặp cho đơn giản, không ảnh hưởng gì
+            for (Map.Entry<StringBuilder, Integer> kouZaiEntry : kouZaiChouPairs.entrySet()) {
+                String chieuDaiBoZaiS = String.valueOf(kouZaiEntry.getKey());
+                String soLuongCuaBozaiS = String.valueOf(kouZaiEntry.getValue());
+
+                chieuDaiCuaBozai = Double.parseDouble(String.valueOf(kouZaiEntry.getKey()));
+                soLuongCuaBozai = Integer.parseInt(soLuongCuaBozaiS);
+
+
+                kouzaiChouGoukei += Double.parseDouble(chieuDaiBoZaiS) * Integer.parseInt(soLuongCuaBozaiS);
+            }
+
+
+
+            // với số lượng của bozai bao nhiêu thì ghi lại số dòng sản phẩm giống nhau bấy nhiêu lần
+            for (int i = 0; i < soLuongCuaBozai; i++) {
+
+            }
+
+            // lặp qua các chiều dài sản phẩm trong cặp tính vật liệu này và tìm trong hàng có chiều dài sản phẩm
+            // tương ứng trong cột sản phẩm, dóng sang cột bozai đang tạo là tìm được ô cần ghi số lượng, sau đó ghi cộng dồn số lượng vào ô đó
+            for (Map.Entry<StringBuilder[], Integer> meiSyouEntry : meiSyouPairs.entrySet()) {
+                // chiều dài sản phẩm trong map
+                double chieuDaiSanPhamTrongMap = Double.parseDouble(meiSyouEntry.getKey()[1].toString());
+                // số lượng sản phẩm trong map
+                int soLuongSanPhamTrongMap = Integer.parseInt(meiSyouEntry.getValue().toString());
+
+                // cách mới khi một chiều dài chỉ xuất hiện 1 lần trên 1 hàng, khác với cách cũ phức tạp hơn
+                // hàng chứa sản phẩm, +9 vì cột chứa sản phẩm bắt đầu chứa các sản phẩm từ hàng thứ 9
+                int indexSeiHinRow = seiHinList.indexOf(chieuDaiSanPhamTrongMap) + HANG_DAU_TIEN_CHUA_SAN_PHAM;
+
+                // lấy cell chứa số lượng của sản phẩm ở cột bozai
+                Cell cellSoLuong = sheet.getRow(indexSeiHinRow).getCell(4 + numBozai);
+
+                // lấy số lượng cũ của cell
+                double oldNum = 0d;
+                // nếu cell có type là số thì nó đã có số lượng từ trước thì gán nó cho số lượng cũ
+                if (cellSoLuong.getCellType() == CellType.NUMERIC) {
+                    oldNum = cellSoLuong.getNumericCellValue();
+                }
+
+                // nếu số lượng cũ > 0 thì ghi giá trị cell với số lượng cũ + số lượng hiện tại
+                // không thì ghi cell với số lượng hiện tại
+                if (oldNum > 0d) {
+                    sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap + oldNum);
+                } else {
+                    sheet.getRow(indexSeiHinRow).getCell(4 + numBozai).setCellValue(soLuongSanPhamTrongMap);
+                }
+
+                seiHinChouGoukei += chieuDaiSanPhamTrongMap * soLuongSanPhamTrongMap * soLuongCuaBozai;
+
+            }
         }
+
+//        rowWritingIndex = 4;
+
+
+        Row underRowWriting = sheet.getRow(rowWritingIndex + 1);
+        int rowWritingHeight = rowWriting.getHeight();
+
+        if (underRowWriting == null) {
+            underRowWriting = sheet.createRow(rowWritingIndex + 1);
+        }
+
+
         // trước khi copy dòng cần tính toán xem có bao nhiêu sản phẩm trong bozai đang nhập để tính xem cần cop bao nhiêu dòng
         // rồi còn gộp ô theo chiều dọc nếu phải cop dòng nhiều hơn 1 lần
         // sau đó update chỉ số dòng đang viết rowWritingIndex
 
         // copy cả chiều cao dòng của dòng bên trên
-        rowWriting.setHeight((short) beforeRowHeight);
+        underRowWriting.setHeight((short) rowWritingHeight);
         for (int i = 0; i < 30; i++) {
-            copyRowCellWithFormulaUpdate(beforeRowWriting.getCell(i), rowWriting.getCell(i), 1);
+            copyRowCellWithFormulaUpdate(rowWriting.getCell(i), underRowWriting.getCell(i), 1);
 
         }
         // Xác định vùng cần hợp nhất (từ cột 0 đến cột 1 trên dòng rowWritingIndex)
-        CellRangeAddress cellRangeAddress = new CellRangeAddress(rowWritingIndex, rowWritingIndex, 0, 1);
-        mergeForce(sheet, cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow(),
-                cellRangeAddress.getFirstColumn(), cellRangeAddress.getLastColumn());
+        hopNhatOBatBuoc(sheet, rowWritingIndex + 1, rowWritingIndex + 1, 0, 1);
+        hopNhatOBatBuoc(sheet, rowWritingIndex + 1, rowWritingIndex + 1, 25, 26);
+        hopNhatOBatBuoc(sheet, rowWritingIndex + 1, rowWritingIndex + 1, 27, 28);
 
-        cellRangeAddress = new CellRangeAddress(rowWritingIndex, rowWritingIndex, 25, 26);
-        mergeForce(sheet, cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow(),
-                cellRangeAddress.getFirstColumn(), cellRangeAddress.getLastColumn());
-
-        cellRangeAddress = new CellRangeAddress(rowWritingIndex, rowWritingIndex, 27, 28);
-        mergeForce(sheet, cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow(),
-                cellRangeAddress.getFirstColumn(), cellRangeAddress.getLastColumn());
-
-        // Ghi saizu vào ô cột C, chưa dùng
-        rowWriting.getCell(2).setCellValue(kouSyu);
 
 //        // lặp qua các cặp tính vật liệu, mỗi cặp gồm "bozai-số lượng trong map kouZaiChouPairs(nằm trong map nhưng thực tế nó chỉ có 1 cặp)"
 //        // và "các bộ chiều dài sản phẩm và số lượng trong map meiSyouPairs"
@@ -3192,6 +3254,22 @@ public class ReadPDFToExcel {
 //        }
 
     }
+
+    /**
+     * TẠO VÙNG GHÉP Ô, CÓ THỂ GHI ĐÈ CẢ GHÉP Ô ĐANG TỒN TẠI TRONG CÁC CELL CẦN GHÉP
+     *
+     * @param sheet
+     * @param firstRow
+     * @param lastRow
+     * @param firstCol
+     * @param lastCol
+     */
+    private static void hopNhatOBatBuoc(Sheet sheet, int firstRow, int lastRow, int firstCol, int lastCol) {
+        CellRangeAddress cellRangeAddress = new CellRangeAddress(firstRow, lastRow, firstCol, lastCol);
+        mergeForce(sheet, cellRangeAddress.getFirstRow(), cellRangeAddress.getLastRow(),
+                cellRangeAddress.getFirstColumn(), cellRangeAddress.getLastColumn());
+    }
+
 
     /**
      * TẠO VÙNG GHÉP Ô, CÓ THỂ GHI ĐÈ CẢ GHÉP Ô ĐANG TỒN TẠI TRONG CÁC CELL CẦN GHÉP
