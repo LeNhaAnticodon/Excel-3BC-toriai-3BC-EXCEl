@@ -101,7 +101,7 @@ public class ReadPDFToExcel {
     private static int rowWritingIndex;
 
     /**
-     * chuyển đổi pdf tính vật liệu thành các file chl theo từng vật liệu khác nhau
+     * chuyển đổi pdf tính vật liệu thành file excel
      *
      * @param fileExcelRootPath link file excel gốc
      * @param filePDFPath       link file pdf
@@ -3031,7 +3031,7 @@ public class ReadPDFToExcel {
     }
 
     /**
-     * chuyển các thông số của tính vật liệu trong file 3bc sang excel
+     * chuyển các thông số của tính vật liệu trong file 3bc sang excel dạng 2 và 3
      *
      * @param kaKouPairs        thông số chiều dài vật liệu và chiều dài + số lượng của các sản phẩm tính cho cây vật liệu đó
      * @param sheetIndex        thứ tự tạo sheet
@@ -3133,21 +3133,23 @@ public class ReadPDFToExcel {
                 rowWriting.getCell(5).setCellValue(1);
 
                 //tính xem số sản phẩm trong bozai là bao nhiêu để tính số dòng cần ghi số sản phẩm đó rồi thêm số dòng tương ứng
-                int soLuongSanPham = meiSyouPairs.size();
-                int soDongCanThem = soLuongSanPham / 5;
+                int soSanPham = meiSyouPairs.size();
+                int soDongCanThem = soSanPham / 5;
                 if (soDongCanThem < 1) {
                     soDongCanThem = 1;
                 }
-                if (soLuongSanPham % 5 > 0 && soLuongSanPham > 5) {
+                if (soSanPham % 5 > 0 && soSanPham > 5) {
                     soDongCanThem++;
                 }
 
                 // đoạn code copy dòng ở đây, sau khi tính xong số sản phẩm trong bozai đang duyệt tính tạo vòng lặp xem cần copy dòng bao nhiêu lần
                 for (int j = 0; j < soDongCanThem; j++) {
-                    Row underRowWriting = sheet.getRow(rowWritingIndex + 1);
+                    int dongDangTao = rowWritingIndex + j + 1;
+
+                    Row underRowWriting = sheet.getRow(dongDangTao);
                     int rowWritingHeight = rowWriting.getHeight();
                     if (underRowWriting == null) {
-                        underRowWriting = sheet.createRow(rowWritingIndex + 1);
+                        underRowWriting = sheet.createRow(dongDangTao);
                     }
                     // trước khi copy dòng cần tính toán xem có bao nhiêu sản phẩm trong bozai đang nhập để tính xem cần cop bao nhiêu dòng
                     // rồi còn gộp ô theo chiều dọc nếu phải cop dòng nhiều hơn 1 lần
@@ -3156,7 +3158,7 @@ public class ReadPDFToExcel {
                     // copy cả chiều cao dòng của dòng bên trên
                     underRowWriting.setHeight((short) rowWritingHeight);
                     for (int k = 0; k < 30; k++) {
-                        copyRowCellWithFormulaUpdate(rowWriting.getCell(k), underRowWriting.getCell(k), 1);
+                        copyRowCellWithFormulaUpdate(rowWriting.getCell(k), underRowWriting.getCell(k), j + 1);
                     }
 
                     // các ô cần giữ lại giá trị của dòng được copy
@@ -3184,23 +3186,41 @@ public class ReadPDFToExcel {
                         underRowWriting.getCell(k).setBlank();
                     }
 
-                    // Xác định vùng cần hợp nhất (từ cột 0 đến cột 1 trên dòng rowWritingIndex)
-                    hopNhatOBatBuoc(sheet, rowWritingIndex + 1, rowWritingIndex + 1, 0, 1);
-                    hopNhatOBatBuoc(sheet, rowWritingIndex + 1, rowWritingIndex + 1, 25, 26);
-                    hopNhatOBatBuoc(sheet, rowWritingIndex + 1, rowWritingIndex + 1, 27, 28);
+                    // Xác định vùng cần hợp nhất (từ cột 0 đến cột 1 trên dòng vừa copy)
+                    hopNhatOBatBuoc(sheet, dongDangTao, dongDangTao, 0, 1);
+                    hopNhatOBatBuoc(sheet, dongDangTao, dongDangTao, 25, 26);
+                    hopNhatOBatBuoc(sheet, dongDangTao, dongDangTao, 27, 28);
 
 
                 }
 
-                // cần tạo biến đếm ở đây để xác định ô cần ghi chiều dài, số lượng sản phẩm
-
+                // cần tạo biến đếm ở đây để xác định ô(cột, hàng) cần ghi chiều dài, số lượng sản phẩm
+                int sttSanPham = 0;
                 // lặp qua các chiều dài sản phẩm trong cặp tính vật liệu này và ghi vào các ô tương ứng
                 for (Map.Entry<StringBuilder[], Integer> meiSyouEntry : meiSyouPairs.entrySet()) {
+
                     // chiều dài sản phẩm trong map
                     double chieuDaiSanPhamTrongMap = Double.parseDouble(meiSyouEntry.getKey()[1].toString());
                     // số lượng sản phẩm trong map
                     int soLuongSanPhamTrongMap = Integer.parseInt(meiSyouEntry.getValue().toString());
                     System.out.println(chieuDaiSanPhamTrongMap + ": sp = " + soLuongSanPhamTrongMap);
+
+                    // chỉ số hàng là số sẽ cộng với chỉ số hàng đang ghi để xác định hàng cần ghi chiều dài, sl
+                    // vì mỗi hàng chỉ ghi được 5 sản phẩm nên dùng số thứ tự sản phẩm / 5, stt từ 0 đến 4 là 5 sản phẩm đầu tiên
+                    // chúng / 5 đều = 0, nên khi 0 cộng với hàng đang ghi thì vẫn là ghi cd, sl trên hàng đó
+                    // từ stt 5 - 9(3 sản phẩm tiếp theo) thìu / 5 = 1, sẽ ghi cd, sl trên hàng có chỉ số là chỉ số hàng đang ghi + 1
+                    int chiSoHang = sttSanPham / 5;
+                    // chỉ số cột sẽ chia ấy dư cho 5, stt sản phẩm từ 0-4 phần dư cũng là 0-4 là đủ xác định 5 cột,
+                    // đến 5-9 là 5 sản phẩm tiếp theo phần dư cũng là 0-4 tiếp tục xác định được 5 cột giống bên trên, tức là cột quay lại từ đầu nhưng sẽ
+                    // tăng thêm một hàng nhờ tính chỉ số hàng ở biến trên
+                    int chiSoCot = sttSanPham % 5;
+
+                    // vị trí cột ghi chiều dài sp sẽ là 6 + (chiSoCot * 4) vì cột ghi sản phẩm đầu tiên bắt đầu từ cột 6,
+                    // và cột ghi chiều dài sp sản phẩm tiếp cách 4 cột sau đó
+                    // vị trí cột ghi số lượng sp sẽ là 8 + (chiSoCot * 4) vị trí cột ghi số lượng sản phẩm tiếp cũng cách 4 cột sau đó
+                    sheet.getRow(rowWritingIndex + chiSoHang).getCell(6 + chiSoCot * 4).setCellValue(chieuDaiSanPhamTrongMap);
+                    sheet.getRow(rowWritingIndex + chiSoHang).getCell(8 + chiSoCot * 4).setCellValue(soLuongSanPhamTrongMap);
+
 
                     // đoạn code tính tổng chiều dài sản phẩm để tổng hợp
                     // phép tính là chỉ tính trong lần đầu ghi sản phẩm, các lần sau ghi lặp lại theo số lượng của bozai nên là thừa và không ghi
@@ -3209,6 +3229,7 @@ public class ReadPDFToExcel {
                         seiHinChouGoukei += chieuDaiSanPhamTrongMap * soLuongSanPhamTrongMap * soLuongCuaBozai;
                     }
 
+                    sttSanPham++;
                 }
 
                 rowWritingIndex += soDongCanThem;
