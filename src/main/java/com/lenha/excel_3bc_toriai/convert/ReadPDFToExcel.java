@@ -934,8 +934,8 @@ public class ReadPDFToExcel {
 
                     Double dLength = Double.parseDouble(length);
 
-                    // thêm tên và chiều dài vào mảng, tên với ứng dụng này thì không cần
-                    StringBuilder[] nameAndLength = {new StringBuilder(), new StringBuilder().append(df.format(dLength))};
+                    // thêm tên và chiều dài vào mảng
+                    StringBuilder[] nameAndLength = {new StringBuilder().append(name), new StringBuilder().append(df.format(dLength))};
 
                     // lấy số lượng sản phẩm
                     String meiSyouHonSuu = extractValue(line, "mm x", "本").trim();
@@ -3201,6 +3201,10 @@ public class ReadPDFToExcel {
 
                     // chiều dài sản phẩm trong map
                     double chieuDaiSanPhamTrongMap = Double.parseDouble(meiSyouEntry.getKey()[1].toString());
+                    String tenSP = meiSyouEntry.getKey()[0].toString();
+                    if (!tenSP.isBlank()) {
+                        System.out.println("ten sp la: " + tenSP);
+                    }
                     // số lượng sản phẩm trong map
                     int soLuongSanPhamTrongMap = Integer.parseInt(meiSyouEntry.getValue().toString());
                     System.out.println(chieuDaiSanPhamTrongMap + ": sp = " + soLuongSanPhamTrongMap);
