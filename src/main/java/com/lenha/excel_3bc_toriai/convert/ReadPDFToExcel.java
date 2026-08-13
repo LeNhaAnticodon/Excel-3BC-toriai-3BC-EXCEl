@@ -10,7 +10,12 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.*;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTLineProperties;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTShapeProperties;
+import org.openxmlformats.schemas.drawingml.x2006.main.STPresetLineDashVal;
+import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTShape;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -3170,8 +3175,8 @@ public class ReadPDFToExcel {
                         boolean canXoaGiatri = true;
                         // lặp qua mảng các ô cần giữ lại giá trị, nếu ô đang lặp xuất hiện trong mảng thì gán lại giá trị biến nhớ cần xóa giá trị
                         // là false rồi thoát lặp
-                        for (int CellCanGiuLai: cacCellCanGiuLaiGiaTri) {
-                            if (k == CellCanGiuLai){
+                        for (int CellCanGiuLai : cacCellCanGiuLaiGiaTri) {
+                            if (k == CellCanGiuLai) {
                                 canXoaGiatri = false;
                                 break;
                             }
@@ -3201,7 +3206,7 @@ public class ReadPDFToExcel {
 
                     // chiều dài sản phẩm trong map
                     double chieuDaiSanPhamTrongMap = Double.parseDouble(meiSyouEntry.getKey()[1].toString());
-                    String tenSP = meiSyouEntry.getKey()[0].toString();
+                    String tenSP = meiSyouEntry.getKey()[0].toString().trim();
                     if (!tenSP.isBlank()) {
                         System.out.println("ten sp la: " + tenSP);
                     }
@@ -3212,7 +3217,7 @@ public class ReadPDFToExcel {
                     // chỉ số hàng là số sẽ cộng với chỉ số hàng đang ghi để xác định hàng cần ghi chiều dài, sl
                     // vì mỗi hàng chỉ ghi được 5 sản phẩm nên dùng số thứ tự sản phẩm / 5, stt từ 0 đến 4 là 5 sản phẩm đầu tiên
                     // chúng / 5 đều = 0, nên khi 0 cộng với hàng đang ghi thì vẫn là ghi cd, sl trên hàng đó
-                    // từ stt 5 - 9(3 sản phẩm tiếp theo) thìu / 5 = 1, sẽ ghi cd, sl trên hàng có chỉ số là chỉ số hàng đang ghi + 1
+                    // từ stt 5 - 9(5 sản phẩm tiếp theo) thìu / 5 = 1, sẽ ghi cd, sl trên hàng có chỉ số là chỉ số hàng đang ghi + 1
                     int chiSoHang = sttSanPham / 5;
                     // chỉ số cột sẽ chia ấy dư cho 5, stt sản phẩm từ 0-4 phần dư cũng là 0-4 là đủ xác định 5 cột,
                     // đến 5-9 là 5 sản phẩm tiếp theo phần dư cũng là 0-4 tiếp tục xác định được 5 cột giống bên trên, tức là cột quay lại từ đầu nhưng sẽ
@@ -3222,6 +3227,53 @@ public class ReadPDFToExcel {
                     // vị trí cột ghi chiều dài sp sẽ là 6 + (chiSoCot * 4) vì cột ghi sản phẩm đầu tiên bắt đầu từ cột 6,
                     // và cột ghi chiều dài sp sản phẩm tiếp cách 4 cột sau đó
                     // vị trí cột ghi số lượng sp sẽ là 8 + (chiSoCot * 4) vị trí cột ghi số lượng sản phẩm tiếp cũng cách 4 cột sau đó
+
+                    // nếu tên sản phẩm có là số 1 hoặc 2 thì tức là nó có naname,
+                    // tạo đường nét đứt bên dưới sản phẩm tên 1, nét liền bên dưới sản phẩm tên 2 để biểu thị naname
+                    if (tenSP.equalsIgnoreCase("1") || tenSP.equalsIgnoreCase("2")) {
+                        XSSFDrawing drawing = (XSSFDrawing) sheet.createDrawingPatriarch();
+
+                        XSSFClientAnchor anchor = new XSSFClientAnchor();
+
+                        // ô bắt đầu
+                        anchor.setCol1(6 + chiSoCot * 4);
+                        anchor.setRow1(rowWritingIndex + chiSoHang);
+
+                        // ô kết thúc
+                        anchor.setCol2(8 + chiSoCot * 4 + 1);
+                        anchor.setRow2(rowWritingIndex + chiSoHang);
+
+                        // tạo khoảng cách với chữ trong ô theo chiều ngang
+                        // Offset trong cell (EMU)
+                        // anchor.setDx1(-5);
+                        anchor.setDy1(Units.pixelToEMU(22));
+
+                        // anchor.setDx2(-5);
+                        anchor.setDy2(Units.pixelToEMU(22));
+
+                        XSSFSimpleShape line = drawing.createSimpleShape(anchor);
+
+                        // nếu tên sản phẩm là 1 thì cần vẽ đường nét đứt
+                        if (tenSP.equalsIgnoreCase("1")) {
+                            CTShape ctShape = line.getCTShape();
+
+                            CTShapeProperties spPr = ctShape.getSpPr();
+
+                            CTLineProperties ln = spPr.isSetLn()
+                                    ? spPr.getLn()
+                                    : spPr.addNewLn();
+
+                            ln.addNewPrstDash().setVal(STPresetLineDashVal.DASH);
+                        }
+
+                        // dạng hình vẽ là đường thẳng
+                        line.setShapeType(ShapeTypes.LINE);
+                        // độ dày đường
+                        line.setLineWidth(1.2);
+                        // màu đường
+                        line.setLineStyleColor(0, 0, 0);   // đen
+                    }
+
                     sheet.getRow(rowWritingIndex + chiSoHang).getCell(6 + chiSoCot * 4).setCellValue(chieuDaiSanPhamTrongMap);
                     sheet.getRow(rowWritingIndex + chiSoHang).getCell(8 + chiSoCot * 4).setCellValue(soLuongSanPhamTrongMap);
 
