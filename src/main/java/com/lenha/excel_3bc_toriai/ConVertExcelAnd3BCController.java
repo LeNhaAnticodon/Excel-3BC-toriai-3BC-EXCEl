@@ -230,6 +230,37 @@ public class ConVertExcelAnd3BCController implements Initializable {
         setExcel3.setUserData("EX3");
         // cho radio click vào nút file excel 1
         excelOutput.selectToggle(setExcel1);
+        // lấy dạng excel cần tạo đã lưu trong file setup
+        String excelType = SetupData.getInstance().getSetup().getExcelType();
+        // nếu không có giá trị hoặc giá trị không đúng cấu trúc thì cho mặc định là dạng excel 1
+        if (excelType.isBlank() || (!excelType.equals("EX1") && !excelType.equals("EX2") && !excelType.equals("EX3"))) {
+            excelOutput.selectToggle(setExcel1);
+        }// còn không thì cho radio click vào nút tương ứng với dạng excel
+        else {
+            if (excelType.equals("EX1")) {
+                excelOutput.selectToggle(setExcel1);
+            }
+
+            if (excelType.equals("EX2")) {
+                excelOutput.selectToggle(setExcel2);
+            }
+
+            if (excelType.equals("EX3")) {
+                excelOutput.selectToggle(setExcel3);
+            }
+        }
+        // tạo sự kiện thay đổi nút dạng excel đầu ra thì lưu dạng này vào file nhớ
+        // và lưu ngôn ngữ mới vào file và đối tượng setup
+        excelOutput.selectedToggleProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue != null) {
+                // lưu dạng excel đầu ra mới vào file và đối tượng setup
+                try {
+                    SetupData.getInstance().setExcelType(excelOutput.getSelectedToggle().getUserData().toString());
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+        });
 
         // lấy ngôn ngữ đã lưu trong file setup
         String lang = SetupData.getInstance().getSetup().getLang();

@@ -391,7 +391,16 @@ public class SetupData {
     }
 
     /**
-     * @return list chứa các file chl đã tạo
+     * set dạng file excel đầu ra sẽ được tạo
+     * @param excelType loại excel sẽ được tạo
+     */
+    public void setExcelType(String excelType) throws IOException {
+        setup.setExcelType(excelType);
+        saveSetup();
+    }
+
+    /**
+     * @return list chứa các file excel đã tạo
      */
     public ObservableList<ExcelFile> getExcelFile() {
         return excelFiles;
@@ -428,6 +437,7 @@ public class SetupData {
                     String lang = dis.readUTF();
                     String linkSave3bcFileDir = dis.readUTF();
                     String linkSaveExcelFileDir = dis.readUTF();
+                    String excelType = dis.readUTF();
 
                     setup.setLinkExcelFile(linkPdfFile);
                     System.out.println(":" + setup.getLinkExcelFile());
@@ -443,6 +453,9 @@ public class SetupData {
 
                     setup.setLinkSaveExcelFileDir(linkSaveExcelFileDir);
                     System.out.println(":" + setup.getLinkSaveExcelFileDir());
+
+                    setup.setExcelType(excelType);
+                    System.out.println(":" + setup.getExcelType());
 
                 } catch (EOFException e) {
                     eof = true;
@@ -480,6 +493,7 @@ public class SetupData {
             dos.writeUTF(setup.getLang());
             dos.writeUTF(setup.getLinkSave3BCFileDir());
             dos.writeUTF(setup.getLinkSaveExcelFileDir());
+            dos.writeUTF(setup.getExcelType());
         }
 
         // Đặt quyền chỉ đọc cho file, để không chỉnh sửa file

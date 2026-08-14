@@ -1,15 +1,12 @@
 package com.lenha.excel_3bc_toriai.model;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
 public class Setup {
     private String linkExcelFile = "";
     private String link3bcToriaiFile = "";
     private String linkSave3BCFileDir = "";
     private String linkSaveExcelFileDir = "";
     private String lang = "";
+    private String excelType = "";
 
     public String getLinkExcelFile() {
         return linkExcelFile;
@@ -52,6 +49,13 @@ public class Setup {
     }
 
 
+    public String getExcelType() {
+        return excelType;
+    }
+
+    public void setExcelType(String excelType) {
+        this.excelType = excelType;
+    }
 }
 
 
