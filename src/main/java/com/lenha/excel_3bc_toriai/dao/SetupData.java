@@ -127,6 +127,7 @@ public class SetupData {
         languageMap.put("Nội dung file EXCEL không phải là tính toán vật liệu hoặc file không được phép truy cập", "The_content_of_the_Excel_file25");
         languageMap.put("Cảnh báo Kirirosu", "Kirirosu_Warning");
         languageMap.put("Có tồn tại kirirosu khác 2.0", "Another_Kirirosu_2.0_exists");
+        languageMap.put("CHUYỂN ĐỔI QUA LẠI GIỮA CÁC FILE EXCEL VÀ 3BC", "CONVERTING_BETWEEN_EXCEL_AND_3BC_FILES");
 
 
         languageMap.put("転送するファイルを選択します", "Select_the_file_to_transfer");
@@ -192,6 +193,7 @@ public class SetupData {
         languageMap.put("Excel ファイルの内容が重要な計算ではないか、ファイルにアクセスできません。", "The_content_of_the_Excel_file25");
         languageMap.put("切ロス警告", "Kirirosu_Warning");
         languageMap.put("切ロスのバージョンが 2.0 以外で存在します。", "Another_Kirirosu_2.0_exists");
+        languageMap.put("Excelファイルと3BCファイル間の変換", "CONVERTING_BETWEEN_EXCEL_AND_3BC_FILES");
 
 
 
@@ -258,6 +260,7 @@ public class SetupData {
         languageMap.put("The content of the Excel file is not material calculations or the file is not accessible.", "The_content_of_the_Excel_file25");
         languageMap.put("Kirirosu Warning", "Kirirosu_Warning");
         languageMap.put("Another Kirirosu 2.0 exists.", "Another_Kirirosu_2.0_exists");
+        languageMap.put("CONVERTING BETWEEN EXCEL AND 3BC FILES", "CONVERTING_BETWEEN_EXCEL_AND_3BC_FILES");
 
 
 
