@@ -128,6 +128,8 @@ public class SetupData {
         languageMap.put("Cảnh báo Kirirosu", "Kirirosu_Warning");
         languageMap.put("Có tồn tại kirirosu khác 2.0", "Another_Kirirosu_2.0_exists");
         languageMap.put("CHUYỂN ĐỔI QUA LẠI GIỮA CÁC FILE EXCEL VÀ 3BC", "CONVERTING_BETWEEN_EXCEL_AND_3BC_FILES");
+        languageMap.put("Địa chỉ của file Excel chưa được xác nhận", "The_Excel_file_path_has_not_been_confirmed");
+        languageMap.put("Hãy chọn file Excel để tiếp tục!", "Please_select_an_Excel_file_to_continue");
 
 
         languageMap.put("転送するファイルを選択します", "Select_the_file_to_transfer");
@@ -194,6 +196,8 @@ public class SetupData {
         languageMap.put("切ロス警告", "Kirirosu_Warning");
         languageMap.put("切ロスのバージョンが 2.0 以外で存在します。", "Another_Kirirosu_2.0_exists");
         languageMap.put("Excelファイルと3BCファイル間の変換", "CONVERTING_BETWEEN_EXCEL_AND_3BC_FILES");
+        languageMap.put("Excelファイルの保存場所が確認できませんでした。", "The_Excel_file_path_has_not_been_confirmed");
+        languageMap.put("続行するには、Excelファイルを選択してください。", "Please_select_an_Excel_file_to_continue");
 
 
 
@@ -261,6 +265,8 @@ public class SetupData {
         languageMap.put("Kirirosu Warning", "Kirirosu_Warning");
         languageMap.put("Another Kirirosu 2.0 exists.", "Another_Kirirosu_2.0_exists");
         languageMap.put("CONVERTING BETWEEN EXCEL AND 3BC FILES", "CONVERTING_BETWEEN_EXCEL_AND_3BC_FILES");
+        languageMap.put("The Excel file path has not been confirmed.", "The_Excel_file_path_has_not_been_confirmed");
+        languageMap.put("Please select an Excel file to continue!", "Please_select_an_Excel_file_to_continue");
 
 
 

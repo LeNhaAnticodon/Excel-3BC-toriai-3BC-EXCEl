@@ -3083,20 +3083,21 @@ public class ReadPDFToExcel {
             // Ghi mã đơn vào ô m1
             sheet.getRow(0).getCell(12).setCellValue(fileExcelName);
 
-            // Ghi tên người làm vào ô w1
-            // do đây là dạng excel khác với dạng 1 nên không ghi sẵn tên người làm, cần phải lấy tên người làm từ file
-            // excel ban khi lấy từ aladin về, biến của nó là fileExcelRootPath rồi lấy ra tên người làm ở vị trí đã biết trong sheet 1 của file
-            Workbook workbookRoot;
-            try (FileInputStream fileExcel = new FileInputStream(fileExcelRootPath)) {
-                workbookRoot = new XSSFWorkbook(fileExcel);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            // lấy sheet đầu tiên
-            Sheet sheetWorkbookRoot = workbookRoot.getSheetAt(0);
-            // lấy giá trị tên người làm trong ô đã biết rồi ghi vào sheet đầu ra
-            String tenNguoiLam = sheetWorkbookRoot.getRow(getLastRowWithDataInColumn(sheetWorkbookRoot, 4)).getCell(4).getStringCellValue();
-            sheet.getRow(0).getCell(22).setCellValue(tenNguoiLam);
+            // không cần ghi tên người làm nữa vì đây là dạng excel 2,3 nên người làm tự ghi để đỡ phải đối chiếu với file excel gốc(không cần lấy link file excel gốc nữa)
+//            // Ghi tên người làm vào ô w1
+//            // do đây là dạng excel khác với dạng 1 nên không ghi sẵn tên người làm, cần phải lấy tên người làm từ file
+//            // excel ban khi lấy từ aladin về, biến của nó là fileExcelRootPath rồi lấy ra tên người làm ở vị trí đã biết trong sheet 1 của file
+//            Workbook workbookRoot;
+//            try (FileInputStream fileExcel = new FileInputStream(fileExcelRootPath)) {
+//                workbookRoot = new XSSFWorkbook(fileExcel);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//            // lấy sheet đầu tiên
+//            Sheet sheetWorkbookRoot = workbookRoot.getSheetAt(0);
+//            // lấy giá trị tên người làm trong ô đã biết rồi ghi vào sheet đầu ra
+//            String tenNguoiLam = sheetWorkbookRoot.getRow(getLastRowWithDataInColumn(sheetWorkbookRoot, 4)).getCell(4).getStringCellValue();
+//            sheet.getRow(0).getCell(22).setCellValue(tenNguoiLam);
 
             // Ghi kirirosu vào ô 03
             sheet.getRow(2).getCell(14).setCellValue(kirirosu);

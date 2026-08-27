@@ -721,8 +721,12 @@ public class ConVertExcelAnd3BCController implements Initializable {
             boolean isFilePDF = pdfFile.isFile();
             boolean isEXcelCopyDir = excelCopyFileDir.isDirectory();
 
-            // nếu không phải là file excel để copy thì yêu cầu chọn lại
-            if (!isFileExcelRoot) {
+            String exCellType2 = excelOutput.getSelectedToggle().getUserData().toString();
+
+
+            // nếu yêu cầu đầu ra là file excel 1 và file excel gốc không phải là file excel để copy thì yêu cầu chọn lại
+            // dạng excel 2,3 thì không cần lấy link file excel gốc
+            if (!isFileExcelRoot && exCellType2.equals("EX1")) {
                 // hiển thị alert yêu cầu chọn lại file excel
                 confirmAlert.setTitle(CONFIRM_EXCEL_FILE_LINK_TITLE);
                 confirmAlert.setHeaderText(CONFIRM_EXCEL_FILE_LINK_HEADER);
@@ -754,8 +758,11 @@ public class ConVertExcelAnd3BCController implements Initializable {
                 }
             }
 
-            // kiểm tra tính hợp lệ của file excel, nếu không hợp thì yêu cầu chọn lại hoặc thoát
-            if (checkExcelRootFile(excelRootFile)) return;
+            // dạng excel 2,3 thì không cần lấy link file excel gốc
+            if (exCellType2.equals("EX1")) {
+                // kiểm tra tính hợp lệ của file excel gốc, nếu không hợp thì yêu cầu chọn lại hoặc thoát
+                if (checkExcelRootFile(excelRootFile)) return;
+            }
 
             // nếu không phải là file pdf thì yêu cầu chọn lại
             if (!isFilePDF) {
@@ -831,7 +838,10 @@ public class ConVertExcelAnd3BCController implements Initializable {
             // đến đây nếu không bị return thì đã chọn xong 3 địa chỉ file
             if (pdfFile.isFile() && excelCopyFileDir.isDirectory()) {
                 System.out.println("đã chọn xong 3 địa chỉ");
-                System.out.println("LINK EXCEL FILE: " + excelRootFile.getAbsolutePath());
+                // dạng excel 2,3 thì không cần lấy link file excel gốc
+                if (exCellType2.equals("EX1")) {
+                    System.out.println("LINK EXCEL FILE: " + excelRootFile.getAbsolutePath());
+                }
                 System.out.println(pdfFile.getAbsolutePath());
                 System.out.println(excelCopyFileDir.getAbsolutePath());
             }
