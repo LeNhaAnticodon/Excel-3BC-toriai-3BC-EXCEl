@@ -2272,7 +2272,8 @@ public class ReadPDFToExcel {
         for (Map.Entry<Double, Integer> sanPham : seiHinMapExcel.entrySet()) {
             double chieuDaiExcel = sanPham.getKey();
             // định dạng chiều dài excel về 1 chữ số phần thập phân và không làm tròn vì chiều dài của 3bc cũng dịnh dạng như vậy
-            BigDecimal bdChieuDai3bc = new BigDecimal(chieuDaiExcel);
+//            BigDecimal bdChieuDai3bc = new BigDecimal(chieuDaiExcel);
+            BigDecimal bdChieuDai3bc = BigDecimal.valueOf(chieuDaiExcel);
             chieuDaiExcel = bdChieuDai3bc.setScale(1, RoundingMode.DOWN).doubleValue(); // cắt (không làm tròn)
 
             double chieuDai3bc = seiHinList.get(sttSanPham);
