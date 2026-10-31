@@ -3131,7 +3131,8 @@ public class ReadPDFToExcel {
                 kouzaiChouGoukei += Double.parseDouble(chieuDaiBoZaiS) * Integer.parseInt(soLuongCuaBozaiS);
             }
 
-            // với số lượng của bozai bao nhiêu thì ghi lại số dòng sản phẩm giống nhau bấy nhiêu lần
+/*            // với số lượng của bozai bao nhiêu thì ghi lại số dòng sản phẩm giống nhau bấy nhiêu lần và ghi số lượng bozai =1
+            // đây là CÁCH CŨ, CÁCH MỚI Là chỉ ghi 1 lần và nhập luôn số lượng bozai
             for (int i = 0; i < soLuongCuaBozai; i++) {
                 // ghi chiều dài và số lượng bozai ở đây, sl là 1 vì số lượng bao nhiêu thì ghi lại bozai bấy nhiêu lần với số lượng 1
 
@@ -3293,10 +3294,168 @@ public class ReadPDFToExcel {
                 rowWritingIndex += soDongCanThem;
 //                rowWritingIndex ++;
 
+            }*/
+
+            // CÁCH MỚI Là chỉ ghi 1 lần và nhập luôn số lượng bozai
+            // ghi chiều dài và số lượng bozai ở đây
+
+            rowWriting = sheet.getRow(rowWritingIndex);
+            rowWriting.getCell(3).setCellValue(chieuDaiCuaBozai);
+            rowWriting.getCell(5).setCellValue(soLuongCuaBozai);
+
+            //tính xem số sản phẩm trong bozai là bao nhiêu để tính số dòng cần ghi số sản phẩm đó rồi thêm số dòng tương ứng
+            int soSanPham = meiSyouPairs.size();
+            int soDongCanThem = soSanPham / 5;
+            if (soDongCanThem < 1) {
+                soDongCanThem = 1;
+            }
+            if (soSanPham % 5 > 0 && soSanPham > 5) {
+                soDongCanThem++;
             }
 
-        }
+            // đoạn code copy dòng ở đây, sau khi tính xong số sản phẩm trong bozai đang duyệt tính tạo vòng lặp xem cần copy dòng bao nhiêu lần
+            for (int j = 0; j < soDongCanThem; j++) {
+                int dongDangTao = rowWritingIndex + j + 1;
 
+                Row underRowWriting = sheet.getRow(dongDangTao);
+                int rowWritingHeight = rowWriting.getHeight();
+                if (underRowWriting == null) {
+                    underRowWriting = sheet.createRow(dongDangTao);
+                }
+                // trước khi copy dòng cần tính toán xem có bao nhiêu sản phẩm trong bozai đang nhập để tính xem cần cop bao nhiêu dòng
+                // rồi còn gộp ô theo chiều dọc nếu phải cop dòng nhiều hơn 1 lần
+                // sau đó update chỉ số dòng đang viết rowWritingIndex
+
+                // copy cả chiều cao dòng của dòng bên trên
+                underRowWriting.setHeight((short) rowWritingHeight);
+                for (int k = 0; k < 30; k++) {
+                    copyRowCellWithFormulaUpdate(rowWriting.getCell(k), underRowWriting.getCell(k), j + 1);
+                }
+
+                // các ô cần giữ lại giá trị của dòng được copy
+                int[] cacCellCanGiuLaiGiaTri = {4, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 26};
+                // xóa các ô giá trị copy từ dòng trên mà không liên quan đến dòng được copy này
+                // lặp qua các ô cần xét
+                for (int k = 0; k < 30; k++) {
+                    // biến xác định cần xóa giá trị không
+                    boolean canXoaGiatri = true;
+                    // lặp qua mảng các ô cần giữ lại giá trị, nếu ô đang lặp xuất hiện trong mảng thì gán lại giá trị biến nhớ cần xóa giá trị
+                    // là false rồi thoát lặp
+                    for (int CellCanGiuLai : cacCellCanGiuLaiGiaTri) {
+                        if (k == CellCanGiuLai) {
+                            canXoaGiatri = false;
+                            break;
+                        }
+                    }
+
+                    // nếu biến nhớ ô này không cần xóa giá trị thì nhảy sang vòng lặp tiếp theo mà không xóa giá trị ô này
+                    if (!canXoaGiatri) {
+                        continue;
+                    }
+
+                    // xóa giá trị ô này nếu biến nhớ vẫn true
+                    underRowWriting.getCell(k).setBlank();
+                }
+
+                // Xác định vùng cần hợp nhất (từ cột 0 đến cột 1 trên dòng vừa copy)
+                hopNhatOBatBuoc(sheet, dongDangTao, dongDangTao, 0, 1);
+                hopNhatOBatBuoc(sheet, dongDangTao, dongDangTao, 25, 26);
+                hopNhatOBatBuoc(sheet, dongDangTao, dongDangTao, 27, 28);
+
+
+            }
+
+            // cần tạo biến đếm ở đây để xác định ô(cột, hàng) cần ghi chiều dài, số lượng sản phẩm
+            int sttSanPham = 0;
+            // lặp qua các chiều dài sản phẩm trong cặp tính vật liệu này và ghi vào các ô tương ứng
+            for (Map.Entry<StringBuilder[], Integer> meiSyouEntry : meiSyouPairs.entrySet()) {
+
+                // chiều dài sản phẩm trong map
+                double chieuDaiSanPhamTrongMap = Double.parseDouble(meiSyouEntry.getKey()[1].toString());
+                String tenSP = meiSyouEntry.getKey()[0].toString().trim();
+                if (!tenSP.isBlank()) {
+                    System.out.println("ten sp la: " + tenSP);
+                }
+                // số lượng sản phẩm trong map
+                int soLuongSanPhamTrongMap = Integer.parseInt(meiSyouEntry.getValue().toString());
+                System.out.println(chieuDaiSanPhamTrongMap + ": sp = " + soLuongSanPhamTrongMap);
+
+                // chỉ số hàng là số sẽ cộng với chỉ số hàng đang ghi để xác định hàng cần ghi chiều dài, sl
+                // vì mỗi hàng chỉ ghi được 5 sản phẩm nên dùng số thứ tự sản phẩm / 5, stt từ 0 đến 4 là 5 sản phẩm đầu tiên
+                // chúng / 5 đều = 0, nên khi 0 cộng với hàng đang ghi thì vẫn là ghi cd, sl trên hàng đó
+                // từ stt 5 - 9(5 sản phẩm tiếp theo) thìu / 5 = 1, sẽ ghi cd, sl trên hàng có chỉ số là chỉ số hàng đang ghi + 1
+                int chiSoHang = sttSanPham / 5;
+                // chỉ số cột sẽ chia ấy dư cho 5, stt sản phẩm từ 0-4 phần dư cũng là 0-4 là đủ xác định 5 cột,
+                // đến 5-9 là 5 sản phẩm tiếp theo phần dư cũng là 0-4 tiếp tục xác định được 5 cột giống bên trên, tức là cột quay lại từ đầu nhưng sẽ
+                // tăng thêm một hàng nhờ tính chỉ số hàng ở biến trên
+                int chiSoCot = sttSanPham % 5;
+
+                // vị trí cột ghi chiều dài sp sẽ là 6 + (chiSoCot * 4) vì cột ghi sản phẩm đầu tiên bắt đầu từ cột 6,
+                // và cột ghi chiều dài sp sản phẩm tiếp cách 4 cột sau đó
+                // vị trí cột ghi số lượng sp sẽ là 8 + (chiSoCot * 4) vị trí cột ghi số lượng sản phẩm tiếp cũng cách 4 cột sau đó
+
+                // nếu tên sản phẩm có là số 1 hoặc 2 thì tức là nó có naname,
+                // tạo đường nét đứt bên dưới sản phẩm tên 1, nét liền bên dưới sản phẩm tên 2 để biểu thị naname
+                if (tenSP.equalsIgnoreCase("1") || tenSP.equalsIgnoreCase("2")) {
+                    XSSFDrawing drawing = (XSSFDrawing) sheet.createDrawingPatriarch();
+
+                    XSSFClientAnchor anchor = new XSSFClientAnchor();
+
+                    // ô bắt đầu
+                    anchor.setCol1(6 + chiSoCot * 4);
+                    anchor.setRow1(rowWritingIndex + chiSoHang);
+
+                    // ô kết thúc
+                    anchor.setCol2(8 + chiSoCot * 4 + 1);
+                    anchor.setRow2(rowWritingIndex + chiSoHang);
+
+                    // tạo khoảng cách với chữ trong ô theo chiều ngang
+                    // Offset trong cell (EMU)
+                    // anchor.setDx1(-5);
+                    anchor.setDy1(Units.pixelToEMU(22));
+
+                    // anchor.setDx2(-5);
+                    anchor.setDy2(Units.pixelToEMU(22));
+
+                    XSSFSimpleShape line = drawing.createSimpleShape(anchor);
+
+                    // nếu tên sản phẩm là 1 thì cần vẽ đường nét đứt
+                    if (tenSP.equalsIgnoreCase("1")) {
+                        CTShape ctShape = line.getCTShape();
+
+                        CTShapeProperties spPr = ctShape.getSpPr();
+
+                        CTLineProperties ln = spPr.isSetLn()
+                                ? spPr.getLn()
+                                : spPr.addNewLn();
+
+                        ln.addNewPrstDash().setVal(STPresetLineDashVal.DASH);
+                    }
+
+                    // dạng hình vẽ là đường thẳng
+                    line.setShapeType(ShapeTypes.LINE);
+                    // độ dày đường
+                    line.setLineWidth(1.2);
+                    // màu đường
+                    line.setLineStyleColor(0, 0, 0);   // đen
+                }
+
+                sheet.getRow(rowWritingIndex + chiSoHang).getCell(6 + chiSoCot * 4).setCellValue(chieuDaiSanPhamTrongMap);
+                sheet.getRow(rowWritingIndex + chiSoHang).getCell(8 + chiSoCot * 4).setCellValue(soLuongSanPhamTrongMap);
+
+
+                // đoạn code tính tổng chiều dài sản phẩm để tổng hợp
+                seiHinChouGoukei += chieuDaiSanPhamTrongMap * soLuongSanPhamTrongMap * soLuongCuaBozai;
+
+                sttSanPham++;
+            }
+
+            rowWritingIndex += soDongCanThem;
+//                rowWritingIndex ++;
+
+
+        }
+        excelFileNames.add(new ExcelFile("Sheet " + sheetIndex + ": " + kouSyu, kouSyuName, kouzaiChouGoukei, seiHinChouGoukei));
 //        rowWritingIndex = 4;
 
 
